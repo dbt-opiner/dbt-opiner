@@ -12,7 +12,7 @@ class IncorrectFileExtensionError(Exception):
     def __init__(self, expected_extension, actual_extension):
         super().__init__(f"Incorrect file extension: expected .{expected_extension}, got .{actual_extension}")
 
-class FileHandlerMixin(ABC):
+class FileHandler(ABC):
     def __init__(self, file_path):
         self.file_path = file_path
 
@@ -24,20 +24,20 @@ class FileHandlerMixin(ABC):
         pass
 
 
-class SQLFileHandler(FileHandlerMixin):
+class SQLFileHandler(FileHandler):
     # Read SQL file but also parse with sqlglot
     def read(self):
         self.has_correct_extension(FileType.SQL)
         with open(self.file_path, 'r') as file:
             return file.read()
 
-class YAMLFileHandler(FileHandlerMixin):
+class YAMLFileHandler(FileHandler):
     def read(self):
         self.has_correct_extension(FileType.YAML)
         with open(self.file_path, 'r') as file:
             return yaml.safe_load(file)
 
-class MarkdownFileHandler(FileHandlerMixin):
+class MarkdownFileHandler(FileHandler):
     def read(self):
         self.has_correct_extension(FileType.MARKDOWN)
         with open(self.file_path, 'r') as file:
