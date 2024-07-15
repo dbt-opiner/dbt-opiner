@@ -62,3 +62,11 @@ Original stuff:
 
 ### Manifest loading
 Each changed file belongs to a project. We need to find for each file the project in case multi-project repos, and generate the manifests for all projects.
+
+Map files to check (as objects) with manifest of the project it belong (as objects).
+Get all files changed or all files in the project. Create an object with the project manifest and the file paths. 
+DbtProject contains a list of Files (SQL, YAML, etc.) and a Manifest object.
+
+
+## Developing and testing
+Create two dbt projects that can use duckDB to develop locally without any connection to external DBs.
