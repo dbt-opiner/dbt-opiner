@@ -17,7 +17,8 @@ class FileHandler(ABC):
         self.file_path = file_path
 
     def has_correct_extension(self, file_type: FileType):
-        return self.file_path.endswith(f".{file_type.value}")
+        if not self.file_path.endswith(f".{file_type.value}"):
+            raise IncorrectFileExtensionError(file_type.value, self.file_path.split('.')[-1])
     
     @abstractmethod
     def read(self):
