@@ -1,0 +1,11 @@
+config:
+  send_anonymous_usage_stats: False
+  
+jaffle_shop:
+
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: 'jaffle_shop.duckdb'
+      threads: 24

@@ -5,7 +5,7 @@ import yaml
 class FileType(Enum):
     SQL = "sql"
     YAML = "yaml"
-    YML = "yaml"
+    YML = "yml"
     MARKDOWN = "md"
 
 class IncorrectFileExtensionError(Exception):
@@ -15,31 +15,48 @@ class IncorrectFileExtensionError(Exception):
 class FileHandler(ABC):
     def __init__(self, file_path):
         self.file_path = file_path
-
+        self.file_type = self.file_path.split('.')[-1]
+        self.content = None
+    
+    @property
+    def content(self):
+        if self.content is None:
+            self.content = self.read()
+        return self.content()
+    
     def has_correct_extension(self, file_type: FileType):
-        if not self.file_path.endswith(f".{file_type.value}"):
-            raise IncorrectFileExtensionError(file_type.value, self.file_path.split('.')[-1])
+        return self.file_type == file_type.value
     
     @abstractmethod
-    def read(self):
+    def _read_content(self):
         pass
 
 
 class SQLFileHandler(FileHandler):
     # Read SQL file but also parse with sqlglot
-    def read(self):
-        self.has_correct_extension(FileType.SQL)
+    # Also, search for compiled SQL from manifest
+    def _read_content(self):
+        try:  
+          assert self.has_correct_extension(FileType.SQL)
+        except AssertionError:
+          raise IncorrectFileExtensionError(FileType.SQL, self.file_path.split('.')[-1])
         with open(self.file_path, 'r') as file:
             return file.read()
 
 class YAMLFileHandler(FileHandler):
-    def read(self):
-        self.has_correct_extension(FileType.YAML)
+    def _read_content(self):
+        try:
+          assert self.has_correct_extension(FileType.YML) or self.has_correct_extension(FileType.YAML)
+        except AssertionError:
+          raise IncorrectFileExtensionError(FileType.YML, self.file_path.split('.')[-1])
         with open(self.file_path, 'r') as file:
             return yaml.safe_load(file)
 
 class MarkdownFileHandler(FileHandler):
-    def read(self):
-        self.has_correct_extension(FileType.MARKDOWN)
+    def _read_content(self):
+        try:
+          assert self.has_correct_extension(FileType.MARKDOWN)
+        except AssertionError:
+          raise IncorrectFileExtensionError(FileType.MARKDOWN, self.file_path.split('.')[-1])
         with open(self.file_path, 'r') as file:
             return file.read()
