@@ -1,5 +1,4 @@
 from dbt_opiner.dbt_project import DbtProject
-from dbt_opiner.dbt_manifest import DbtManifest
 from pathlib import Path
 
 
