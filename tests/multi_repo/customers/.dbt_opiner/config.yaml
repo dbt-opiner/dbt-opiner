@@ -1,5 +1,7 @@
 global:
-  some_global_config: True
+  custom_rules_source: local
+  custom_rules_path: /path/to/custom_rules
+  # alternative a git repo that can be cloned.
 
 sql:
   formatter: sqlfmt
