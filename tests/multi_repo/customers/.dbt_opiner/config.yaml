@@ -1,0 +1,17 @@
+global:
+  some_global_config: True
+
+sql:
+  formatter: sqlfmt
+  linter: none
+  disable_opinions: none
+
+yaml:
+  formatter: none
+  linter: none
+  disable_opinions: none
+
+markdown:
+  formatter: none
+  linter: none
+  disable_opinions: none

@@ -1,0 +1,11 @@
+config:
+  send_anonymous_usage_stats: False
+  
+orders:
+
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: 'orders.duckdb'
+      threads: 24

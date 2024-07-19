@@ -1,22 +1,28 @@
 DEFAULT_PYTHON_VERSION = 3.12.2
+DIRS = $(shell ls -d tests/multi_repo/* )
 
 dev:
 	brew install duckdb; \
-	cd tests/multi_repo/jaffle_shop; \
-		if [ -f .python-version ]; then \
-			PYTHON_VERSION=`cat .python-version`; \
-		else \
-			PYTHON_VERSION=$(DEFAULT_PYTHON_VERSION); \
-			printf "$(DEFAULT_PYTHON_VERSION)" > .python-version; \
-		fi; \
-		pyenv local $$PYTHON_VERSION; \
-		poetry env use $$PYTHON_VERSION; \
-		poetry install --no-root; \
-		poetry run dbt deps; \
-		poetry run dbt build; \
-		cd ..; \
+	for dir in $(DIRS); do \
+		cd $$dir; \
+			if [ -f .python-version ]; then \
+				PYTHON_VERSION=`cat .python-version`; \
+			else \
+				PYTHON_VERSION=$(DEFAULT_PYTHON_VERSION); \
+				printf "$(DEFAULT_PYTHON_VERSION)" > .python-version; \
+			fi; \
+			pyenv local $$PYTHON_VERSION; \
+			poetry env use $$PYTHON_VERSION; \
+			poetry install --no-root; \
+			poetry run dbt deps; \
+			poetry run dbt build; \
+			cd ../../../; \
+	done
 
 clean:
-	rm -rf tests/multi_repo/jaffle_shop/jaffle_shop.duckdb; \
-	rm -rf tests/multi_repo/jaffle_shop/.venv; \
-	rm -rf tests/multi_repo/jaffle_shop/poetry.lock;
+	for dir in $(DIRS); do \
+		rm -rf $$dir/*.duckdb; \
+		rm -rf $$dir/target; \
+		rm -rf $$dir/.venv; \
+		rm -rf $$dir/poetry.lock; \
+	done
