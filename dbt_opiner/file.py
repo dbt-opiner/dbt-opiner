@@ -1,62 +1,54 @@
 from abc import ABC, abstractmethod
-from enum import Enum
+from pathlib import Path
 import yaml
 
-class FileType(Enum):
-    SQL = "sql"
-    YAML = "yaml"
-    YML = "yml"
-    MARKDOWN = "md"
-
-class IncorrectFileExtensionError(Exception):
-    def __init__(self, expected_extension, actual_extension):
-        super().__init__(f"Incorrect file extension: expected .{expected_extension}, got .{actual_extension}")
 
 class FileHandler(ABC):
-    def __init__(self, file_path):
+    def __init__(self, file_path: Path):
         self.file_path = file_path
-        self.file_type = self.file_path.split('.')[-1]
-        self.content = None
-    
+        self.file_type = self.file_path.suffix
+        self._content = None
+
     @property
     def content(self):
-        if self.content is None:
-            self.content = self.read()
-        return self.content()
-    
-    def has_correct_extension(self, file_type: FileType):
-        return self.file_type == file_type.value
-    
+        if self._content is None:
+            self._content = self._read_content()
+        return self._content
+
     @abstractmethod
     def _read_content(self):
         pass
+
+    def __str__(self):
+        return f"{self.file_path}"
 
 
 class SQLFileHandler(FileHandler):
     # Read SQL file but also parse with sqlglot
     # Also, search for compiled SQL from manifest
     def _read_content(self):
-        try:  
-          assert self.has_correct_extension(FileType.SQL)
-        except AssertionError:
-          raise IncorrectFileExtensionError(FileType.SQL, self.file_path.split('.')[-1])
-        with open(self.file_path, 'r') as file:
-            return file.read()
+        try:
+            with self.file_path.open("r") as file:
+                return file.read()
+        except Exception as e:
+            raise RuntimeError(f"Error reading SQL file: {e}")
 
-class YAMLFileHandler(FileHandler):
+
+class YamlFileHandler(FileHandler):
     def _read_content(self):
         try:
-          assert self.has_correct_extension(FileType.YML) or self.has_correct_extension(FileType.YAML)
-        except AssertionError:
-          raise IncorrectFileExtensionError(FileType.YML, self.file_path.split('.')[-1])
-        with open(self.file_path, 'r') as file:
-            return yaml.safe_load(file)
+            with self.file_path.open("r") as file:
+                return yaml.safe_load(file)
+        except yaml.YAMLError as e:
+            raise RuntimeError(f"Error parsing YAML file: {e}")
+        except Exception as e:
+            raise RuntimeError(f"Error reading YAML file: {e}")
+
 
 class MarkdownFileHandler(FileHandler):
     def _read_content(self):
         try:
-          assert self.has_correct_extension(FileType.MARKDOWN)
-        except AssertionError:
-          raise IncorrectFileExtensionError(FileType.MARKDOWN, self.file_path.split('.')[-1])
-        with open(self.file_path, 'r') as file:
-            return file.read()
+            with self.file_path.open("r") as file:
+                return file.read()
+        except Exception as e:
+            raise RuntimeError(f"Error reading Markdown file: {e}")

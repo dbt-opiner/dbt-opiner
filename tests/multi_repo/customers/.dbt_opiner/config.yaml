@@ -4,6 +4,7 @@ global:
   # alternative a git repo that can be cloned.
 
 sql:
+  files: ^.*/(models|macros)/.*$ #regex pattern
   formatter: sqlfmt
   linter: none
   disable_opinions: none

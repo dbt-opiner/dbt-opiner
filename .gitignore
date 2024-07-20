@@ -163,3 +163,6 @@ cython_debug/
 
 #Duckdb local dbs
 *.duckdb
+
+# Ruff cache
+.ruff_cache/
