@@ -1,5 +1,6 @@
-from dbt_opiner.dbt_project import DbtProject
 from pathlib import Path
+from loguru import logger
+from dbt_opiner.dbt_project import DbtProject
 from dbt_opiner.utils import find_dbt_project_yml, find_all_dbt_project_ymls
 
 
@@ -8,10 +9,11 @@ def process_all_files():
     dbt_projects = []
     for dbt_project_file_path in dbt_projects_file_paths:
         dbt_project = DbtProject(dbt_project_file_path=dbt_project_file_path)
+        dbt_project.load_manifest()
         dbt_project.load_all_files()
         dbt_projects.append(dbt_project)
     for project in dbt_projects:
-        print(project.files)
+        logger.info(project.files)
 
 
 def process_changed_files(changed_files: list):
@@ -26,7 +28,9 @@ def process_changed_files(changed_files: list):
             file_to_project_map[dbt_project_file_path].append(file)
         else:
             file_to_project_map[dbt_project_file_path] = [file]
-        print(file_to_project_map)
+        # Check if manifest exists, if not, run dbt compile
+
+        # Load dbt projects
 
 
 def main(changed_files: list = [], all_files: bool = False):
@@ -37,9 +41,11 @@ def main(changed_files: list = [], all_files: bool = False):
 
 
 if __name__ == "__main__":
+    logger.info("Running for changed files")
     main(
         changed_files=[
             Path("tests/multi_repo/customers/models/dimensions/dim_customers.sql"),
         ]
     )
+    logger.info("Running for all files")
     main(all_files=True)

@@ -1,5 +1,7 @@
-from pathlib import Path
 import os
+import subprocess
+from loguru import logger
+from pathlib import Path
 
 
 def find_git_root(path):
@@ -47,3 +49,29 @@ def find_all_dbt_project_ymls():
                 dbt_project_ymls.append(Path(root) / file)
 
     return dbt_project_ymls
+
+
+def check_manifest_exists(dbt_project_file_path: Path):
+    dbt_project_path = dbt_project_file_path.parent
+    manifest_path = dbt_project_path / "target" / "manifest.json"
+    return manifest_path.exists()
+
+
+def run_dbt_command(dbt_project_file_path: Path, dbt_profile_path: Path, command: str):
+    """Run dbt command for the given dbt project file path using subprocess"""
+    if dbt_profile_path:
+        logger.info(
+            f"Running dbt {command} for {dbt_project_file_path} with profile {dbt_profile_path}"
+        )
+        subprocess.run(
+            [
+                "dbt",
+                command,
+                "--project-dir",
+                dbt_project_file_path.parent,
+                "--profiles-dir",
+                dbt_profile_path.parent,
+            ]
+        )
+    else:
+        subprocess.run(["dbt", command, "--project-dir", dbt_project_file_path.parent])
