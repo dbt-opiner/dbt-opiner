@@ -10,9 +10,17 @@ class DbtProject:
             self.dbt_project_file_path = dbt_project_file_path
         except AssertionError:
             raise FileNotFoundError(f"{dbt_project_file_path} does not exist")
-        self.dbt_manifest = DbtManifest(
-            self.dbt_project_file_path.parent / "target" / "manifest.json"
-        )
+        try:
+            assert (
+                self.dbt_project_file_path.parent / "target" / "manifest.json"
+            ).exists()
+            self.dbt_manifest = DbtManifest(
+                self.dbt_project_file_path.parent / "target" / "manifest.json"
+            )
+        except AssertionError:
+            raise FileNotFoundError(
+                f"{self.dbt_project_file_path.parent / 'target' / 'manifest.json'} does not exist"
+            )
         self.files = dict(sql=[], yaml=[], markdown=[])
 
     def load_all_files(self):

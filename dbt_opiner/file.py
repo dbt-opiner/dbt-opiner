@@ -5,6 +5,10 @@ import yaml
 
 class FileHandler(ABC):
     def __init__(self, file_path: Path):
+        try:
+            assert file_path.exists()
+        except AssertionError:
+            raise FileNotFoundError(f"{file_path} does not exist")
         self.file_path = file_path
         self.file_type = self.file_path.suffix
         self._content = None
