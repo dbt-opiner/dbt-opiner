@@ -1,19 +1,19 @@
-from pathlib import Path
 from loguru import logger
-from dbt_opiner.dbt_project import DbtProject
+from dbt_opiner.dbt_artifacts import DbtProject
 from dbt_opiner.utils import find_dbt_project_yml, find_all_dbt_project_ymls
 
 
 def process_all_files():
+    # Find all dbt projects
     dbt_projects_file_paths = find_all_dbt_project_ymls()
     dbt_projects = []
+    # Load all dbt projects
     for dbt_project_file_path in dbt_projects_file_paths:
         dbt_project = DbtProject(dbt_project_file_path=dbt_project_file_path)
-        dbt_project.load_manifest()
-        dbt_project.load_all_files()
         dbt_projects.append(dbt_project)
+    # Process every dbt project
     for project in dbt_projects:
-        logger.info(project.files)
+        logger.info(project.dbt_manifest.manifest_dict)
 
 
 def process_changed_files(changed_files: list):
@@ -28,24 +28,19 @@ def process_changed_files(changed_files: list):
             file_to_project_map[dbt_project_file_path].append(file)
         else:
             file_to_project_map[dbt_project_file_path] = [file]
-        # Check if manifest exists, if not, run dbt compile
-
         # Load dbt projects
 
 
-def main(changed_files: list = [], all_files: bool = False):
+def lint(changed_files: list = [], all_files: bool = False, **kwargs):
+    if all_files and changed_files:
+        raise ValueError("Cannot process all files and changed files at the same time")
+
     if all_files:
+        logger.info("Processing all files")
         process_all_files()
-    else:
-        process_changed_files(changed_files)
 
-
-if __name__ == "__main__":
-    logger.info("Running for changed files")
-    main(
-        changed_files=[
-            Path("tests/multi_repo/customers/models/dimensions/dim_customers.sql"),
-        ]
-    )
-    logger.info("Running for all files")
-    main(all_files=True)
+    if changed_files:
+        logger.info("Processing changed files")
+        for file in changed_files:
+            logger.info(file)
+        # process_changed_files(changed_files)

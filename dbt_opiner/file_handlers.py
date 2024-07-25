@@ -23,13 +23,11 @@ class FileHandler(ABC):
     def _read_content(self):
         pass
 
-    def __str__(self):
-        return f"{self.file_path}"
+    def __repr__(self):
+        return f"FileHander({self.file_path})"
 
 
 class SQLFileHandler(FileHandler):
-    # Read SQL file but also parse with sqlglot
-    # Also, search for compiled SQL from manifest
     def _read_content(self):
         try:
             with self.file_path.open("r") as file:
