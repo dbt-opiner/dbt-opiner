@@ -1,14 +1,15 @@
 global:
-  custom_rules_source: local
-  custom_rules_path: /path/to/custom_rules
-  # alternative a git repo that can be cloned.
+  custom_opinions_source: local
+  # git_repository: Only if custom_rules_sources is git
+  ignore_opinions:
+    - O002
 
 sql:
-  files: ".*/models/.*"
-  disable_opinions: none
+  files: ".*/(models|macros)/.*"
+  opinions_config:
+    O002_keywords:
+      - summary
+      - granularity
 
-yaml:
-  disable_opinions: none
-
-md:
-  disable_opinions: none
+#yaml:
+#md:

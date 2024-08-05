@@ -125,7 +125,13 @@ def main(ctx, log_level):
 @click.option(
     "-f", "--files", cls=MultiOption, type=tuple, multiple=True, help="Files to process"
 )
+@click.option("--target", type=str, help="DBT Target to compile manifest")
+@click.option(
+    "--force-compile",
+    is_flag=True,
+    help="Compile dbt project manifest even if it exists",
+)
 @click.pass_context
-def lint(ctx, files, all_files):
+def lint(ctx, files, all_files, target, force_compile):
     # Run linter
-    entrypoint.lint(files, all_files)
+    entrypoint.lint(files, all_files, target, force_compile)

@@ -8,7 +8,7 @@ def find_git_root(path):
     current_path = Path(path).resolve()
     while current_path != current_path.parent:
         if (current_path / ".git").exists():
-            logger.debug("git root is: {current_path}")
+            logger.debug(f"git root is: {current_path}")
             return current_path
         current_path = current_path.parent
     return None
@@ -56,21 +56,64 @@ def check_manifest_exists(dbt_project_file_path: Path):
     return manifest_path.exists()
 
 
-def run_dbt_command(dbt_project_file_path: Path, dbt_profile_path: Path, command: str):
+def run_dbt_command(
+    dbt_project_file_path: Path,
+    command: str,
+    target: str = None,
+    dbt_profile_path: Path = None,
+):
     """Run dbt command for the given dbt project file path using subprocess"""
+    # Get current working directory
+    current_working_dir = os.getcwd()
+    # Set working directory to the dbt project directory
+    os.chdir(dbt_project_file_path.parent)
+
+    cmd = [
+        "dbt",
+        command,
+        "--project-dir",
+        str(dbt_project_file_path.parent),
+    ]
+
     if dbt_profile_path:
-        logger.info(
-            f"Running dbt {command} for {dbt_project_file_path} with profile {dbt_profile_path}"
-        )
-        subprocess.run(
+        cmd.extend(
             [
-                "dbt",
-                command,
-                "--project-dir",
-                dbt_project_file_path.parent,
                 "--profiles-dir",
-                dbt_profile_path.parent,
+                str(dbt_profile_path.parent),
             ]
         )
-    else:
-        subprocess.run(["dbt", command, "--project-dir", dbt_project_file_path.parent])
+    if target:
+        cmd.extend(
+            [
+                "--target",
+                str(target),
+            ]
+        )
+    logger.debug(f"Running dbt command: {cmd}")
+    subprocess.run(cmd)
+
+    # Reset working directory
+    os.chdir(current_working_dir)
+
+
+def compile_dbt_manifest(
+    dbt_project_file_path: Path, dbt_profile_path: Path = None, target: str = None
+):
+    run_dbt_command(
+        command="deps",
+        dbt_project_file_path=dbt_project_file_path,
+        dbt_profile_path=dbt_profile_path,
+        target=target,
+    )
+    run_dbt_command(
+        command="seed",
+        dbt_project_file_path=dbt_project_file_path,
+        dbt_profile_path=dbt_profile_path,
+        target=target,
+    )
+    run_dbt_command(
+        command="compile",
+        dbt_project_file_path=dbt_project_file_path,
+        dbt_profile_path=dbt_profile_path,
+        target=target,
+    )

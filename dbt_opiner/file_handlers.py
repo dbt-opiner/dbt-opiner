@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
-from pathlib import Path
 import yaml
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from dbt_opiner.dbt_artifacts import DbtNode
 
 
 class FileHandler(ABC):
@@ -26,9 +30,26 @@ class FileHandler(ABC):
     def __repr__(self):
         return f"FileHander({self.file_path})"
 
+    def __str__(self):
+        return f"{self.file_path}"
+
 
 class SQLFileHandler(FileHandler):
-    def _read_content(self):
+    # Add reading the node in manifest
+    def __init__(self, file_path: Path, dbt_node: "DbtNode" = None):
+        self.dbt_node = dbt_node
+        super().__init__(file_path)
+
+    @property
+    def compiled_code(self):
+        if self.dbt_node:
+            return self.dbt_node.compiled_code
+        return None
+
+    def set_dbt_node(self, dbt_node):
+        self.dbt_node = dbt_node
+
+    def _read_content(self) -> str:
         try:
             with self.file_path.open("r") as file:
                 return file.read()
@@ -37,10 +58,18 @@ class SQLFileHandler(FileHandler):
 
 
 class YamlFileHandler(FileHandler):
-    def _read_content(self):
+    # Add reading the node in manifest
+    def __init__(self, file_path: Path, dbt_nodes: list = None):
+        self.dbt_nodes = dbt_nodes
+        super().__init__(file_path)
+
+    def _read_content(self) -> dict:
+        with self.file_path.open("r") as file:
+            return file.read()
+
+    def to_dict(self):
         try:
-            with self.file_path.open("r") as file:
-                return yaml.safe_load(file)
+            yaml.safe_load(self.content)
         except yaml.YAMLError as e:
             raise RuntimeError(f"Error parsing YAML file: {e}")
         except Exception as e:
@@ -48,7 +77,7 @@ class YamlFileHandler(FileHandler):
 
 
 class MarkdownFileHandler(FileHandler):
-    def _read_content(self):
+    def _read_content(self) -> str:
         try:
             with self.file_path.open("r") as file:
                 return file.read()

@@ -3,23 +3,30 @@ import re
 from pathlib import Path
 from loguru import logger
 from dbt_opiner.config_singleton import ConfigSingleton
+from dbt_opiner.exceptions import DbtNodeNotFoundExeption
 from dbt_opiner.file_handlers import (
     SQLFileHandler,
     YamlFileHandler,
     MarkdownFileHandler,
 )
-from dbt_opiner.utils import run_dbt_command
+from dbt_opiner.utils import compile_dbt_manifest
 
 MATCH_ALL = r".*"
 
 
 class DbtProject:
     def __init__(
-        self, dbt_project_file_path: Path, files: list = [], all_files: bool = True
+        self,
+        dbt_project_file_path: Path,
+        files: list = [],
+        all_files: bool = True,
+        target: str = None,
+        force_compile: bool = False,
     ) -> None:
+        self._target = target
+
         # Set config
         self._config = ConfigSingleton().get_config()
-
         # Set dbt project file
         try:
             assert dbt_project_file_path.exists()
@@ -27,14 +34,12 @@ class DbtProject:
             self.dbt_project_config = YamlFileHandler(dbt_project_file_path)
         except AssertionError:
             raise FileNotFoundError(f"{dbt_project_file_path} does not exist")
-
         # Set profiles file
+        self.dbt_profile_path = None
         if (dbt_project_file_path.parent / "profiles.yml").exists():
             self.dbt_profile_path = dbt_project_file_path.parent / "profiles.yml"
-        else:
-            self.dbt_profile_path = None
         # Load manifest
-        self._load_manifest()
+        self._load_manifest(force_compile)
 
         # Load files
         self.files = dict(sql=[], yaml=[], markdown=[])
@@ -62,15 +67,56 @@ class DbtProject:
                     if self.do_file_match(
                         self._config.get("sql").get("files", MATCH_ALL), file
                     ):
-                        self.files["sql"].append(SQLFileHandler(file))
+                        file = SQLFileHandler(file)
+
+                        # Check if it's a model or a macro .sql file
+                        if "{%macro" in file.content.replace(" ", ""):
+                            dbt_node = next(
+                                (
+                                    node
+                                    for node in self.dbt_manifest.macros
+                                    if node.original_file_path in str(file.file_path)
+                                ),
+                                None,
+                            )
+
+                        else:
+                            # It's a model (or a test, not supported yet)
+                            dbt_node = next(
+                                (
+                                    node
+                                    for node in self.dbt_manifest.nodes
+                                    if node.original_file_path in str(file.file_path)
+                                ),
+                                None,
+                            )
+
+                        if not dbt_node:
+                            raise DbtNodeNotFoundExeption(
+                                f"Node not found for {file.file_path}."
+                            )
+
+                        file.set_dbt_node(dbt_node)
+                        # TODO support tests
+
+                        self.files["sql"].append(file)
                 elif file.suffix in [".yml", ".yaml"]:
                     try:
                         yaml_config = self._config["yaml"]
                         file_pattern = yaml_config.get("files", MATCH_ALL)
                     except KeyError:
                         file_pattern = self._config.get("yml").get("files", MATCH_ALL)
+
                     if self.do_file_match(file_pattern, file):
-                        self.files["yaml"].append(YamlFileHandler(file))
+                        # Search for the node in the manifest by the file name in patch
+                        # A yml file can have more than one dbt node
+                        dbt_nodes = (
+                            node
+                            for node in self.dbt_manifest.nodes
+                            if node.docs_yml_file_path in str(file)
+                        )
+
+                        self.files["yaml"].append(YamlFileHandler(file, dbt_nodes))
                 elif file.suffix == ".md":
                     if self.do_file_match(
                         self._config.get("md").get("files", MATCH_ALL), file
@@ -79,23 +125,23 @@ class DbtProject:
                 else:
                     logger.debug(f"{file.suffix} is not supported. Skipping.")
 
-    def _load_manifest(self):
-        try:
-            assert (
-                self.dbt_project_file_path.parent / "target" / "manifest.json"
-            ).exists()
-        except AssertionError:
-            logger.info(
-                f"{self.dbt_project_file_path.parent / 'target' / 'manifest.json'} does not exist. Compiling."
+    def _load_manifest(self, force_compile=False):
+        manifest_path = self.dbt_project_file_path.parent / "target" / "manifest.json"
+
+        # Check if we need to compile the manifest either because of force_compile
+        # or because the manifest does not exist.
+        if force_compile or not manifest_path.exists():
+            action = (
+                "Force compiling"
+                if force_compile
+                else f"{manifest_path} does not exist. Compiling"
             )
-            run_dbt_command(self.dbt_project_file_path, self.dbt_profile_path, "deps")
-            run_dbt_command(self.dbt_project_file_path, self.dbt_profile_path, "seed")
-            run_dbt_command(
-                self.dbt_project_file_path, self.dbt_profile_path, "compile"
+            logger.info(action)
+            compile_dbt_manifest(
+                self.dbt_project_file_path, self.dbt_profile_path, self._target
             )
-        self.dbt_manifest = DbtManifest(
-            self.dbt_project_file_path.parent / "target" / "manifest.json"
-        )
+
+        self.dbt_manifest = DbtManifest(manifest_path)
 
     @staticmethod
     def do_file_match(
@@ -111,3 +157,58 @@ class DbtManifest:
         with open(self.manifest_path, "r") as f:
             self.manifest_dict = json.load(f)
             f.close()
+        # Only keep the values of the nodes.
+        # We don't need the ket to access the nodes.
+        self.nodes = [
+            DbtNode(node) for node in self.manifest_dict.get("nodes").values()
+        ]
+        self.macros = [
+            DbtNode(node) for node in self.manifest_dict.get("macros").values()
+        ]
+
+
+class DbtNode:
+    def __init__(self, node: dict) -> None:
+        self.node = node
+
+    @property
+    def alias(self):
+        return self.node.get("alias")
+
+    @property
+    def type(self):
+        return self.node.get("resource_type")
+
+    @property
+    def original_file_path(self):
+        return self.node.get("original_file_path")
+
+    @property
+    def compiled_code(self):
+        return self.node.get("compiled_code")
+
+    @property
+    def docs_yml_file_path(self):
+        return Path(self.node.get("patch_path").replace("://", "/"))
+
+    @property
+    def description(self):
+        return self.node.get("description")
+
+    def __repr__(self):
+        return f"DbtNode({self.alias})"
+
+    def __str__(self):
+        return f"{self.node}"
+
+    def keys(self):
+        return self.node.keys()
+
+    def values(self):
+        return self.node.values()
+
+    def items(self):
+        return self.node.items()
+
+    def get(self, key):
+        return self.node.get(key)

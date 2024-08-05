@@ -19,6 +19,9 @@ seeds:
   customers:
     schema: seeds
 
+flags:
+  send_anonymous_usage_stats: false
+
 models:
   customers:
     staging:

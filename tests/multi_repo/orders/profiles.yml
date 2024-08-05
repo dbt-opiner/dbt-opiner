@@ -1,6 +1,3 @@
-config:
-  send_anonymous_usage_stats: False
-
 orders:
 
   target: dev
