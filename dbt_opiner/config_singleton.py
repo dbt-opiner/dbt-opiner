@@ -12,6 +12,7 @@ class ConfigSingleton:
 
     _instance = None
     _config = None
+    _config_file_path = None
 
     def __new__(cls, root_dir=None):
         if cls._instance is None:
@@ -27,13 +28,12 @@ class ConfigSingleton:
         self._config = self._find_config(root_dir)
 
     def _find_config(self, root_dir):
-        config_file = None
         for root, dirs, files in os.walk(root_dir):
             if "dbt-opiner.yaml" in files:
-                config_file = os.path.join(root, "dbt-opiner.yaml")
+                self._config_file_path = os.path.join(root, "dbt-opiner.yaml")
                 break
-        if config_file:
-            with open(config_file, "r") as file:
+        if self._config_file_path:
+            with open(self._config_file_path, "r") as file:
                 return yaml.safe_load(file)
         else:
             raise FileNotFoundError(
@@ -42,3 +42,6 @@ class ConfigSingleton:
 
     def get_config(self):
         return self._config
+
+    def get_config_file_path(self):
+        return self._config_file_path

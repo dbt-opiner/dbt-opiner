@@ -54,13 +54,18 @@ class Linter:
                 logger.debug(f"Lint Result: {lint_result}")
                 self.lint_results[file.file_path].append(lint_result)
 
-    def log_failed_results_and_exit(self):
+    def log_results_and_exit(self):
         exit_code = 0
         for file_path, results in self.lint_results.items():
             for result in sorted(results):
                 if not result.passed:
-                    exit_code = 1
-                    logger.error(f"{file_path}: {result.message}")
+                    if result.severity == OpinionSeverity.MUST:
+                        exit_code = 1
+                        logger.error(f"{file_path}: {result.message}")
+                    if result.severity == OpinionSeverity.SHOULD:
+                        logger.warning(f"{file_path}: {result.message}")
+                if result.passed:
+                    logger.debug(f"{file_path}: {result.message}")
 
         logger.debug(f"Exit with code: {exit_code}")
         sys.exit(exit_code)

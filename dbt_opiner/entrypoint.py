@@ -79,7 +79,7 @@ def initialize_dbt_projects(
 
 
 def lint(
-    changed_files: list = [],
+    changed_files: list[Path] = [],
     all_files: bool = False,
     target: str = None,
     force_compile: bool = False,
@@ -103,4 +103,4 @@ def lint(
             linter.lint_file(file)
 
     # Log results and exit
-    linter.log_failed_results_and_exit()
+    linter.log_results_and_exit()

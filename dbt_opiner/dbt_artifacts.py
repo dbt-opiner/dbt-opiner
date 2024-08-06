@@ -56,16 +56,21 @@ class DbtProject:
         files = (self.dbt_project_file_path.parent).rglob("*")
         self._init_files(files)
 
-    def _init_files(self, files: list):
+    def _init_files(self, files: list[Path]):
         """
         Initialize only the list of files pased. Useful for git diff files loading.
         """
         for file in files:
             if file.is_file():
+                # Ignore files inside the target directory
+                if (
+                    self.dbt_project_file_path.parent / "target"
+                ).resolve() in file.resolve().parents:
+                    logger.debug(f"Ignoring file inside target directory: {file}")
+                    continue
                 if file.suffix == ".sql":
-                    # replace with regex match
-                    if self.do_file_match(
-                        self._config.get("sql").get("files", MATCH_ALL), file
+                    if re.match(
+                        self._config.get("sql").get("files", MATCH_ALL), str(file)
                     ):
                         file = SQLFileHandler(file)
 
@@ -107,7 +112,7 @@ class DbtProject:
                     except KeyError:
                         file_pattern = self._config.get("yml").get("files", MATCH_ALL)
 
-                    if self.do_file_match(file_pattern, file):
+                    if re.match(file_pattern, str(file)):
                         # Search for the node in the manifest by the file name in patch
                         # A yml file can have more than one dbt node
                         dbt_nodes = (
@@ -118,8 +123,8 @@ class DbtProject:
 
                         self.files["yaml"].append(YamlFileHandler(file, dbt_nodes))
                 elif file.suffix == ".md":
-                    if self.do_file_match(
-                        self._config.get("md").get("files", MATCH_ALL), file
+                    if re.match(
+                        self._config.get("md").get("files", MATCH_ALL), str(file)
                     ):
                         self.files["markdown"].append(MarkdownFileHandler(file))
                 else:
@@ -143,13 +148,6 @@ class DbtProject:
 
         self.dbt_manifest = DbtManifest(manifest_path)
 
-    @staticmethod
-    def do_file_match(
-        pattern: str,
-        file: Path,
-    ) -> bool:
-        return re.match(pattern, str(file))
-
 
 class DbtManifest:
     def __init__(self, manifest_path: str) -> None:
@@ -169,46 +167,50 @@ class DbtManifest:
 
 class DbtNode:
     def __init__(self, node: dict) -> None:
-        self.node = node
+        self._node = node
 
     @property
     def alias(self):
-        return self.node.get("alias")
+        return self._node.get("alias")
 
     @property
     def type(self):
-        return self.node.get("resource_type")
+        return self._node.get("resource_type")
 
     @property
     def original_file_path(self):
-        return self.node.get("original_file_path")
+        return self._node.get("original_file_path")
 
     @property
     def compiled_code(self):
-        return self.node.get("compiled_code")
+        return self._node.get("compiled_code")
 
     @property
     def docs_yml_file_path(self):
-        return Path(self.node.get("patch_path").replace("://", "/"))
+        return Path(self._node.get("patch_path").replace("://", "/"))
 
     @property
     def description(self):
-        return self.node.get("description")
+        return self._node.get("description")
+
+    @property
+    def schema(self):
+        return self._node.get("schema")
 
     def __repr__(self):
         return f"DbtNode({self.alias})"
 
     def __str__(self):
-        return f"{self.node}"
+        return f"{self._node}"
 
     def keys(self):
-        return self.node.keys()
+        return self._node.keys()
 
     def values(self):
-        return self.node.values()
+        return self._node.values()
 
     def items(self):
-        return self.node.items()
+        return self._node.items()
 
     def get(self, key):
-        return self.node.get(key)
+        return self._node.get(key)
