@@ -110,22 +110,29 @@ class DbtProject:
                         yaml_config = self._config["yaml"]
                         file_pattern = yaml_config.get("files", MATCH_ALL)
                     except KeyError:
-                        file_pattern = self._config.get("yml").get("files", MATCH_ALL)
+                        if self._config.get("yml"):
+                            file_pattern = self._config.get("yml").get(
+                                "files", MATCH_ALL
+                            )
+                        else:
+                            file_pattern = MATCH_ALL
 
                     if re.match(file_pattern, str(file)):
                         # Search for the node in the manifest by the file name in patch
                         # A yml file can have more than one dbt node
-                        dbt_nodes = (
+                        dbt_nodes = [
                             node
                             for node in self.dbt_manifest.nodes
-                            if node.docs_yml_file_path in str(file)
-                        )
+                            if str(node.docs_yml_file_path) in str(file)
+                        ]
 
                         self.files["yaml"].append(YamlFileHandler(file, dbt_nodes))
                 elif file.suffix == ".md":
-                    if re.match(
-                        self._config.get("md").get("files", MATCH_ALL), str(file)
-                    ):
+                    if self._config.get("md"):
+                        file_pattern = self._config.get("md").get("files", MATCH_ALL)
+                    else:
+                        file_pattern = MATCH_ALL
+                    if re.match(file_pattern, str(file)):
                         self.files["markdown"].append(MarkdownFileHandler(file))
                 else:
                     logger.debug(f"{file.suffix} is not supported. Skipping.")
@@ -190,8 +197,10 @@ class DbtNode:
         return self._node.get("compiled_code")
 
     @property
-    def docs_yml_file_path(self):
-        return Path(self._node.get("patch_path").replace("://", "/"))
+    def docs_yml_file_path(self) -> Path:
+        if self._node.get("patch_path"):
+            return Path(self._node.get("patch_path").replace("://", "/"))
+        return None
 
     @property
     def description(self):

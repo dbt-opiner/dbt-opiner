@@ -43,9 +43,13 @@ class Linter:
 
     def lint_file(self, file: FileHandler):
         logger.debug(f"Linting file {file.file_path}")
-        for opinion in self.opinions_pack.get_opinions(
-            file.file_type, file.dbt_node.type
-        ):
+        # TODO: find a way to make the yaml thing more elegant
+        file_type = file.file_type
+        if file_type == ".sql":
+            node_type = file.dbt_node.type
+        elif file_type == ".yml" or file_type == ".yaml":
+            node_type = file.dbt_nodes[0].type
+        for opinion in self.opinions_pack.get_opinions(file_type, node_type):
             if self._check_noqa(file, opinion.code):
                 continue
             logger.debug(f"Checking opinion {opinion.code}")

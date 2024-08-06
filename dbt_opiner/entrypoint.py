@@ -38,7 +38,8 @@ def get_dbt_projects_changed_files(
         except AssertionError:
             raise FileNotFoundError(f"{file} does not exist")
         dbt_project_file_path = find_dbt_project_yml(file)
-        file_to_project_map[dbt_project_file_path].append(file)
+        if dbt_project_file_path:
+            file_to_project_map[dbt_project_file_path].append(file)
 
     dbt_projects = []
     for dbt_project_file_path, files in file_to_project_map.items():
