@@ -1,5 +1,6 @@
 from dbt_opiner.opinions.base_opinion import BaseOpinion
-from dbt_opiner.linter import OpinionSeverity
+from dbt_opiner.linter import OpinionSeverity, LintResult
+from dbt_opiner.file_handlers import SQLFileHandler
 
 
 class O002(BaseOpinion):
@@ -12,5 +13,5 @@ class O002(BaseOpinion):
             applies_to_node_type="model",
         )
 
-    def _eval(self, file):
+    def _eval(self, file: SQLFileHandler) -> LintResult:
         pass

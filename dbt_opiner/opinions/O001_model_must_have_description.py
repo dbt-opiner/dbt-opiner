@@ -1,5 +1,6 @@
 from dbt_opiner.opinions.base_opinion import BaseOpinion
 from dbt_opiner.linter import LintResult, OpinionSeverity
+from dbt_opiner.file_handlers import SQLFileHandler
 
 
 class O001(BaseOpinion):
@@ -12,7 +13,7 @@ class O001(BaseOpinion):
             applies_to_node_type="model",
         )
 
-    def _eval(self, file):
+    def _eval(self, file: SQLFileHandler) -> LintResult:
         if file.dbt_node.description:
             if len(file.dbt_node.description) > 0:
                 return LintResult(

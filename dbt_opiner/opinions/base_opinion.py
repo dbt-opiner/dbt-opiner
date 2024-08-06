@@ -1,6 +1,10 @@
 from abc import ABC, abstractmethod
 from dbt_opiner.linter import LintResult, OpinionSeverity
-from dbt_opiner.file_handlers import FileHandler
+from dbt_opiner.file_handlers import (
+    SQLFileHandler,
+    YamlFileHandler,
+    MarkdownFileHandler,
+)
 
 
 class BaseOpinion(ABC):
@@ -31,7 +35,9 @@ class BaseOpinion(ABC):
         self.applies_to_file_type = applies_to_file_type
         self.applies_to_node_type = applies_to_node_type
 
-    def check_opinion(self, file: FileHandler) -> LintResult:
+    def check_opinion(
+        self, file: SQLFileHandler | YamlFileHandler | MarkdownFileHandler
+    ) -> LintResult:
         """The method that will be called to evaluate the opinion.
 
         Args:
@@ -46,7 +52,9 @@ class BaseOpinion(ABC):
             return None
 
     @abstractmethod
-    def _eval(self, file: FileHandler) -> LintResult:
+    def _eval(
+        self, file: SQLFileHandler | YamlFileHandler | MarkdownFileHandler
+    ) -> LintResult:
         """
         The method that contains all the logic of the opinon evaluation.
 
