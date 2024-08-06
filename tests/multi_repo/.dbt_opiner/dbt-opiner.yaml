@@ -1,6 +1,6 @@
 global:
-  custom_opinions_source: local
-  # git_repository: Only if custom_rules_sources is git
+  custom_opinions_source: git
+  git_repository: https://github.com/dbt-opiner/dbt-opiner-custom-opinions.git
   ignore_opinions:
     - O002
 

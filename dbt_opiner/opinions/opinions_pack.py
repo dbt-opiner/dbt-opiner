@@ -47,19 +47,27 @@ class OpinionsPack:
     def _load_custom_opinions(self):
         custom_opinions = []
 
-        if self._config.get("global").get("custom_opinions_source") == "local":
+        source = self._config.get("global").get("custom_opinions_source")
+        if source == "local":
             path = (
                 pathlib.Path(ConfigSingleton().get_config_file_path()).parent
                 / "custom_opinions"
             )
             logger.debug(f"Loading custom opinions from local source: {path}")
+            custom_opinions.extend(self._load_opinions_from_path(path))
 
-        if self._config.get("global").get("custom_opinions_source") == "git":
+        elif source == "git":
             with tempfile.TemporaryDirectory() as temp_dir:
                 git_repo = self._config.get("global").get("git_repository")
                 subprocess.run(["git", "clone", git_repo, temp_dir], check=True)
                 path = pathlib.Path(temp_dir) / "custom_opinions"
+                logger.debug(f"Loading custom opinions from git repository: {git_repo}")
+                custom_opinions.extend(self._load_opinions_from_path(path))
 
+        return custom_opinions
+
+    def _load_opinions_from_path(self, path):
+        loaded_opinions = []
         for file in path.glob("*.py"):
             module_name = file.stem
             spec = importlib.util.spec_from_file_location(module_name, file)
@@ -74,6 +82,5 @@ class OpinionsPack:
                     and obj is not BaseOpinion
                 ):
                     logger.debug(f"Found class {name} in {file}")
-                    custom_opinions.append(obj())
-
-        return custom_opinions
+                    loaded_opinions.append(obj())
+        return loaded_opinions
