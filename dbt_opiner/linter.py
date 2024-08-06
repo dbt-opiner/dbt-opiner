@@ -51,7 +51,9 @@ class Linter:
         if file_type == ".sql":
             node_type = file.dbt_node.type
         elif file_type == ".yml" or file_type == ".yaml":
-            node_type = file.dbt_nodes[0].type if file.dbt_nodes else None
+            node_type = file.dbt_nodes[0].type if file.dbt_nodes else "none"
+        elif file_type == ".md":
+            node_type = "markdown"  # TODO
         for opinion in self.opinions_pack.get_opinions(file_type, node_type):
             if self._check_noqa(file, opinion.code):
                 continue
