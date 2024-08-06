@@ -11,6 +11,7 @@ dbt-opiner = "dbt_opiner.cli:main"
 python = ">=3.10,<3.13"
 click = ">=8.1"
 loguru = "^0.7.2"
+pyyaml = "^6.0.1"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2"
