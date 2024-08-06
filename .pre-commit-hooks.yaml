@@ -1,0 +1,5 @@
+- id: dbt-opiner-lint
+  name: dbt-opiner lint
+  entry: dbt-opiner lint
+  language: python
+  files: \.sql$|\.yml$|\.yaml$|\.md$
