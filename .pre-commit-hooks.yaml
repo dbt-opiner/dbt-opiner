@@ -3,3 +3,4 @@
   entry: dbt-opiner lint
   language: python
   files: \.sql$|\.yml$|\.yaml$|\.md$
+  require_serial: true
