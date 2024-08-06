@@ -5,7 +5,10 @@ from dataclasses import dataclass
 from collections import defaultdict
 from loguru import logger
 from dbt_opiner.file_handlers import FileHandler
-# from dbt_opiner.opinions.opinions_pack import OpinionsPack
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from dbt_opiner.opinions.opinions_pack import OpinionsPack
 
 
 class OpinionSeverity(Enum):
@@ -37,7 +40,7 @@ class LintResult:
 
 
 class Linter:
-    def __init__(self, opinions_pack):
+    def __init__(self, opinions_pack: "OpinionsPack"):
         self.lint_results = defaultdict(list)
         self.opinions_pack = opinions_pack  # TODO make it the class iterable
 
@@ -48,7 +51,7 @@ class Linter:
         if file_type == ".sql":
             node_type = file.dbt_node.type
         elif file_type == ".yml" or file_type == ".yaml":
-            node_type = file.dbt_nodes[0].type
+            node_type = file.dbt_nodes[0].type if file.dbt_nodes else None
         for opinion in self.opinions_pack.get_opinions(file_type, node_type):
             if self._check_noqa(file, opinion.code):
                 continue
