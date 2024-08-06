@@ -57,6 +57,8 @@ class OpinionsPack:
             custom_opinions.extend(self._load_opinions_from_path(path))
 
         elif source == "git":
+            # TODO figure out how to install dependencies that are in the custom opinions project
+            # But not in the dbt_opiner project
             with tempfile.TemporaryDirectory() as temp_dir:
                 git_repo = self._config.get("global").get("git_repository")
                 subprocess.run(["git", "clone", git_repo, temp_dir], check=True)
