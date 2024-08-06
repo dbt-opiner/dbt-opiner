@@ -171,7 +171,7 @@ class DbtNode:
 
     @property
     def schema(self):
-        return self.node.get("schema")
+        return self._node.get("schema")
 
     @property
     def alias(self):
