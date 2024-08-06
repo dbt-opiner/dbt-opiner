@@ -170,6 +170,10 @@ class DbtNode:
         self._node = node
 
     @property
+    def schema(self):
+        return self.node.get("schema")
+
+    @property
     def alias(self):
         return self._node.get("alias")
 
@@ -192,10 +196,6 @@ class DbtNode:
     @property
     def description(self):
         return self._node.get("description")
-
-    @property
-    def schema(self):
-        return self._node.get("schema")
 
     def __repr__(self):
         return f"DbtNode({self.alias})"
