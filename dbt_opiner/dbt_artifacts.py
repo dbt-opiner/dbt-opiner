@@ -210,6 +210,10 @@ class DbtNode:
     def columns(self):
         return self._node.get("columns")
 
+    @property
+    def unique_key(self):
+        return self._node.get("config").get("unique_key")
+
     def __repr__(self):
         return f"DbtNode({self.alias})"
 

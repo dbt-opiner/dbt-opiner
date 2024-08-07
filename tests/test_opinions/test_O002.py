@@ -34,7 +34,7 @@ from dbt_opiner.opinions import O002
     ],
     indirect=["mock_sqlfilehandler"],
 )
-def test_C001(mock_sqlfilehandler, config, expected_passed):
+def test_C002(mock_sqlfilehandler, config, expected_passed):
     opinion = O002(config)
     result = opinion.check_opinion(mock_sqlfilehandler)
     if result:

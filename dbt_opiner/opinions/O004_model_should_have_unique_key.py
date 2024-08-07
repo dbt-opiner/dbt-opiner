@@ -16,4 +16,18 @@ class O004(BaseOpinion):
         )
 
     def _eval(self, file: SQLFileHandler) -> LintResult:
-        pass
+        if file.dbt_node.unique_key:
+            return LintResult(
+                file=file,
+                opinion_code=self.code,
+                passed=True,
+                severity=self.severity,
+                message="Model has a unique key.",
+            )
+        return LintResult(
+            file=file,
+            opinion_code=self.code,
+            passed=False,
+            severity=self.severity,
+            message=f"Model {self.severity.value} have a unique key.",
+        )

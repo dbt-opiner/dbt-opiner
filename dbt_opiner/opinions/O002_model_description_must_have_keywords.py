@@ -27,16 +27,26 @@ class O002(BaseOpinion):
 
         if file.dbt_node.description and keywords:
             logger.debug(f"Checking model description for keywords: {keywords}")
-            passed = True
+            missing_keywords = []
+
             for keyword in keywords:
-                if keyword not in file.dbt_node.description:
-                    passed = False
+                if keyword.lower() not in file.dbt_node.description.lower():
+                    missing_keywords.append(keyword)
+
+            if len(missing_keywords) > 0:
+                return LintResult(
+                    file=file,
+                    opinion_code=self.code,
+                    passed=False,
+                    severity=self.severity,
+                    message=f"Model description {self.severity.value} have keywords: {", ".join(missing_keywords)}",
+                )
             return LintResult(
                 file=file,
                 opinion_code=self.code,
-                passed=passed,
+                passed=True,
                 severity=self.severity,
-                message=f"Model description {self.severity.value} have keywords: {keywords}",
+                message="Model description has all required keywords.",
             )
 
         logger.debug("Model has no description or keywords are not defined.")
