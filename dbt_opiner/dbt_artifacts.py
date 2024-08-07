@@ -206,6 +206,10 @@ class DbtNode:
     def description(self):
         return self._node.get("description")
 
+    @property
+    def columns(self):
+        return self._node.get("columns")
+
     def __repr__(self):
         return f"DbtNode({self.alias})"
 

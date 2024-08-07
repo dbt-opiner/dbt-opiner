@@ -12,6 +12,7 @@ class O001(BaseOpinion):
             severity=OpinionSeverity.MUST,
             applies_to_file_type=".sql",
             applies_to_node_type="model",
+            config=config,
         )
 
     def _eval(self, file: SQLFileHandler) -> LintResult:
