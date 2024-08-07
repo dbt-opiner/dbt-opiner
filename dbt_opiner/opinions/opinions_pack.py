@@ -37,12 +37,19 @@ class OpinionsPack:
         """
         Get all the opinions that apply to a file and node type.
         """
-        return [
+        opinions = [
             opinion
             for opinion in self._opinions
             if opinion.applies_to_file_type == file_type
-            and opinion.applies_to_node_type == node_type
         ]
+
+        if node_type:
+            return [
+                opinion
+                for opinion in opinions
+                if opinion.applies_to_node_type == node_type
+            ]
+        return opinions
 
     def _load_custom_opinions(self):
         custom_opinions = []

@@ -133,5 +133,9 @@ def main(ctx, log_level):
 )
 @click.pass_context
 def lint(ctx, files, all_files, target, force_compile):
+    # Try to stablish a target from an environment variable
+    # This is useful when things should run in CI
+    if target is None:
+        target = os.getenv("DBT_TARGET")
     # Run linter
     entrypoint.lint(files, all_files, target, force_compile)

@@ -1,10 +1,10 @@
 from loguru import logger
-from pathlib import Path
 from collections import defaultdict
-from dbt_opiner.dbt_artifacts import DbtProject
+from pathlib import Path
 from dbt_opiner.linter import Linter
-from dbt_opiner.utils import find_dbt_project_yml, find_all_dbt_project_ymls
+from dbt_opiner.utils import find_all_dbt_project_ymls, find_dbt_project_yml
 from dbt_opiner.opinions.opinions_pack import OpinionsPack
+from dbt_opiner.dbt_artifacts import DbtProject
 
 
 def get_dbt_projects_all_files(target: str = None, force_compile: bool = False):
@@ -92,7 +92,6 @@ def lint(
         force_compile=force_compile,
     )
 
-    # Lint files
     opinions_pack = OpinionsPack()
     linter = Linter(opinions_pack)
 
@@ -103,5 +102,4 @@ def lint(
         for file in merged_files:
             linter.lint_file(file)
 
-    # Log results and exit
     linter.log_results_and_exit()

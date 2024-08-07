@@ -42,18 +42,17 @@ class LintResult:
 class Linter:
     def __init__(self, opinions_pack: "OpinionsPack"):
         self.lint_results = defaultdict(list)
-        self.opinions_pack = opinions_pack  # TODO make it the class iterable
+        self.opinions_pack = opinions_pack
 
     def lint_file(self, file: FileHandler):
         logger.debug(f"Linting file {file.file_path}")
+
         # TODO: find a way to make the yaml thing more elegant
         file_type = file.file_type
         if file_type == ".sql":
             node_type = file.dbt_node.type
-        elif file_type == ".yml" or file_type == ".yaml":
-            node_type = file.dbt_nodes[0].type if file.dbt_nodes else "none"
-        elif file_type == ".md":
-            node_type = "markdown"  # TODO
+        elif file_type == ".yml" or file_type == ".yaml" or file_type == ".md":
+            node_type = None
         for opinion in self.opinions_pack.get_opinions(file_type, node_type):
             if self._check_noqa(file, opinion.code):
                 continue
