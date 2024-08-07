@@ -1,7 +1,9 @@
-from abc import ABC, abstractmethod
-import yaml
+from abc import ABC
+from abc import abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+import yaml
 
 if TYPE_CHECKING:
     from dbt_opiner.dbt_artifacts import DbtNode

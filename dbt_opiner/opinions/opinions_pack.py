@@ -1,9 +1,11 @@
-import tempfile
+import importlib.util
 import inspect
 import pathlib
 import subprocess
-import importlib.util
+import tempfile
+
 from loguru import logger
+
 from dbt_opiner.config_singleton import ConfigSingleton
 from dbt_opiner.opinions.base_opinion import BaseOpinion
 

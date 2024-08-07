@@ -1,14 +1,14 @@
 import json
 import re
 from pathlib import Path
+
 from loguru import logger
+
 from dbt_opiner.config_singleton import ConfigSingleton
 from dbt_opiner.exceptions import DbtNodeNotFoundExeption
-from dbt_opiner.file_handlers import (
-    SQLFileHandler,
-    YamlFileHandler,
-    MarkdownFileHandler,
-)
+from dbt_opiner.file_handlers import MarkdownFileHandler
+from dbt_opiner.file_handlers import SQLFileHandler
+from dbt_opiner.file_handlers import YamlFileHandler
 from dbt_opiner.utils import compile_dbt_manifest
 
 MATCH_ALL = r".*"

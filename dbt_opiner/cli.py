@@ -1,11 +1,15 @@
+import inspect
 import os
 import sys
-import inspect
 import typing as t
+
 import click
-from click import Context, Choice
-from click.parser import OptionParser, ParsingState
+from click import Choice
+from click import Context
+from click.parser import OptionParser
+from click.parser import ParsingState
 from loguru import logger
+
 from dbt_opiner import entrypoint
 from dbt_opiner.config_singleton import ConfigSingleton
 

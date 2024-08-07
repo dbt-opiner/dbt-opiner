@@ -1,11 +1,13 @@
-import sys
-from enum import Enum
 import re
-from dataclasses import dataclass
+import sys
 from collections import defaultdict
-from loguru import logger
-from dbt_opiner.file_handlers import FileHandler
+from dataclasses import dataclass
+from enum import Enum
 from typing import TYPE_CHECKING
+
+from loguru import logger
+
+from dbt_opiner.file_handlers import FileHandler
 
 if TYPE_CHECKING:
     from dbt_opiner.opinions.opinions_pack import OpinionsPack

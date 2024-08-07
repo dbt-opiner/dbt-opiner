@@ -1,7 +1,8 @@
 import os
 import subprocess
-from loguru import logger
 from pathlib import Path
+
+from loguru import logger
 
 
 def find_git_root(path):

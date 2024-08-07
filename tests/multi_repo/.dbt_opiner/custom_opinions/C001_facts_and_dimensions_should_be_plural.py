@@ -1,6 +1,7 @@
 # Write a custom rule for dbt_opiner
+from dbt_opiner.linter import LintResult
+from dbt_opiner.linter import OpinionSeverity
 from dbt_opiner.opinions.base_opinion import BaseOpinion
-from dbt_opiner.linter import LintResult, OpinionSeverity
 
 
 class C001(BaseOpinion):

@@ -1,10 +1,13 @@
-from loguru import logger
 from collections import defaultdict
 from pathlib import Path
-from dbt_opiner.linter import Linter
-from dbt_opiner.utils import find_all_dbt_project_ymls, find_dbt_project_yml
-from dbt_opiner.opinions.opinions_pack import OpinionsPack
+
+from loguru import logger
+
 from dbt_opiner.dbt_artifacts import DbtProject
+from dbt_opiner.linter import Linter
+from dbt_opiner.opinions.opinions_pack import OpinionsPack
+from dbt_opiner.utils import find_all_dbt_project_ymls
+from dbt_opiner.utils import find_dbt_project_yml
 
 
 def get_dbt_projects_all_files(target: str = None, force_compile: bool = False):
@@ -67,13 +70,13 @@ def initialize_dbt_projects(
         raise ValueError("Cannot process all files and changed files at the same time")
 
     if all_files:
-        logger.info("Processing all files")
+        logger.debug("Processing all files")
         dbt_projects = get_dbt_projects_all_files(
             target=target, force_compile=force_compile
         )
 
     if changed_files:
-        logger.info("Processing changed files")
+        logger.debug("Processing changed files")
         files = [Path(file) for file in changed_files]
         dbt_projects = get_dbt_projects_changed_files(
             files, target=target, force_compile=force_compile

@@ -1,6 +1,7 @@
-from dbt_opiner.opinions.base_opinion import BaseOpinion
-from dbt_opiner.linter import OpinionSeverity, LintResult
 from dbt_opiner.file_handlers import SQLFileHandler
+from dbt_opiner.linter import LintResult
+from dbt_opiner.linter import OpinionSeverity
+from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
 class O002(BaseOpinion):

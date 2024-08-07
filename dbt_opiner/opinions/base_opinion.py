@@ -1,10 +1,11 @@
-from abc import ABC, abstractmethod
-from dbt_opiner.linter import LintResult, OpinionSeverity
-from dbt_opiner.file_handlers import (
-    SQLFileHandler,
-    YamlFileHandler,
-    MarkdownFileHandler,
-)
+from abc import ABC
+from abc import abstractmethod
+
+from dbt_opiner.file_handlers import MarkdownFileHandler
+from dbt_opiner.file_handlers import SQLFileHandler
+from dbt_opiner.file_handlers import YamlFileHandler
+from dbt_opiner.linter import LintResult
+from dbt_opiner.linter import OpinionSeverity
 
 
 class BaseOpinion(ABC):
