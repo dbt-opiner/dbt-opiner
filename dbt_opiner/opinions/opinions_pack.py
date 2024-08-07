@@ -25,7 +25,7 @@ class OpinionsPack:
 
         for opinion_class in opinion_classes:
             if opinion_class.__name__ not in self._ignored_opinions:
-                self._opinions.append(opinion_class())
+                self._opinions.append(opinion_class(self._config))
 
         # Load custom opinions
         self._opinions.extend(self._load_custom_opinions())
@@ -93,5 +93,5 @@ class OpinionsPack:
                     and obj is not BaseOpinion
                 ):
                     logger.debug(f"Found class {name} in {file}")
-                    loaded_opinions.append(obj())
+                    loaded_opinions.append(obj(self._config))
         return loaded_opinions

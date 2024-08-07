@@ -20,6 +20,7 @@ class BaseOpinion(ABC):
             Should is a suggestion, must is an obligation
         applies_to_file_type: The file type that this opinion applies to (sql, yml, etc.)
         applies_to_node_type: The node type that this opinion applies to (model, marco, etc.)
+        config: The configuration for this opinion.
     """
 
     def __init__(
@@ -29,12 +30,14 @@ class BaseOpinion(ABC):
         severity: OpinionSeverity,
         applies_to_file_type: str,
         applies_to_node_type: str,
+        config: dict = None,
     ) -> None:
         self.code = code
         self.description = description
         self.severity = severity
         self.applies_to_file_type = applies_to_file_type
         self.applies_to_node_type = applies_to_node_type
+        self._config = config  # In this case we inject the config to the opinion instead of relying on the singleton.
 
     def check_opinion(
         self, file: SQLFileHandler | YamlFileHandler | MarkdownFileHandler

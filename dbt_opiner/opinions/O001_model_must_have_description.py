@@ -5,7 +5,7 @@ from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
 class O001(BaseOpinion):
-    def __init__(self):
+    def __init__(self, config: dict = None) -> None:
         super().__init__(
             code="O001",
             description="Model must have a description.",

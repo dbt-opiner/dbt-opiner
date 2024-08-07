@@ -2,7 +2,7 @@ global:
   custom_opinions_source: git
   git_repository: https://github.com/dbt-opiner/dbt-opiner-custom-opinions.git
   ignore_opinions:
-    - O002
+    - O004
 
 sql:
   files: ".*/(models|macros)/.*"
