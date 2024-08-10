@@ -5,14 +5,13 @@ from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
 class O003(BaseOpinion):
-    def __init__(self, config: dict = None) -> None:
+    def __init__(self, **kwargs) -> None:
         super().__init__(
             code="O003",
             description="All columns must have a description.",
             severity=OpinionSeverity.MUST,
             applies_to_file_type=".sql",
             applies_to_node_type="model",
-            config=config,
         )
 
     def _eval(self, file: SQLFileHandler) -> LintResult:
@@ -27,7 +26,7 @@ class O003(BaseOpinion):
                 opinion_code=self.code,
                 passed=False,
                 severity=self.severity,
-                message=f"Columns: \n{"\n".join(descriptionless_columns)}{self.severity.value} have a description.",
+                message=f"Columns: {", ".join(descriptionless_columns)} {self.severity.value} have a description.",
             )
 
         return LintResult(

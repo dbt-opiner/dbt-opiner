@@ -4,17 +4,17 @@ import sys
 import typing as t
 
 import click
-from click import Choice
-from click import Context
-from click.parser import OptionParser
-from click.parser import ParsingState
 from loguru import logger
 
 from dbt_opiner import entrypoint
 from dbt_opiner.config_singleton import ConfigSingleton
 
 
-class ChoiceTuple(Choice):
+class ChoiceTuple(click.Choice):
+    """
+    Required for MultiOption to work
+    """
+
     name = "CHOICE_TUPLE"
 
     def convert(self, value, param, ctx):
@@ -54,8 +54,8 @@ class MultiOption(click.Option):
         else:
             assert isinstance(option_type, ChoiceTuple), msg
 
-    def add_to_parser(self, parser: OptionParser, ctx: Context):
-        def parser_process(value: str, state: ParsingState):
+    def add_to_parser(self, parser: click.parser.OptionParser, ctx: click.Context):
+        def parser_process(value: str, state: click.parser.ParsingState):
             # method to hook to the parser.process
             done = False
             value_list = str.split(value, " ")
@@ -85,7 +85,7 @@ class MultiOption(click.Option):
                 break
         return retval
 
-    def type_cast_value(self, ctx: Context, value: t.Any) -> t.Any:
+    def type_cast_value(self, ctx: click.Context, value: t.Any) -> t.Any:
         def flatten(data):
             if isinstance(data, tuple):
                 for x in data:
@@ -100,7 +100,13 @@ class MultiOption(click.Option):
         return value
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
+@click.group(
+    help="Tool to lint dbt projects and keep them on rails.",
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
+@click.version_option(
+    message="dbt-opiner version: %(version)s",
+)
 @click.option(
     "--log-level",
     type=click.Choice(
@@ -111,15 +117,13 @@ class MultiOption(click.Option):
 )
 @click.pass_context
 def main(ctx, log_level):
-    # Initialize the config singleton with the current working directory
+    # Load config
     config_root = os.getcwd()
     ConfigSingleton(config_root)
 
     # Set logger options
     logger.remove()
     logger.add(sys.stdout, level=log_level.upper())
-
-    # Store log level in context
     ctx.ensure_object(dict)
     ctx.obj["log_level"] = log_level
 
@@ -135,11 +139,16 @@ def main(ctx, log_level):
     is_flag=True,
     help="Compile dbt project manifest even if it exists",
 )
-@click.pass_context
-def lint(ctx, files, all_files, target, force_compile):
-    # Try to stablish a target from an environment variable
+def lint(files, all_files, target, force_compile):
+    if not files and not all_files:
+        raise click.BadParameter(
+            "Either --files or --all_files options must be provided"
+        )
+
+    # Try to set a target from an environment variable
     # This is useful when things should run in CI
     if target is None:
         target = os.getenv("DBT_TARGET")
+
     # Run linter
     entrypoint.lint(files, all_files, target, force_compile)

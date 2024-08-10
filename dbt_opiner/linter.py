@@ -1,6 +1,5 @@
 import re
 import sys
-from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
@@ -14,20 +13,43 @@ if TYPE_CHECKING:
 
 
 class OpinionSeverity(Enum):
+    """Enum class to represent the severity of an opinion.
+
+    Attributes:
+        MUST: The opinion must be followed.
+        SHOULD: The opinion should be followed.
+    """
+
     MUST = (1, "must")
     SHOULD = (2, "should")
 
-    def __init__(self, num, text):
+    def __init__(self, num: int, text: str) -> None:
+        """
+        Args:
+            num: The numerical value of the severity.
+            text: The text value of the severity.
+        """
         self.num = num
         self.text = text
 
     @property
-    def value(self):
+    def value(self) -> str:
+        """Returns the text value of the severity."""
         return self.text
 
 
 @dataclass
 class LintResult:
+    """Dataclass to hold the result of a linting operation.
+
+    Attributes:
+        file: The file handler that was linted.
+        opinion_code: The code of the opinion that was checked.
+        passed: True if the opinion passed, False otherwise.
+        severity: The severity of the opinion.
+        message: The message of the opinion check.
+    """
+
     file: FileHandler
     opinion_code: str
     passed: bool
@@ -35,6 +57,7 @@ class LintResult:
     message: str
 
     def __gt__(self, other):
+        """Compare two LintResult objects by severity and opinion code."""
         if self.severity.num != other.severity.num:
             return self.severity.num > other.severity.num
         else:
@@ -42,46 +65,100 @@ class LintResult:
 
 
 class Linter:
+    """Perform linting operations on dbt project files and log the results.
+
+    Methods:
+        lint_file: Lint a file with the loaded opinions.
+        get_lint_results: Get the lint results sorted by severity and opinion code.
+        log_results_and_exit: Log the lint results and exit with the appropriate code.
+
+    """
+
     def __init__(self, opinions_pack: "OpinionsPack"):
-        self.lint_results = defaultdict(list)
-        self.opinions_pack = opinions_pack
+        """
+        Args:
+            opinions_pack: OpinionsPack object containing the opinions to be checked.
+        """
+        self._lint_results = []
+        self._opinions_pack = opinions_pack
 
-    def lint_file(self, file: FileHandler):
+    def lint_file(self, file: FileHandler) -> None:
+        """Lint a file with the loaded opinions and add the result to the lint results.
+
+        Args:
+            file: The file handler to be linted.
+        """
         logger.debug(f"Linting file {file.file_path}")
-
-        # TODO: find a way to make the yaml thing more elegant
+        # TODO: find a way to make the node_type thing more elegant
         file_type = file.file_type
         if file_type == ".sql":
             node_type = file.dbt_node.type
-        elif file_type == ".yml" or file_type == ".yaml" or file_type == ".md":
+        elif file_type == ".yaml" or file_type == ".md":
             node_type = None
-        for opinion in self.opinions_pack.get_opinions(file_type, node_type):
-            if self._check_noqa(file, opinion.code):
+
+        opinions = self._opinions_pack.get_opinions(file_type, node_type)
+
+        for opinion in opinions:
+            if self._has_noqa(file, opinion.code):
+                logger.debug(f"Skipping opinion {opinion.code} because of noqa")
                 continue
             logger.debug(f"Checking opinion {opinion.code}")
             lint_result = opinion.check_opinion(file)
             if lint_result:
                 logger.debug(f"Lint Result: {lint_result}")
-                self.lint_results[file.file_path].append(lint_result)
+                self._lint_results.append((lint_result, file.file_path))
 
-    def log_results_and_exit(self):
+    def get_lint_results(self) -> list[tuple[FileHandler, LintResult]]:
+        """Returns a tuple of file and lint results sorted by severity and
+        opinion code (alphabetically).
+        Files can be in different order and not necessarily together if
+        more than one opinion for the file fails.
+        """
+        return sorted(self._lint_results, key=lambda x: x[0])
+
+    def log_results_and_exit(self) -> None:
+        """Log the results of the linting and exit with the appropriate code."""
+        # Change logger setup to make messages more clear
+        original_config = logger._core.handlers.copy().get(1)
+        logger.remove()
+        logger_id = logger.add(
+            original_config._sink,
+            level=original_config._levelno,
+            colorize=True,
+            format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}\n{message}</level>",
+        )
+
         exit_code = 0
-        for file_path, results in self.lint_results.items():
-            for result in sorted(results):
-                if not result.passed:
-                    if result.severity == OpinionSeverity.MUST:
-                        exit_code = 1
-                        logger.error(f"{file_path}: {result.message}")
-                    if result.severity == OpinionSeverity.SHOULD:
-                        logger.warning(f"{file_path}: {result.message}")
-                if result.passed:
-                    logger.debug(f"{file_path}: {result.message}")
 
+        for result, file_path in self.get_lint_results():
+            message = f"{result.opinion_code} | {result.message}\n{file_path}"
+            if not result.passed:
+                if result.severity == OpinionSeverity.MUST:
+                    exit_code = 1
+                    logger.error(message)
+                if result.severity == OpinionSeverity.SHOULD:
+                    logger.warning(message)
+            if result.passed:
+                logger.debug(message)
+
+        logger.remove(logger_id)
+        logger.add(sys.stdout, level=original_config._levelno)
         logger.debug(f"Exit with code: {exit_code}")
         sys.exit(exit_code)
 
     @staticmethod
-    def _check_noqa(file: FileHandler, opinion_code):
+    def _has_noqa(file: FileHandler, opinion_code: str) -> bool:
+        """
+        Check if the file has a noqa comment for the opinion code or all opinions.
+
+        Args:
+            file: The file handler to check for noqa comments.
+            opinion_code: The opinion code to check for.
+
+        Returns:
+            bool: True if the file has a noqa comment for the opinion code or
+                  all opinions, False otherwise.
+        """
         if re.search(rf"noqa: dbt-opiner [0-9]*,? ?{opinion_code}", file.content):
             return True
         if re.search(r"noqa: dbt-opiner all", file.content):

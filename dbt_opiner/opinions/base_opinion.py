@@ -20,8 +20,13 @@ class BaseOpinion(ABC):
             Should is a suggestion, must is an obligation
         applies_to_file_type: The file type that this opinion applies to (sql, yml, etc.)
         applies_to_node_type: The node type that this opinion applies to (model, marco, etc.)
-        config: The configuration for this opinion.
     """
+
+    # To install required packages for custom opinions this must be specified in children classes
+    # It is done like this because:
+    #  - there are different ways of defining packages in python projects
+    #  - if an opinion is ignored and not loaded, we don't want to install the packages
+    required_packages: list[str] = []
 
     def __init__(
         self,
@@ -30,14 +35,12 @@ class BaseOpinion(ABC):
         severity: OpinionSeverity,
         applies_to_file_type: str,
         applies_to_node_type: str,
-        config: dict = None,
     ) -> None:
         self.code = code
         self.description = description
         self.severity = severity
         self.applies_to_file_type = applies_to_file_type
         self.applies_to_node_type = applies_to_node_type
-        self._config = config  # In this case we inject the config to the opinion instead of relying on the singleton.
 
     def check_opinion(
         self, file: SQLFileHandler | YamlFileHandler | MarkdownFileHandler
@@ -48,24 +51,24 @@ class BaseOpinion(ABC):
             file: The the file to evaluate.
 
         Returns:
-            bool: True if the opinion is met, False otherwise.
+            A LintResult with the evaluation result of the opinion.
         """
-        if file.file_type == self.applies_to_file_type:
-            return self._eval(file)
-        else:
-            return None
+        # Public interface that provides better encapsulation, flexibility,
+        # consistency, extensibility, and ease of testing.
+        return self._eval(file)
 
     @abstractmethod
     def _eval(
         self, file: SQLFileHandler | YamlFileHandler | MarkdownFileHandler
     ) -> LintResult:
         """
-        The method that contains all the logic of the opinon evaluation.
+        The method that will contain all the logic of the opinon evaluation.
+        Should be implemented in the child class.
 
         Args:
             file: The the file to evaluate.
 
         Returns:
-            bool: True if the opinion is met, False otherwise.
+            A LintResult with the evaluation result of the opinion.
         """
         pass

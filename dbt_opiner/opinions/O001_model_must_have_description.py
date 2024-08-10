@@ -5,14 +5,13 @@ from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
 class O001(BaseOpinion):
-    def __init__(self, config: dict = None) -> None:
+    def __init__(self, **kwargs) -> None:
         super().__init__(
             code="O001",
             description="Model must have a description.",
             severity=OpinionSeverity.MUST,
             applies_to_file_type=".sql",
             applies_to_node_type="model",
-            config=config,
         )
 
     def _eval(self, file: SQLFileHandler) -> LintResult:

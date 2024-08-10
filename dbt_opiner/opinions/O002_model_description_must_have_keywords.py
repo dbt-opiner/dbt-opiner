@@ -7,20 +7,20 @@ from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
 class O002(BaseOpinion):
-    def __init__(self, config: dict = None) -> None:
+    def __init__(self, config: dict = None, **kwargs) -> None:
         super().__init__(
             code="O002",
             description="Model description must have keywords.",
             severity=OpinionSeverity.MUST,
             applies_to_file_type=".sql",
             applies_to_node_type="model",
-            config=config,
         )
+        self._config = config
 
     def _eval(self, file: SQLFileHandler) -> LintResult:
         try:
             keywords = (
-                self._config.get("sql").get("opinions_config").get("O002_keywords")
+                self._config.get("sql", {}).get("opinions_config").get("O002_keywords")
             )
         except AttributeError:
             keywords = None
