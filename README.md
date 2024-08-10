@@ -71,11 +71,11 @@ To ignore an opinion at the file level, add a comment with the format: `noqa: db
 
 ### Default opinions
 
-#### **O001 model must have a description** [source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O001_model_must_have_description.py)
+#### **O001 model must have a description** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O001_model_must_have_description.py)]
 Applies to: .sql files, dbt models nodes
 Models description is mandatory. Empty descriptions are not allowed.
 
-#### **O002 model description must have keywords** [source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)
+#### **O002 model description must have keywords** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)]
 Applies to: .sql files, dbt models nodes
 Models description must have certain keywords. The keywords can be set in the configuration (see above).
 This is useful if we want to enforce a certain structure in the descriptions. For example:
@@ -89,11 +89,11 @@ Granularity:
 
 Keywords are not case sensitive.
 
-#### **O003 all columns must have description** [source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O003_all_columns_must_have_description.py)
+#### **O003 all columns must have description** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O003_all_columns_must_have_description.py)]
 Applies to: .sql files, dbt models nodes
 All columns must have a description. Empty descriptions are not allowed.
 
-#### **O004 model should have unique key** [source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O004_model_should_have_unique_key.py)
+#### **O004 model should have unique key** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O004_model_should_have_unique_key.py)]
 Applies to: .sql files, dbt models nodes
 Models should have a unique key defined in the config block of the model. This is useful to enforce the uniqueness of the model and to make the granularity of the model explicit.
 
