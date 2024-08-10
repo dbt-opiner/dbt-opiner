@@ -110,6 +110,10 @@ class OpinionsPack:
                             stderr=subprocess.PIPE,
                             cwd=temp_dir,
                         )
+                    else:
+                        logger.warning(
+                            "Revision not defined. Main branch latest commit will be used. We advise to pin a revision."
+                        )
                 except subprocess.CalledProcessError as e:
                     logger.critical(
                         f"Could not clone git repository: {git_repo}. Error: {e.stderr.decode('utf-8')}"
