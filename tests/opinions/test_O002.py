@@ -8,25 +8,39 @@ from dbt_opiner.opinions import O002
     "mock_sqlfilehandler, config, expected_passed",
     [
         pytest.param(
-            (DbtNode({"description": "Some description with keyword"})),
+            (
+                DbtNode(
+                    {
+                        "resource_type": "model",
+                        "description": "Some description with keyword",
+                    }
+                )
+            ),
             {"sql": {"opinions_config": {"O002_keywords": ["keyword"]}}},
             True,
             id="model with description with keyword",
         ),
         pytest.param(
-            (DbtNode({"description": "Some description without"})),
+            (
+                DbtNode(
+                    {
+                        "resource_type": "model",
+                        "description": "Some description without",
+                    }
+                )
+            ),
             {"sql": {"opinions_config": {"O002_keywords": ["keyword"]}}},
             False,
             id="model with description without keyword",
         ),
         pytest.param(
-            (DbtNode({"description": "Some description"})),
+            (DbtNode({"resource_type": "model", "description": "Some description"})),
             {},
             True,
             id="No keywords config defined",
         ),
         pytest.param(
-            (DbtNode({})),
+            (DbtNode({"resource_type": "model"})),
             {"sql": {"opinions_config": {"O002_keywords": ["keyword"]}}},
             True,
             id="model without description",

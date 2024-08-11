@@ -9,17 +9,19 @@ from dbt_opiner.opinions import O001
     [
         pytest.param(
             (
-                DbtNode({"description": "Some description"})
+                DbtNode({"resource_type": "model", "description": "Some description"})
             ),  # This is a tuple because pytest expects a tuple for each set of parameters.
             True,
             id="model with description",
         ),
         pytest.param(
-            (DbtNode({"description": ""})),
+            (DbtNode({"resource_type": "model", "description": ""})),
             False,
             id="model with empty description",
         ),
-        pytest.param((DbtNode({})), False, id="model with no description"),
+        pytest.param(
+            (DbtNode({"resource_type": "model"})), False, id="model with no description"
+        ),
     ],
     indirect=["mock_sqlfilehandler"],
 )

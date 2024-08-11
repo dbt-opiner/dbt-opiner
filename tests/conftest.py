@@ -8,6 +8,6 @@ from dbt_opiner.file_handlers import SQLFileHandler
 @pytest.fixture
 def mock_sqlfilehandler(request):
     mock_handler = create_autospec(SQLFileHandler)
-    mock_handler.file_type = ".sql"
+    mock_handler.type = ".sql"
     mock_handler.dbt_node = request.param
     return mock_handler

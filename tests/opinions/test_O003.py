@@ -11,6 +11,7 @@ from dbt_opiner.opinions import O003
             (
                 DbtNode(
                     {
+                        "resource_type": "model",
                         "columns": {
                             "column_1": {
                                 "name": "columns_1",
@@ -20,7 +21,7 @@ from dbt_opiner.opinions import O003
                                 "name": "columns_2",
                                 "description": "Description",
                             },
-                        }
+                        },
                     }
                 )
             ),
@@ -31,13 +32,14 @@ from dbt_opiner.opinions import O003
             (
                 DbtNode(
                     {
+                        "resource_type": "model",
                         "columns": {
                             "column_1": {"name": "columns_1"},
                             "column_2": {
                                 "name": "columns_2",
                                 "description": "Description",
                             },
-                        }
+                        },
                     }
                 )
             ),
@@ -48,13 +50,14 @@ from dbt_opiner.opinions import O003
             (
                 DbtNode(
                     {
+                        "resource_type": "model",
                         "columns": {
                             "column_1": {"name": "columns_1", "description": ""},
                             "column_2": {
                                 "name": "columns_2",
                                 "description": "Description",
                             },
-                        }
+                        },
                     }
                 )
             ),

@@ -8,12 +8,12 @@ from dbt_opiner.opinions import O004
     "mock_sqlfilehandler, expected_passed",
     [
         pytest.param(
-            (DbtNode({"config": {"unique_key": "column_1"}})),
+            (DbtNode({"resource_type": "model", "config": {"unique_key": "column_1"}})),
             True,
             id="Model has a unique key",
         ),
         pytest.param(
-            (DbtNode({"config": {}})),
+            (DbtNode({"resource_type": "model", "config": {}})),
             False,
             id="Model doesn't have a unique key",
         ),
