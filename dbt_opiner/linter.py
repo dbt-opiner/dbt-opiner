@@ -1,4 +1,3 @@
-import re
 import sys
 from dataclasses import dataclass
 from enum import Enum
@@ -91,14 +90,21 @@ class Linter:
         logger.debug(f"Linting file {file.path}")
 
         for opinion in self.opinions:
-            if self._has_noqa(file, opinion.code):
+            if opinion.code in file.no_qa_opinions or "all" in file.no_qa_opinions:
                 logger.debug(f"Skipping opinion {opinion.code} because of noqa")
                 continue
             logger.debug(f"Checking opinion {opinion.code}")
             lint_result = opinion.check_opinion(file)
             if lint_result:
                 logger.debug(f"Lint Result: {lint_result}")
-                self._lint_results.append((lint_result, file.path))
+
+                # yaml files that can have multiple dbt nodes
+                # so sometimes lint results are a list for the same yml file but different nodes
+                if isinstance(lint_result, list):
+                    for result in lint_result:
+                        self._lint_results.append((result, file.path))
+                else:
+                    self._lint_results.append((lint_result, file.path))
 
     def get_lint_results(self) -> list[tuple[FileHandler, LintResult]]:
         """Returns a tuple of file and lint results sorted by severity and
@@ -137,22 +143,3 @@ class Linter:
         logger.add(sys.stdout, level=original_config._levelno)
         logger.debug(f"Exit with code: {exit_code}")
         sys.exit(exit_code)
-
-    @staticmethod
-    def _has_noqa(file: FileHandler, opinion_code: str) -> bool:
-        """
-        Check if the file has a noqa comment for the opinion code or all opinions.
-
-        Args:
-            file: The file handler to check for noqa comments.
-            opinion_code: The opinion code to check for.
-
-        Returns:
-            bool: True if the file has a noqa comment for the opinion code or
-                  all opinions, False otherwise.
-        """
-        if re.search(rf"noqa: dbt-opiner [0-9]*,? ?{opinion_code}", file.content):
-            return True
-        if re.search(r"noqa: dbt-opiner all", file.content):
-            return True
-        return False

@@ -16,7 +16,6 @@ dev:
 			poetry install --no-root; \
 			poetry run dbt deps; \
 			poetry run dbt build; \
-			rm -rf dbt_packages/dbt_utils/tests; \
 			cd ../../../; \
 	done
 

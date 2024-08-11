@@ -1,11 +1,14 @@
+import re
+import sys
 from abc import ABC
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import yaml
+from loguru import logger
 
 if TYPE_CHECKING:
-    from dbt_opiner.dbt import DbtNode
+    from dbt_opiner.dbt import DbtManifest
 
 
 class FileHandler(ABC):
@@ -29,6 +32,7 @@ class FileHandler(ABC):
         self.path = file_path
         self.type = self.path.suffix
         self._content = None
+        self.no_qa_opinions = self._get_no_qa_opinions(self.content)
 
     @property
     def content(self):
@@ -36,6 +40,40 @@ class FileHandler(ABC):
         if self._content is None:
             self._content = self._read_content()
         return self._content
+
+    @staticmethod
+    def _get_no_qa_opinions(content: str) -> list[str]:
+        """Get the no_qa_opinions from a string.
+        Args:
+            content: String to search for no_qa_opinions.
+        Returns:
+            List of no_qa_opinions.
+        """
+        if re.search(r"noqa: dbt-opiner all", content):
+            return ["all"]
+        matches = re.findall(r"noqa: dbt-opiner ([\w\d, ]+)", content)
+        if matches:
+            return matches[0].split(", ")
+        return []
+
+    def _add_no_qa_opinions_from_other_file(self, other_file_path: str) -> None:
+        """Add no_qa_opinions from another file to the current file.
+
+        Args:
+            other_file_path: Str path to the file to get the no_qa_opinions from.
+                             It's a string because dbt provides incomplete paths and we need to reconstruct them.
+        """
+        original_file_path = list(Path(other_file_path).parts)
+        parent_path = list(self.path.parent.parts)
+        for part in parent_path:
+            if original_file_path and original_file_path[0] == part:
+                original_file_path.pop(0)
+
+        parent_path.extend(original_file_path)
+        sql_file_path = Path(*parent_path)
+        with sql_file_path.open("r") as file:
+            content = file.read()
+        self.no_qa_opinions.extend(self._get_no_qa_opinions(content))
 
     def _read_content(self):
         try:
@@ -63,12 +101,11 @@ class SqlFileHandler(FileHandler):
         set_dbt_node: Sets the dbt_node attribute.
     """
 
-    def __init__(self, file_path: Path, dbt_node: "DbtNode" = None) -> None:
+    def __init__(self, file_path: Path, dbt_manifest: "DbtManifest") -> None:
         """
         Args:
             file_path: Path to the SQL file.
-            dbt_node: DbtNode object associated with the SQL file. Defaults to None.
-                      Can be later set with the set_dbt_node method.
+            dbt_manifest:  dbt manifest to search the DbtNode object associated with the SQL file.
         """
         # Trying to instantiate SqlFileHandler with another extension should fail
         try:
@@ -77,8 +114,44 @@ class SqlFileHandler(FileHandler):
             raise ValueError(
                 f"SqlFileHandler requires a .sql file, got {file_path.suffix}"
             )
-        self.dbt_node = dbt_node
         super().__init__(file_path)
+
+        self.dbt_node = None
+
+        # Add dbt node to the file handler
+        # Check if it's a model or a macro .sql file
+        if "{%macro" in self.content.replace(" ", ""):
+            self.dbt_node = next(
+                (
+                    node
+                    for node in dbt_manifest.macros
+                    if node.original_file_path in str(self.path)
+                ),
+                None,
+            )
+
+        else:
+            # It's a model or a test
+            self.dbt_node = next(
+                (
+                    node
+                    for node in dbt_manifest.nodes
+                    if node.original_file_path in str(self.path)
+                ),
+                None,
+            )
+
+        if not self.dbt_node:
+            logger.critical(
+                f"Node not found for {self.path}. Try running dbt compile to generate the manifest file, or make sure the file is part of a well formed dbt project."
+            )
+            sys.exit(1)
+
+        # Add no_qa_opinions from the docs yml file
+        if self.dbt_node.docs_yml_file_path:
+            self._add_no_qa_opinions_from_other_file(self.dbt_node.docs_yml_file_path)
+
+        # TODO: Add catalog entry to the file handler
 
     @property
     def compiled_code(self) -> str:
@@ -88,14 +161,6 @@ class SqlFileHandler(FileHandler):
         return None
 
     # TODO: add sqlglot parsing of compiled code
-
-    def set_dbt_node(self, dbt_node):
-        """Sets the dbt_node attribute.
-
-        Args:
-            dbt_node: DbtNode object associated with the SQL file.
-        """
-        self.dbt_node = dbt_node
 
 
 class YamlFileHandler(FileHandler):
@@ -109,11 +174,11 @@ class YamlFileHandler(FileHandler):
         get: Returns the value of a key in the YAML file content.
     """
 
-    def __init__(self, file_path: Path, dbt_nodes: list = None) -> None:
+    def __init__(self, file_path: Path, dbt_manifest: "DbtManifest" = None) -> None:
         """
         Args:
             file_path: Path to the YAML file.
-            dbt_nodes: List of DbtNode objects for which the YAML file is a patch (contains docs of). Defaults to None.
+            dbt_manifest: dbt manifest to search in which the YAML file is a patch (contains docs of).
         """
         # Trying to instantiate YamlFileHandler with another extension should fail
         try:
@@ -122,10 +187,25 @@ class YamlFileHandler(FileHandler):
             raise ValueError(
                 f"YamlFileHandler requires a .yml or .yaml file, got {file_path.suffix}"
             )
-        self.dbt_nodes = dbt_nodes
-        self._dict = None
         super().__init__(file_path)
+        self._dict = None
         self.type = ".yaml"
+
+        # Search for the node in the manifest by the file name in patch
+        # A yml file can have more than one dbt node
+        self.dbt_nodes = []
+        if dbt_manifest:
+            self.dbt_nodes = [
+                node
+                for node in dbt_manifest.nodes
+                if str(node.docs_yml_file_path) in str(file_path)
+            ]
+
+            # If we have a dbt node, get the no_qa_opinions from the sql file
+            # and append to the ignored opinions of the yaml file
+            if self.dbt_nodes:
+                for node in self.dbt_nodes:
+                    self._add_no_qa_opinions_from_other_file(node.original_file_path)
 
     def to_dict(self) -> dict:
         """Returns the YAML file content as a dictionary."""

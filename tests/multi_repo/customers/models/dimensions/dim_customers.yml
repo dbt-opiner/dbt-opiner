@@ -30,3 +30,6 @@ models:
 
       - name: total_order_amount
         description: Total value (AUD) of a customer's orders
+
+  - name: dim_churned_customers
+    description: ''

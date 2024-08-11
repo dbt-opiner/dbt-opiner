@@ -1,5 +1,0 @@
-version: 2
-
-models:
-  - name: dim_churned_customers
-    description: ''

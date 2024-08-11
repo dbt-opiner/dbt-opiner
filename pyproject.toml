@@ -2,7 +2,7 @@
 name = "dbt-opiner"
 version = "0.1.0"
 description = "A tool to keep dbt projects on rails"
-authors=["John Smith <john@example.com>"]
+authors=["Rodrigo Loredo <loredo.rod@gmail.com>"]
 
 [tool.poetry.scripts]
 dbt-opiner = "dbt_opiner.cli:main"
@@ -21,3 +21,6 @@ pytest = "^7.4"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = "--ignore=tests/multi_repo"

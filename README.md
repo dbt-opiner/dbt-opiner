@@ -62,21 +62,29 @@ sql:
 
 ```
 
-## Opinions
-The opinions are defined in the `opinions` directory. They apply to certain type of files and dbt nodes and have a severity level. The severity levels are: `Must` (it's mandatory) and `Should` (it's highly recommended). The opinions have a code, a description and a configuration. The configuration is optional and can be used to set extra parameters for the opinion.
+TODO: add link to example repo.
 
-Opinions can be ignored at the global level or at the file level.
+## Opinions
+The opinions are defined in the `opinions` directory. They apply to certain dbt nodes (models, macros, or tests) and/or type of files (yaml, sql, md). The opinions have a code, a description, a severity, and a configuration.
+The severity levels are: `Must` (it's mandatory) and `Should` (it's highly recommended).
+The configuration is optional and can be used to set extra parameters for the opinion.
+
+### Ignoring opinions (noqa)
+Opinions can be ignored at the global level or at the node level.
 To ignore an opinion at the global level, add the opinion code to the `ignore_opinions` list in the `dbt-opiner.yaml` file.
-To ignore an opinion at the file level, add a comment with the format: `noqa: dbt-opiner OXXX`at the beginning of the file, where `OXXX` is the opinion code. Use a comma separated list if you want to ignore more than one opinion (e.g. `noqa: dbt-opiner O001, O002`). You can also ignore all opinions in a file by using `noqa: dbt-opiner all`.
+To ignore an opinion at the node (model, macro, or test) level, add a comment with the format: `noqa: dbt-opiner OXXX` at the beginning of the sql or yaml file, where `OXXX` is the opinion code. Use a comma separated list if you want to ignore more than one opinion (e.g. `noqa: dbt-opiner O001, O002`). You can also ignore all opinions in a node by using `noqa: dbt-opiner all`.
+Note that if multiple nodes are defined in the same yaml file, the noqa comment will apply to all the nodes defined in that file.
+
+TODO: add link to example repo.
 
 ### Default opinions
 
 #### **O001 model must have a description** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O001_model_must_have_description.py)]
-Applies to: .sql files, dbt models nodes
+Applies to: dbt models when either sql or yaml files are changed
 Models description is mandatory. Empty descriptions are not allowed.
 
 #### **O002 model description must have keywords** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)]
-Applies to: .sql files, dbt models nodes
+Applies to: dbt models when either sql or yaml files are changed
 Models description must have certain keywords. The keywords can be set in the configuration (see above).
 This is useful if we want to enforce a certain structure in the descriptions. For example:
 
@@ -90,11 +98,11 @@ Granularity:
 Keywords are not case sensitive.
 
 #### **O003 all columns must have description** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O003_all_columns_must_have_description.py)]
-Applies to: .sql files, dbt models nodes
+Applies to: dbt models when either sql or yaml files are changed
 All columns must have a description. Empty descriptions are not allowed.
 
 #### **O004 model should have unique key** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O004_model_should_have_unique_key.py)]
-Applies to: .sql files, dbt models nodes
+Applies to: dbt models when sql files are changed
 Models should have a unique key defined in the config block of the model. This is useful to enforce the uniqueness of the model and to make the granularity of the model explicit.
 
 ### Adding custom opinions

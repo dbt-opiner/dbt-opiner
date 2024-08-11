@@ -2,7 +2,6 @@ import json
 import os
 import re
 import subprocess
-import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -111,59 +110,20 @@ class DbtProject:
                     if re.match(
                         self._config.get("sql", {}).get("files", MATCH_ALL), str(file)
                     ):
-                        file = SqlFileHandler(file)
+                        sql_file = SqlFileHandler(file, self.dbt_manifest)
+                        self.files["sql"].append(sql_file)
 
-                        # Check if it's a model or a macro .sql file
-                        if "{%macro" in file.content.replace(" ", ""):
-                            dbt_node = next(
-                                (
-                                    node
-                                    for node in self.dbt_manifest.macros
-                                    if node.original_file_path in str(file.path)
-                                ),
-                                None,
-                            )
-
-                        else:
-                            # It's a model or a test
-                            # TODO: Add catalog
-                            dbt_node = next(
-                                (
-                                    node
-                                    for node in self.dbt_manifest.nodes
-                                    if node.original_file_path in str(file.path)
-                                ),
-                                None,
-                            )
-
-                        if not dbt_node:
-                            logger.critical(
-                                f"Node not found for {file.path}. Try running dbt compile to generate the manifest file, or make sure the file is part of a well formed dbt project."
-                            )
-                            sys.exit(1)
-
-                        file.set_dbt_node(dbt_node)
-
-                        self.files["sql"].append(file)
                 elif file.suffix in [".yml", ".yaml"]:
                     try:
-                        yaml_config = self._config["yaml"]
-                        file_pattern = yaml_config.get("files", MATCH_ALL)
+                        file_pattern = self._config["yaml"].get("files", MATCH_ALL)
                     except KeyError:
                         file_pattern = self._config.get("yml", {}).get(
                             "files", MATCH_ALL
                         )
-
                     if re.match(file_pattern, str(file)):
-                        # Search for the node in the manifest by the file name in patch
-                        # A yml file can have more than one dbt node
-                        dbt_nodes = [
-                            node
-                            for node in self.dbt_manifest.nodes
-                            if str(node.docs_yml_file_path) in str(file)
-                        ]
+                        yaml_file = YamlFileHandler(file, self.dbt_manifest)
+                        self.files["yaml"].append(yaml_file)
 
-                        self.files["yaml"].append(YamlFileHandler(file, dbt_nodes))
                 elif file.suffix == ".md":
                     file_pattern = self._config.get("md", {}).get("files", MATCH_ALL)
                     if re.match(file_pattern, str(file)):
@@ -282,9 +242,9 @@ class DbtNode:
         return self._node.get("compiled_code")
 
     @property
-    def docs_yml_file_path(self) -> Path:
+    def docs_yml_file_path(self) -> str | None:
         if self._node.get("patch_path"):
-            return Path(self._node.get("patch_path").replace("://", "/"))
+            return self._node.get("patch_path").replace("://", "/")
         return None
 
     @property

@@ -13,29 +13,52 @@ class O001(BaseOpinion):
             severity=OpinionSeverity.MUST,
         )
 
-    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> LintResult:
-        # Check type of file and model.
-        if file.type not in [".sql"]:
-            return None
-        if file.dbt_node.type != "model":
-            return None
+    def _eval(
+        self, file: SqlFileHandler | YamlFileHandler
+    ) -> LintResult | list[LintResult]:
+        if file.type == ".sql" and file.dbt_node.type == "model":
+            if file.dbt_node.description:
+                if len(file.dbt_node.description) > 0:
+                    return LintResult(
+                        file=file,
+                        opinion_code=self.code,
+                        passed=True,
+                        severity=self.severity,
+                        message="Model has a description.",
+                    )
+            return LintResult(
+                file=file,
+                opinion_code=self.code,
+                passed=False,
+                severity=self.severity,
+                message=f"Model {self.severity.value} have a description.",
+            )
 
-        # TODO: add yaml check support
-        # If you change the yaml and remove the description, this should fail.
+        if file.type == ".yaml":
+            results = []
+            for node in file.dbt_nodes:
+                if node.type == "model":
+                    if node.get("description"):
+                        if len(node.get("description")) > 0:
+                            results.append(
+                                LintResult(
+                                    file=file,
+                                    opinion_code=self.code,
+                                    passed=True,
+                                    severity=self.severity,
+                                    message=f"Model {node.alias} has a description.",
+                                )
+                            )
+                            continue
+                    results.append(
+                        LintResult(
+                            file=file,
+                            opinion_code=self.code,
+                            passed=False,
+                            severity=self.severity,
+                            message=f"Model {node.alias} {self.severity.value} have a description.",
+                        )
+                    )
+            return results
 
-        if file.dbt_node.description:
-            if len(file.dbt_node.description) > 0:
-                return LintResult(
-                    file=file,
-                    opinion_code=self.code,
-                    passed=True,
-                    severity=self.severity,
-                    message="Model has a description.",
-                )
-        return LintResult(
-            file=file,
-            opinion_code=self.code,
-            passed=False,
-            severity=self.severity,
-            message=f"Model {self.severity.value} have a description.",
-        )
+        return None

@@ -38,14 +38,15 @@ class BaseOpinion(ABC):
 
     def check_opinion(
         self, file: SqlFileHandler | YamlFileHandler | MarkdownFileHandler
-    ) -> LintResult:
+    ) -> LintResult | list[LintResult]:
         """The method that will be called to evaluate the opinion.
 
         Args:
             file: The the file to evaluate.
 
         Returns:
-            A LintResult with the evaluation result of the opinion.
+            A single ListResult with the evaluation result of the opinion.
+            A list if the result evaluates more than one dbt node.
         """
         # Public interface that provides better encapsulation, flexibility,
         # consistency, extensibility, and ease of testing.
@@ -54,7 +55,7 @@ class BaseOpinion(ABC):
     @abstractmethod
     def _eval(
         self, file: SqlFileHandler | YamlFileHandler | MarkdownFileHandler
-    ) -> LintResult:
+    ) -> LintResult | list[LintResult]:
         """
         The method that will contain all the logic of the opinon evaluation.
         Should be implemented in the child class.
@@ -63,6 +64,7 @@ class BaseOpinion(ABC):
             file: The the file to evaluate.
 
         Returns:
-            A LintResult with the evaluation result of the opinion.
+            A single ListResult with the evaluation result of the opinion.
+            A list if the result evaluates more than one dbt node.
         """
         pass
