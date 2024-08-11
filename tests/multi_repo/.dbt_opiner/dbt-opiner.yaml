@@ -2,7 +2,7 @@ global:
   custom_opinions:
     source: git
     repository: https://github.com/dbt-opiner/dbt-opiner-custom-opinions.git
-    rev: 2348b98 # Tag or commit sha, not branches.
+    #rev: 2348b98 # Tag or commit sha, not branches.
 
 sql:
   files: ".*/(models|macros|tests)/.*"

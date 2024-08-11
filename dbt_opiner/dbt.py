@@ -119,7 +119,7 @@ class DbtProject:
                                 (
                                     node
                                     for node in self.dbt_manifest.macros
-                                    if node.original_file_path in str(file.file_path)
+                                    if node.original_file_path in str(file.path)
                                 ),
                                 None,
                             )
@@ -131,14 +131,14 @@ class DbtProject:
                                 (
                                     node
                                     for node in self.dbt_manifest.nodes
-                                    if node.original_file_path in str(file.file_path)
+                                    if node.original_file_path in str(file.path)
                                 ),
                                 None,
                             )
 
                         if not dbt_node:
                             logger.critical(
-                                f"Node not found for {file.file_path}. Try running dbt compile to generate the manifest file, or make sure the file is part of a well formed dbt project."
+                                f"Node not found for {file.path}. Try running dbt compile to generate the manifest file, or make sure the file is part of a well formed dbt project."
                             )
                             sys.exit(1)
 

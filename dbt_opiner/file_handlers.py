@@ -12,8 +12,8 @@ class FileHandler(ABC):
     """Abstract class for handling files.
 
     Attributes:
-        file_path: Path to the file.
-        file_type: File extension.
+        path: Path to the file.
+        type: File extension.
         content: Raw content (as a string) of a file.
     """
 
@@ -26,8 +26,8 @@ class FileHandler(ABC):
             assert file_path.exists()
         except AssertionError:
             raise FileNotFoundError(f"{file_path} does not exist")
-        self.file_path = file_path
-        self.file_type = self.file_path.suffix
+        self.path = file_path
+        self.type = self.path.suffix
         self._content = None
 
     @property
@@ -39,16 +39,16 @@ class FileHandler(ABC):
 
     def _read_content(self):
         try:
-            with self.file_path.open("r") as file:
+            with self.path.open("r") as file:
                 return file.read()
         except Exception as e:
             raise RuntimeError(f"Error reading file: {e}")
 
     def __repr__(self):
-        return f"FileHander({self.file_path})"
+        return f"FileHander({self.path})"
 
     def __str__(self):
-        return f"{self.file_path}"
+        return f"{self.path}"
 
 
 class SQLFileHandler(FileHandler):
@@ -125,7 +125,7 @@ class YamlFileHandler(FileHandler):
         self.dbt_nodes = dbt_nodes
         self._dict = None
         super().__init__(file_path)
-        self.file_type = ".yaml"
+        self.type = ".yaml"
 
     def to_dict(self) -> dict:
         """Returns the YAML file content as a dictionary."""

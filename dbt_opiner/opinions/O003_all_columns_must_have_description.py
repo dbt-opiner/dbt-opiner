@@ -10,11 +10,18 @@ class O003(BaseOpinion):
             code="O003",
             description="All columns must have a description.",
             severity=OpinionSeverity.MUST,
-            applies_to_file_type=".sql",
-            applies_to_node_type="model",
         )
 
     def _eval(self, file: SQLFileHandler) -> LintResult:
+        # Check type of file and model.
+        if file.type not in [".sql"]:
+            return None  # TODO: add yaml check support
+        if file.dbt_node.type != "model":
+            return None
+
+        # TODO: add yaml check support
+        # If you change the yaml and remove the description, this should fail.
+
         descriptionless_columns = []
         for key, value in file.dbt_node.columns.items():
             if not value.get("description") or len(value.get("description")) == 0:

@@ -12,12 +12,19 @@ class O002(BaseOpinion):
             code="O002",
             description="Model description must have keywords.",
             severity=OpinionSeverity.MUST,
-            applies_to_file_type=".sql",
-            applies_to_node_type="model",
         )
         self._config = config
 
     def _eval(self, file: SQLFileHandler) -> LintResult:
+        # Check type of file and model.
+        if file.type not in [".sql"]:
+            return None  # TODO: add yaml check support
+        if file.dbt_node.type != "model":
+            return None
+
+        # TODO: add yaml check support
+        # If you change the yaml and remove the description, this should fail.
+
         try:
             keywords = (
                 self._config.get("sql", {}).get("opinions_config").get("O002_keywords")

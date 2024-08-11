@@ -10,11 +10,13 @@ class O004(BaseOpinion):
             code="O004",
             description="Model should have unique key.",
             severity=OpinionSeverity.SHOULD,
-            applies_to_file_type=".sql",
-            applies_to_node_type="model",
         )
 
     def _eval(self, file: SQLFileHandler) -> LintResult:
+        # Check type of file and model.
+        if file.type != ".sql" or file.dbt_node.type != "model":
+            return None
+
         if file.dbt_node.unique_key:
             return LintResult(
                 file=file,

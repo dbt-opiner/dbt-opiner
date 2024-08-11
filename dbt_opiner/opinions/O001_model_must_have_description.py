@@ -10,11 +10,15 @@ class O001(BaseOpinion):
             code="O001",
             description="Model must have a description.",
             severity=OpinionSeverity.MUST,
-            applies_to_file_type=".sql",
-            applies_to_node_type="model",
         )
 
     def _eval(self, file: SQLFileHandler) -> LintResult:
+        # Check type of file and model.
+        if file.type not in [".sql"]:
+            return None  # TODO: add yaml check support
+        if file.dbt_node.type != "model":
+            return None
+
         if file.dbt_node.description:
             if len(file.dbt_node.description) > 0:
                 return LintResult(

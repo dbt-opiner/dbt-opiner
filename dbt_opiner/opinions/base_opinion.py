@@ -18,8 +18,6 @@ class BaseOpinion(ABC):
             opinion does. It will be displayed when any violations are found.
         severity: The severity of the opinion. It can be one of should or must.
             Should is a suggestion, must is an obligation
-        applies_to_file_type: The file type that this opinion applies to (sql, yml, etc.)
-        applies_to_node_type: The node type that this opinion applies to (model, marco, etc.)
     """
 
     # To install required packages for custom opinions this must be specified in children classes
@@ -33,14 +31,10 @@ class BaseOpinion(ABC):
         code: str,
         description: str,
         severity: OpinionSeverity,
-        applies_to_file_type: str,
-        applies_to_node_type: str,
     ) -> None:
         self.code = code
         self.description = description
         self.severity = severity
-        self.applies_to_file_type = applies_to_file_type
-        self.applies_to_node_type = applies_to_node_type
 
     def check_opinion(
         self, file: SQLFileHandler | YamlFileHandler | MarkdownFileHandler

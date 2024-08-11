@@ -38,24 +38,9 @@ class OpinionsPack:
             f"Loaded opinions:\n{'\n'.join([opinion.code for opinion in self._opinions])}"
         )
 
-    # Organize opinons by file and node type
-    def get_opinions(self, file_type, node_type):
-        """
-        Get all the opinions that apply to a file and node type.
-        """
-        opinions = [
-            opinion
-            for opinion in self._opinions
-            if opinion.applies_to_file_type == file_type
-        ]
-
-        if node_type:
-            return [
-                opinion
-                for opinion in opinions
-                if opinion.applies_to_node_type == node_type
-            ]
-        return opinions
+    def get_opinions(self):
+        """Returns all the loaded opinions."""
+        return [opinion for opinion in self._opinions]
 
     def _load_custom_opinions(self):
         custom_opinions = []

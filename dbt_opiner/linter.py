@@ -80,7 +80,7 @@ class Linter:
             opinions_pack: OpinionsPack object containing the opinions to be checked.
         """
         self._lint_results = []
-        self._opinions_pack = opinions_pack
+        self.opinions = opinions_pack.get_opinions()
 
     def lint_file(self, file: FileHandler) -> None:
         """Lint a file with the loaded opinions and add the result to the lint results.
@@ -88,17 +88,9 @@ class Linter:
         Args:
             file: The file handler to be linted.
         """
-        logger.debug(f"Linting file {file.file_path}")
-        # TODO: find a way to make the node_type thing more elegant
-        file_type = file.file_type
-        if file_type == ".sql":
-            node_type = file.dbt_node.type
-        elif file_type == ".yaml" or file_type == ".md":
-            node_type = None
+        logger.debug(f"Linting file {file.path}")
 
-        opinions = self._opinions_pack.get_opinions(file_type, node_type)
-
-        for opinion in opinions:
+        for opinion in self.opinions:
             if self._has_noqa(file, opinion.code):
                 logger.debug(f"Skipping opinion {opinion.code} because of noqa")
                 continue
@@ -106,7 +98,7 @@ class Linter:
             lint_result = opinion.check_opinion(file)
             if lint_result:
                 logger.debug(f"Lint Result: {lint_result}")
-                self._lint_results.append((lint_result, file.file_path))
+                self._lint_results.append((lint_result, file.path))
 
     def get_lint_results(self) -> list[tuple[FileHandler, LintResult]]:
         """Returns a tuple of file and lint results sorted by severity and
