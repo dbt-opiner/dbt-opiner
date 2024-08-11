@@ -10,7 +10,7 @@ from loguru import logger
 
 from dbt_opiner.config_singleton import ConfigSingleton
 from dbt_opiner.file_handlers import MarkdownFileHandler
-from dbt_opiner.file_handlers import SQLFileHandler
+from dbt_opiner.file_handlers import SqlFileHandler
 from dbt_opiner.file_handlers import YamlFileHandler
 
 MATCH_ALL = r".*"
@@ -111,7 +111,7 @@ class DbtProject:
                     if re.match(
                         self._config.get("sql", {}).get("files", MATCH_ALL), str(file)
                     ):
-                        file = SQLFileHandler(file)
+                        file = SqlFileHandler(file)
 
                         # Check if it's a model or a macro .sql file
                         if "{%macro" in file.content.replace(" ", ""):

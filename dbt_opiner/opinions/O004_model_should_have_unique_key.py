@@ -1,4 +1,4 @@
-from dbt_opiner.file_handlers import SQLFileHandler
+from dbt_opiner.file_handlers import SqlFileHandler
 from dbt_opiner.linter import LintResult
 from dbt_opiner.linter import OpinionSeverity
 from dbt_opiner.opinions.base_opinion import BaseOpinion
@@ -12,7 +12,7 @@ class O004(BaseOpinion):
             severity=OpinionSeverity.SHOULD,
         )
 
-    def _eval(self, file: SQLFileHandler) -> LintResult:
+    def _eval(self, file: SqlFileHandler) -> LintResult:
         # Check type of file and model.
         if file.type != ".sql" or file.dbt_node.type != "model":
             return None

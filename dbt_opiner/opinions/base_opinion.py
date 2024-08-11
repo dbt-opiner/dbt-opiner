@@ -2,7 +2,7 @@ from abc import ABC
 from abc import abstractmethod
 
 from dbt_opiner.file_handlers import MarkdownFileHandler
-from dbt_opiner.file_handlers import SQLFileHandler
+from dbt_opiner.file_handlers import SqlFileHandler
 from dbt_opiner.file_handlers import YamlFileHandler
 from dbt_opiner.linter import LintResult
 from dbt_opiner.linter import OpinionSeverity
@@ -37,7 +37,7 @@ class BaseOpinion(ABC):
         self.severity = severity
 
     def check_opinion(
-        self, file: SQLFileHandler | YamlFileHandler | MarkdownFileHandler
+        self, file: SqlFileHandler | YamlFileHandler | MarkdownFileHandler
     ) -> LintResult:
         """The method that will be called to evaluate the opinion.
 
@@ -53,7 +53,7 @@ class BaseOpinion(ABC):
 
     @abstractmethod
     def _eval(
-        self, file: SQLFileHandler | YamlFileHandler | MarkdownFileHandler
+        self, file: SqlFileHandler | YamlFileHandler | MarkdownFileHandler
     ) -> LintResult:
         """
         The method that will contain all the logic of the opinon evaluation.

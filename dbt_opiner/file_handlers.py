@@ -51,7 +51,7 @@ class FileHandler(ABC):
         return f"{self.path}"
 
 
-class SQLFileHandler(FileHandler):
+class SqlFileHandler(FileHandler):
     """Class for handling SQL files.
     It expects the SQL file to be a model, macro, or test of a dbt project.
 
@@ -70,12 +70,12 @@ class SQLFileHandler(FileHandler):
             dbt_node: DbtNode object associated with the SQL file. Defaults to None.
                       Can be later set with the set_dbt_node method.
         """
-        # Trying to instantiate SQLFileHandler with another extension should fail
+        # Trying to instantiate SqlFileHandler with another extension should fail
         try:
             assert file_path.suffix == ".sql"
         except AssertionError:
             raise ValueError(
-                f"SQLFileHandler requires a .sql file, got {file_path.suffix}"
+                f"SqlFileHandler requires a .sql file, got {file_path.suffix}"
             )
         self.dbt_node = dbt_node
         super().__init__(file_path)

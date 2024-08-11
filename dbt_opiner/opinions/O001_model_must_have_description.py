@@ -1,4 +1,5 @@
-from dbt_opiner.file_handlers import SQLFileHandler
+from dbt_opiner.file_handlers import SqlFileHandler
+from dbt_opiner.file_handlers import YamlFileHandler
 from dbt_opiner.linter import LintResult
 from dbt_opiner.linter import OpinionSeverity
 from dbt_opiner.opinions.base_opinion import BaseOpinion
@@ -12,12 +13,15 @@ class O001(BaseOpinion):
             severity=OpinionSeverity.MUST,
         )
 
-    def _eval(self, file: SQLFileHandler) -> LintResult:
+    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> LintResult:
         # Check type of file and model.
         if file.type not in [".sql"]:
-            return None  # TODO: add yaml check support
+            return None
         if file.dbt_node.type != "model":
             return None
+
+        # TODO: add yaml check support
+        # If you change the yaml and remove the description, this should fail.
 
         if file.dbt_node.description:
             if len(file.dbt_node.description) > 0:
