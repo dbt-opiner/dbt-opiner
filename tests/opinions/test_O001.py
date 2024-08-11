@@ -79,7 +79,7 @@ def test_sql_O001(mock_sqlfilehandler, expected_passed):
     ],
     indirect=["mock_yamlfilehandler"],
 )
-def test_yaml_C001(mock_yamlfilehandler, expected_passed):
+def test_yaml_O001(mock_yamlfilehandler, expected_passed):
     opinion = O001()
     results = opinion.check_opinion(mock_yamlfilehandler)
     assert [result.passed for result in results] == expected_passed
