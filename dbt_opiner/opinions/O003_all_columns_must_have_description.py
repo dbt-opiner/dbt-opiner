@@ -5,6 +5,28 @@ from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
 class O003(BaseOpinion):
+    """All columns in the model should have a description.
+
+    Descriptions are important for documentation and understanding the purpose
+    of the columns. A good description desambiguates the content of a column
+    and helps making data more obvious.
+
+    This opinion has some caveats. The only way of really knowning the
+    columns of a model is by running the model and checking the columns in
+    the catalog.json. However we don't want to depend on the execution of
+    the model.
+
+    This opinion checks if:
+      - all defined columns have a description in the manifests.json.
+      - the columns extracted by the sqlglot parser have a description in
+        the manifest.json.
+
+    If the model is constructed in a way that not all columns are extracted by
+    the sqlglot parser, this opinion will omit those columns from the check.
+    Rule O004 will check against this condition and will fail if
+    unresolved select are found.
+    """
+
     def __init__(self, **kwargs) -> None:
         super().__init__(
             code="O003",

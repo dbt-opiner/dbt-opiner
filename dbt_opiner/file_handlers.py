@@ -159,7 +159,7 @@ class SqlFileHandler(FileHandler):
 
     @property
     def sql_code_ast(self) -> sqlglot.expressions.Select:
-        """Returns the sqlglot AST for the compiled sql code.
+        """Returns the sqlglot Abstract Syntax Tree for the compiled sql code.
         See more about AST at: https://github.com/tobymao/sqlglot/blob/main/posts/ast_primer.md
         """
         if self._sql_code_ast is None:
