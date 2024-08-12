@@ -4,7 +4,7 @@ from dbt_opiner.linter import OpinionSeverity
 from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
-class O004(BaseOpinion):
+class O005(BaseOpinion):
     def __init__(self, **kwargs) -> None:
         super().__init__(
             code="O004",

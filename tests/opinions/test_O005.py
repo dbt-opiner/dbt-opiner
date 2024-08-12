@@ -1,7 +1,7 @@
 import pytest
 
 from dbt_opiner.dbt import DbtNode
-from dbt_opiner.opinions import O004
+from dbt_opiner.opinions import O005
 
 
 @pytest.mark.parametrize(
@@ -21,6 +21,6 @@ from dbt_opiner.opinions import O004
     indirect=["mock_sqlfilehandler"],
 )
 def test_C004(mock_sqlfilehandler, expected_passed):
-    opinion = O004()
+    opinion = O005()
     result = opinion.check_opinion(mock_sqlfilehandler)
     assert result.passed == expected_passed

@@ -1,4 +1,5 @@
 global:
+  sqlglot_dialect: duckdb
   custom_opinions:
     source: git
     repository: https://github.com/dbt-opiner/dbt-opiner-custom-opinions.git

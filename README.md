@@ -37,6 +37,7 @@ The `dbt-opiner.yaml` file should have the following structure:
 
 ```yaml
 global:
+  sqlglot_dialect: duckdb # The dialect to use when parsing the sql files with sqlglot.
   ignore_opinions: # To ignore some opinions list the opinion codes. Optional.
     - O001
   custom_opinions: # To set custom opinions. Optional.
@@ -80,30 +81,38 @@ TODO: add link to example repo.
 ### Default opinions
 
 #### **O001 model must have a description** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O001_model_must_have_description.py)]
-Applies to: dbt models when either sql or yaml files are changed
-Models description is mandatory. Empty descriptions are not allowed.
+Applies to: dbt models when either sql or yaml files are changed.
+
+Models must have descriptions. Empty descriptions are not allowed.
+Descriptions are important for documentation and understanding the purpose of the model.
+A good description makes data more obvious.
+Include a description for the model in a yaml file or config block.
 
 #### **O002 model description must have keywords** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)]
-Applies to: dbt models when either sql or yaml files are changed
-Models description must have certain keywords. The keywords can be set in the configuration (see above).
-This is useful if we want to enforce a certain structure in the descriptions. For example:
+Applies to: dbt models when either sql or yaml files are changed.
 
+Models descriptions must have keywords.
+Keywords help standarizing the description of the models,
+and ensure that all the important information is present in the description.
+Make sure the description of the model has all the required keywords.
+The keywords can be set in the configuration like this:
+```yaml
+sql:
+  opinions_config:
+    O002_keywords:
+      - summary
+      - granularity
 ```
-Summary:
-  This model contains all the customers of jaffle_shop
-Granularity:
-  one row per user_id
-```
-
-Keywords are not case sensitive.
+Keywords are case insensitive.
 
 #### **O003 all columns must have description** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O003_all_columns_must_have_description.py)]
 Applies to: dbt models when either sql or yaml files are changed
 All columns must have a description. Empty descriptions are not allowed.
 
-#### **O004 model should have unique key** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O004_model_should_have_unique_key.py)]
+#### **O005 model should have unique key** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O005_model_should_have_unique_key.py)]
 Applies to: dbt models when sql files are changed
-Models should have a unique key defined in the config block of the model. This is useful to enforce the uniqueness of the model and to make the granularity of the model explicit.
+Models should have a unique key defined in the config block of the model.
+This is useful to enforce the uniqueness of the model and to make the granularity of the model explicit.
 
 ### Adding custom opinions
 TODO
