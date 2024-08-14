@@ -20,7 +20,7 @@ class OpinionsPack:
     def __init__(self):
         self._opinions = []
         self._config = ConfigSingleton().get_config()
-        self._ignored_opinions = self._config.get("global", {}).get(
+        self._ignored_opinions = self._config.get("opinions_configl", {}).get(
             "ignore_opinions", []
         )
 
@@ -45,7 +45,11 @@ class OpinionsPack:
     def _load_custom_opinions(self):
         custom_opinions = []
 
-        source = self._config.get("global", {}).get("custom_opinions", {}).get("source")
+        source = (
+            self._config.get("opinions_config", {})
+            .get("custom_opinions", {})
+            .get("source")
+        )
         if not source:
             logger.info(
                 "No custom opinions source defined. Skipping custom opinions loading."
@@ -62,12 +66,14 @@ class OpinionsPack:
             # TODO Use persistent directory path?
             with tempfile.TemporaryDirectory() as temp_dir:
                 git_repo = (
-                    self._config.get("global", {})
+                    self._config.get("opinions_config", {})
                     .get("custom_opinions", {})
                     .get("repository")
                 )
                 revision = (
-                    self._config.get("global", {}).get("custom_opinions", {}).get("rev")
+                    self._config.get("opinions_config", {})
+                    .get("custom_opinions", {})
+                    .get("rev")
                 )
 
                 if not git_repo:

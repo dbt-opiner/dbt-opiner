@@ -5,6 +5,11 @@ from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
 class O005(BaseOpinion):
+    """Models should have a unique key defined in the config block of the model.
+    This is useful to enforce the uniqueness of the model and
+    to make the granularity of the model explicit.
+    """
+
     def __init__(self, **kwargs) -> None:
         super().__init__(
             code="O004",
@@ -30,5 +35,5 @@ class O005(BaseOpinion):
             opinion_code=self.code,
             passed=False,
             severity=self.severity,
-            message=f"Model {self.severity.value} have a unique key.",
+            message=f"Model {self.severity.value} have a unique key defined in the config block.",
         )

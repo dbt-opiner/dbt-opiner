@@ -3,6 +3,10 @@ import pytest
 from dbt_opiner.dbt import DbtNode
 from dbt_opiner.opinions import O002
 
+config_dict = {
+    "opinions_config": {"extra_opinions_config": {"O002_keywords": ["keyword"]}}
+}
+
 
 @pytest.mark.parametrize(
     "mock_sqlfilehandler, config, expected_passed",
@@ -16,8 +20,8 @@ from dbt_opiner.opinions import O002
                     }
                 )
             ),
-            {"sql": {"opinions_config": {"O002_keywords": ["keyword"]}}},
-            True,
+            config_dict,
+            [True],
             id="model with description with keyword",
         ),
         pytest.param(
@@ -29,8 +33,8 @@ from dbt_opiner.opinions import O002
                     }
                 )
             ),
-            {"sql": {"opinions_config": {"O002_keywords": ["keyword"]}}},
-            False,
+            config_dict,
+            [False],
             id="model with description without keyword",
         ),
         pytest.param(
@@ -41,7 +45,7 @@ from dbt_opiner.opinions import O002
         ),
         pytest.param(
             (DbtNode({"resource_type": "model"})),
-            {"sql": {"opinions_config": {"O002_keywords": ["keyword"]}}},
+            config_dict,
             True,
             id="model without description",
         ),
@@ -50,11 +54,11 @@ from dbt_opiner.opinions import O002
 )
 def test__O002(mock_sqlfilehandler, config, expected_passed):
     opinion = O002(config)
-    result = opinion.check_opinion(mock_sqlfilehandler)
-    if result:
-        assert result.passed == expected_passed
-    else:
-        assert expected_passed  # If model has no description or keywords are not defined result should be None
+    results = opinion.check_opinion(mock_sqlfilehandler)
+    if results:
+        assert [result.passed for result in results] == expected_passed
+    else:  # If no keywords or no description it should return None or empty list so no results
+        assert expected_passed
 
 
 @pytest.mark.parametrize(
@@ -79,7 +83,7 @@ def test__O002(mock_sqlfilehandler, config, expected_passed):
                     )
                 ),
             ],
-            {"sql": {"opinions_config": {"O002_keywords": ["keyword"]}}},
+            config_dict,
             [True, True],
             id="Two models with description with keyword",
         ),
@@ -102,7 +106,7 @@ def test__O002(mock_sqlfilehandler, config, expected_passed):
                     )
                 ),
             ],
-            {"sql": {"opinions_config": {"O002_keywords": ["keyword"]}}},
+            config_dict,
             [True, False],
             id="Two models one with description with keyword, another one without",
         ),
@@ -124,7 +128,7 @@ def test__O002(mock_sqlfilehandler, config, expected_passed):
                     )
                 ),
             ],
-            {"sql": {"opinions_config": {"O002_keywords": ["keyword"]}}},
+            config_dict,
             [True],  # Second node returns None so no result expected
             id="Two models one with description with keyword, another one without description",
         ),

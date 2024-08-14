@@ -12,6 +12,7 @@ def lint(
     all_files: bool = False,
     target: str = None,
     force_compile: bool = False,
+    no_ignore: bool = False,
 ):
     """Lint the dbt project using the dbt-opiner package.
 
@@ -29,7 +30,7 @@ def lint(
     )
 
     opinions_pack = OpinionsPack()
-    linter = Linter(opinions_pack)
+    linter = Linter(opinions_pack, no_ignore)
 
     # TODO: make it parallel?
     start = time.process_time()

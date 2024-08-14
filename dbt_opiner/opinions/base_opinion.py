@@ -1,5 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
+from typing import Any
 
 from dbt_opiner.file_handlers import MarkdownFileHandler
 from dbt_opiner.file_handlers import SqlFileHandler
@@ -9,32 +10,35 @@ from dbt_opiner.linter import OpinionSeverity
 
 
 class BaseOpinion(ABC):
-    """The base class for an opinion.
+    """The base class for an opinion."""
 
-    Args:
-        code: The identifier for this opinion, used in inclusion
-            or exclusion.
-        description: A human readable description of what this
-            opinion does. It will be displayed when any violations are found.
-        severity: The severity of the opinion. It can be one of should or must.
-            Should is a suggestion, must is an obligation
-    """
-
-    # To install required packages for custom opinions this must be specified in children classes
+    # To install required dependencies packages for custom opinions this must be specified in children classes
     # It is done like this because:
-    #  - there are different ways of defining packages in python projects
+    #  - there are different ways of installing packages in python projects
     #  - if an opinion is ignored and not loaded, we don't want to install the packages
-    required_packages: list[str] = []
+    required_dependencies: list[str] = []
 
     def __init__(
         self,
         code: str,
         description: str,
         severity: OpinionSeverity,
+        config: dict[str, Any] = {},
     ) -> None:
+        """
+        Args:
+        code: The identifier for this opinion, used in inclusion
+            or exclusion.
+        description: A human readable description of what this
+            opinion does. It will be displayed when any violations are found.
+        severity: The severity of the opinion. It can be one of should or must.
+            Should is a suggestion, must is an obligation
+        config: Configuration dict with optional extra configuration for the opinion.
+        """
         self.code = code
         self.description = description
         self.severity = severity
+        self._config = config
 
     def check_opinion(
         self, file: SqlFileHandler | YamlFileHandler | MarkdownFileHandler

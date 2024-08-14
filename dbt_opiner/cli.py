@@ -139,7 +139,12 @@ def main(ctx, log_level):
     is_flag=True,
     help="Compile dbt project manifest even if it exists",
 )
-def lint(files, all_files, target, force_compile):
+@click.option(
+    "--no-ignore",
+    is_flag=True,
+    help="Ignore all no-qa configurations",
+)
+def lint(files, all_files, target, force_compile, no_ignore):
     if not files and not all_files:
         raise click.BadParameter(
             "Either --files or --all_files options must be provided"
@@ -151,4 +156,4 @@ def lint(files, all_files, target, force_compile):
         target = os.getenv("DBT_TARGET")
 
     # Run linter
-    entrypoint.lint(files, all_files, target, force_compile)
+    entrypoint.lint(files, all_files, target, force_compile, no_ignore)

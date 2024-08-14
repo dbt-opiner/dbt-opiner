@@ -1,6 +1,5 @@
 from loguru import logger
 
-from dbt_opiner.dbt import DbtNode
 from dbt_opiner.file_handlers import SqlFileHandler
 from dbt_opiner.file_handlers import YamlFileHandler
 from dbt_opiner.linter import LintResult
@@ -32,59 +31,56 @@ class O002(BaseOpinion):
             code="O002",
             description="Model description must have keywords.",
             severity=OpinionSeverity.MUST,
+            config=config,
         )
-        self._config = config
 
-    def _eval(
-        self, file: SqlFileHandler | YamlFileHandler
-    ) -> LintResult | list[LintResult]:
+    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:
         # Check type of file and model.
         try:
             keywords = (
-                self._config.get("sql", {}).get("opinions_config").get("O002_keywords")
+                self._config.get("opinions_config", {})
+                .get("extra_opinions_config", {})
+                .get("O002_keywords")
             )
         except AttributeError:
             keywords = None
+
         if keywords:
             logger.debug(f"Checking model descriptions for keywords: {keywords}")
-            if (
-                file.type == ".sql"
-                and file.dbt_node.type == "model"
-                and file.dbt_node.description
-            ):
-                return self._check_keywords(file.dbt_node, file, keywords)
+            if file.type == ".sql" and file.dbt_node.type == "model":
+                nodes = [file.dbt_node]
+
             if file.type == ".yaml":
-                results = []
-                for node in file.dbt_nodes:
-                    if node.type == "model" and node.description:
-                        results.append(self._check_keywords(node, file, keywords))
-                        continue
+                nodes = [node for node in file.dbt_nodes if node.type == "model"]
+
+            results = []
+            for node in nodes:
+                if node.description:
+                    missing_keywords = []
+                    for keyword in keywords:
+                        if keyword.lower() not in node.description.lower():
+                            missing_keywords.append(keyword)
+
+                    if len(missing_keywords) > 0:
+                        result = LintResult(
+                            file=file,
+                            opinion_code=self.code,
+                            passed=False,
+                            severity=self.severity,
+                            message=f"Model {node.alias} description {self.severity.value} have keywords: {", ".join(missing_keywords)}",
+                        )
+                    else:
+                        result = LintResult(
+                            file=file,
+                            opinion_code=self.code,
+                            passed=True,
+                            severity=self.severity,
+                            message=f"Model {node.alias} description has all required keywords.",
+                        )
+                    results.append(result)
+                else:
                     logger.debug(f"Model {node.alias} has no description.")
-                if results:
-                    return results
-        logger.debug("Model has no description or keywords are not defined.")
+            return results
+
+        logger.debug("Keywords are not defined.")
         return None
-
-    def _check_keywords(
-        self, node: DbtNode, file: SqlFileHandler | YamlFileHandler, keywords: list[str]
-    ) -> LintResult:
-        missing_keywords = []
-        for keyword in keywords:
-            if keyword.lower() not in node.description.lower():
-                missing_keywords.append(keyword)
-
-        if len(missing_keywords) > 0:
-            return LintResult(
-                file=file,
-                opinion_code=self.code,
-                passed=False,
-                severity=self.severity,
-                message=f"Model {node.alias} description {self.severity.value} have keywords: {", ".join(missing_keywords)}",
-            )
-        return LintResult(
-            file=file,
-            opinion_code=self.code,
-            passed=True,
-            severity=self.severity,
-            message=f"Model {node.alias} description has all required keywords.",
-        )

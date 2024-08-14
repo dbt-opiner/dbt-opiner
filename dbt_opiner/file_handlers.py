@@ -4,11 +4,9 @@ from abc import ABC
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import sqlglot
 import yaml
 from loguru import logger
 
-from dbt_opiner.config_singleton import ConfigSingleton
 
 if TYPE_CHECKING:
     from dbt_opiner.dbt import DbtManifest
@@ -118,7 +116,6 @@ class SqlFileHandler(FileHandler):
                 f"SqlFileHandler requires a .sql file, got {file_path.suffix}"
             )
         super().__init__(file_path)
-
         self.dbt_node = None
 
         # Add dbt node to the file handler
@@ -153,25 +150,7 @@ class SqlFileHandler(FileHandler):
         # Add no_qa_opinions from the docs yml file
         if self.dbt_node.docs_yml_file_path:
             self._add_no_qa_opinions_from_other_file(self.dbt_node.docs_yml_file_path)
-
-        self._sql_code_ast = None
         # TODO: Add catalog entry to the file handler
-
-    @property
-    def sql_code_ast(self) -> sqlglot.expressions.Select:
-        """Returns the sqlglot Abstract Syntax Tree for the compiled sql code.
-        See more about AST at: https://github.com/tobymao/sqlglot/blob/main/posts/ast_primer.md
-        """
-        if self._sql_code_ast is None:
-            if self.dbt_node.compiled_code:
-                dialect = (
-                    ConfigSingleton().config.get("global", {}).get("sqlglot_dialect")
-                )
-                self._sql_code_ast = sqlglot.parse_one(
-                    self.dbt_node.compiled_code, dialect=dialect
-                )
-
-        return self._sql_code_ast
 
 
 class YamlFileHandler(FileHandler):

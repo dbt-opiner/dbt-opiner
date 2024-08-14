@@ -169,3 +169,6 @@ cython_debug/
 
 # dbt packages
 dbt_packages
+
+# Ignore mac os files
+.DS_Store

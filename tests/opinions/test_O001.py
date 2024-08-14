@@ -11,24 +11,26 @@ from dbt_opiner.opinions import O001
             (
                 DbtNode({"resource_type": "model", "description": "Some description"})
             ),  # This is a tuple because pytest expects a tuple for each set of parameters.
-            True,
+            [True],
             id="model with description",
         ),
         pytest.param(
             (DbtNode({"resource_type": "model", "description": ""})),
-            False,
+            [False],
             id="model with empty description",
         ),
         pytest.param(
-            (DbtNode({"resource_type": "model"})), False, id="model with no description"
+            (DbtNode({"resource_type": "model"})),
+            [False],
+            id="model with no description",
         ),
     ],
     indirect=["mock_sqlfilehandler"],
 )
 def test_sql_O001(mock_sqlfilehandler, expected_passed):
     opinion = O001()
-    result = opinion.check_opinion(mock_sqlfilehandler)
-    assert result.passed == expected_passed
+    results = opinion.check_opinion(mock_sqlfilehandler)
+    assert [result.passed for result in results] == expected_passed
 
 
 @pytest.mark.parametrize(

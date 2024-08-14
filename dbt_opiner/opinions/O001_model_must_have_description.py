@@ -1,4 +1,3 @@
-from dbt_opiner.dbt import DbtNode
 from dbt_opiner.file_handlers import SqlFileHandler
 from dbt_opiner.file_handlers import YamlFileHandler
 from dbt_opiner.linter import LintResult
@@ -22,36 +21,31 @@ class O001(BaseOpinion):
             severity=OpinionSeverity.MUST,
         )
 
-    def _eval(
-        self, file: SqlFileHandler | YamlFileHandler
-    ) -> LintResult | list[LintResult]:
+    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:
         if file.type == ".sql" and file.dbt_node.type == "model":
-            return self._check_description(file.dbt_node, file)
-
+            nodes = [file.dbt_node]
         if file.type == ".yaml":
-            results = []
-            for node in file.dbt_nodes:
-                if node.type == "model":
-                    results.append(self._check_description(node, file))
-            return results
-        return None
+            nodes = [node for node in file.dbt_nodes if node.type == "model"]
 
-    def _check_description(
-        self, node: DbtNode, file: SqlFileHandler | YamlFileHandler
-    ) -> LintResult:
-        if node.description:
-            if len(node.description) > 0:
-                return LintResult(
+        results = []
+        for node in nodes:
+            if node.description:
+                if len(node.description) > 0:
+                    result = LintResult(
+                        file=file,
+                        opinion_code=self.code,
+                        passed=True,
+                        severity=self.severity,
+                        message=f"Model {node.alias} has a description.",
+                    )
+            else:
+                result = LintResult(
                     file=file,
                     opinion_code=self.code,
-                    passed=True,
+                    passed=False,
                     severity=self.severity,
-                    message=f"Model {node.alias} has a description.",
+                    message=f"Model {node.alias} {self.severity.value} have a description.",
                 )
-        return LintResult(
-            file=file,
-            opinion_code=self.code,
-            passed=False,
-            severity=self.severity,
-            message=f"Model {node.alias} {self.severity.value} have a description.",
-        )
+            results.append(result)
+
+        return results

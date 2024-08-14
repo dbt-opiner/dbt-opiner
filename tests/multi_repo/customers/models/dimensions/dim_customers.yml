@@ -33,3 +33,6 @@ models:
 
   - name: dim_churned_customers
     description: ''
+    columns:
+      - name: id
+        description: "id of the customer"

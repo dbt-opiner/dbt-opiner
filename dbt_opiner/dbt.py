@@ -5,7 +5,11 @@ import subprocess
 from collections import defaultdict
 from pathlib import Path
 
+import sqlglot
 from loguru import logger
+from sqlglot.optimizer.qualify import qualify
+from sqlglot.optimizer.scope import build_scope
+from sqlglot.optimizer.scope import find_in_scope
 
 from dbt_opiner.config_singleton import ConfigSingleton
 from dbt_opiner.file_handlers import MarkdownFileHandler
@@ -108,24 +112,24 @@ class DbtProject:
 
                 if file.suffix == ".sql":
                     if re.match(
-                        self._config.get("sql", {}).get("files", MATCH_ALL), str(file)
+                        self._config.get("files", {}).get("sql", MATCH_ALL), str(file)
                     ):
                         sql_file = SqlFileHandler(file, self.dbt_manifest)
                         self.files["sql"].append(sql_file)
 
                 elif file.suffix in [".yml", ".yaml"]:
                     try:
-                        file_pattern = self._config["yaml"].get("files", MATCH_ALL)
+                        file_pattern = self._config.get("files")["yaml"]
                     except KeyError:
-                        file_pattern = self._config.get("yml", {}).get(
-                            "files", MATCH_ALL
+                        file_pattern = self._config.get("files", {}).get(
+                            "yml", MATCH_ALL
                         )
                     if re.match(file_pattern, str(file)):
                         yaml_file = YamlFileHandler(file, self.dbt_manifest)
                         self.files["yaml"].append(yaml_file)
 
                 elif file.suffix == ".md":
-                    file_pattern = self._config.get("md", {}).get("files", MATCH_ALL)
+                    file_pattern = self._config.get("files", {}).get("md", MATCH_ALL)
                     if re.match(file_pattern, str(file)):
                         self.files["markdown"].append(MarkdownFileHandler(file))
                 else:
@@ -174,14 +178,14 @@ class DbtManifest:
         with open(self._manifest_path, "r") as f:
             self.manifest_dict = json.load(f)
             f.close()
-
+        dialect = ConfigSingleton().get_config().get("sqlglot_dialect")
         # For now only a few elements of the manifest are defined as Attributes
         # If more are required they can be added or the manifest_dict can be used instead.
         self.nodes = [
-            DbtNode(node) for node in self.manifest_dict.get("nodes").values()
+            DbtNode(node, dialect) for node in self.manifest_dict.get("nodes").values()
         ]
         self.macros = [
-            DbtNode(node) for node in self.manifest_dict.get("macros").values()
+            DbtNode(node, dialect) for node in self.manifest_dict.get("macros").values()
         ]
 
 
@@ -204,8 +208,10 @@ class DbtNode:
         compiled_code: The compiled code of the node.
         docs_yml_file_path: The path to the docs yml file of the node.
         description: The description of the node.
-        columns: The columns of the node.
+        columns: The columns of the node available in the manifest.json
         unique_key: The unique key of the node.
+        sql_code_ast: The sqlglot Abstract Syntax Tree (AST) of the compiled code.
+        ast_extracted_columns: The columns extracted from the sql code AST.
 
     These Dict methods are also available:
         keys: Get the keys of the node.
@@ -214,12 +220,14 @@ class DbtNode:
         get: Get the value of a key in the node.
     """
 
-    def __init__(self, node: dict) -> None:
+    def __init__(self, node: dict, sql_dialect: str = None) -> None:
         """
         Args:
             node: The dictionary representation of the dbt node.
         """
         self._node = node
+        self._sql_code_ast = None
+        self._sql_dialect = sql_dialect
 
     @property
     def schema(self):
@@ -258,6 +266,48 @@ class DbtNode:
     @property
     def unique_key(self):
         return self._node.get("config").get("unique_key")
+
+    @property
+    def sql_code_ast(self) -> sqlglot.expressions.Select:
+        """Returns the sqlglot Abstract Syntax Tree for the compiled sql code.
+        See more about AST at: https://github.com/tobymao/sqlglot/blob/main/posts/ast_primer.md
+        """
+        if self._sql_code_ast is None and self.compiled_code:
+            try:
+                sqlglot.transpile(self.compiled_code, read=self._sql_dialect)
+            except sqlglot.errors.ParseError as e:
+                logger.error(f"Malformed SQL code:\n{e}")
+            else:
+                self._sql_code_ast = sqlglot.parse_one(
+                    self.compiled_code, dialect=self._sql_dialect
+                )
+
+        return self._sql_code_ast
+
+    @property
+    def ast_extracted_columns(self):
+        """Returns the columns extracted from the sql code ast."""
+        if self.sql_code_ast:
+            return self._extract_columns_from_ast()
+        return []
+
+    def _extract_columns_from_ast(self):
+        columns = []
+        for column in qualify(self.sql_code_ast).selects:
+            # If there's a select * in the final CTE
+            if column.is_star:
+                root = build_scope(qualify(column.parent))
+                try:
+                    # If the column is a `select *` from a directly referenced table
+                    columns.append(
+                        f"* from {find_in_scope(root.expression, sqlglot.exp.Table).name}"
+                    )
+                except AttributeError:
+                    # If the column is a `select * from (select * from table)`
+                    columns.append("* from nested query")
+            else:
+                columns.append(column.alias)
+        return columns
 
     def __repr__(self):
         return f"DbtNode({self.alias})"

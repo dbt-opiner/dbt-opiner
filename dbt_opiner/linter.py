@@ -1,3 +1,4 @@
+import re
 import sys
 from dataclasses import dataclass
 from enum import Enum
@@ -5,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from loguru import logger
 
+from dbt_opiner.config_singleton import ConfigSingleton
 from dbt_opiner.file_handlers import FileHandler
 
 if TYPE_CHECKING:
@@ -73,12 +75,15 @@ class Linter:
 
     """
 
-    def __init__(self, opinions_pack: "OpinionsPack"):
+    def __init__(self, opinions_pack: "OpinionsPack", no_ignore: bool = False) -> None:
         """
         Args:
             opinions_pack: OpinionsPack object containing the opinions to be checked.
+            no_ignore: If True, ignore all the no qa configs.
         """
         self._lint_results = []
+        self._no_ignore = no_ignore
+        self._config = ConfigSingleton().get_config()
         self.opinions = opinions_pack.get_opinions()
 
     def lint_file(self, file: FileHandler) -> None:
@@ -90,10 +95,24 @@ class Linter:
         logger.debug(f"Linting file {file.path}")
 
         for opinion in self.opinions:
-            if opinion.code in file.no_qa_opinions or "all" in file.no_qa_opinions:
-                logger.debug(f"Skipping opinion {opinion.code} because of noqa")
-                continue
+            if not self._no_ignore:
+                # Check file no_qa
+                if opinion.code in file.no_qa_opinions or "all" in file.no_qa_opinions:
+                    logger.debug(f"Skipping opinion {opinion.code} because of noqa")
+                    continue
+                # Check opinions_config>ignore_files
+                ignore_files = (
+                    self._config.get("opinions_config", {})
+                    .get("ignore_files", {})
+                    .get(opinion.code)
+                )
+                if ignore_files:
+                    if re.match(ignore_files, str(file)):
+                        logger.debug(f"Skipping opinion {opinion.code} because of noqa")
+                        continue
+
             logger.debug(f"Checking opinion {opinion.code}")
+
             lint_result = opinion.check_opinion(file)
             if lint_result:
                 logger.debug(f"Lint Result: {lint_result}")
@@ -117,11 +136,11 @@ class Linter:
     def log_results_and_exit(self) -> None:
         """Log the results of the linting and exit with the appropriate code."""
         # Change logger setup to make messages more clear
-        original_config = logger._core.handlers.copy().get(1)
+        original_logger_config = logger._core.handlers.copy().get(1)
         logger.remove()
         logger_id = logger.add(
-            original_config._sink,
-            level=original_config._levelno,
+            original_logger_config._sink,
+            level=original_logger_config._levelno,
             colorize=True,
             format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}\n{message}</level>",
         )
@@ -140,6 +159,6 @@ class Linter:
                 logger.debug(message)
 
         logger.remove(logger_id)
-        logger.add(sys.stdout, level=original_config._levelno)
+        logger.add(sys.stdout, level=original_logger_config._levelno)
         logger.debug(f"Exit with code: {exit_code}")
         sys.exit(exit_code)
