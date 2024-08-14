@@ -67,7 +67,7 @@ class O002(BaseOpinion):
                             opinion_code=self.code,
                             passed=False,
                             severity=self.severity,
-                            message=f"Model {node.alias} description {self.severity.value} have keywords: {", ".join(missing_keywords)}",
+                            message=f"Model {node.alias} description {self.severity.value} have keywords: {missing_keywords}",
                         )
                     else:
                         result = LintResult(
