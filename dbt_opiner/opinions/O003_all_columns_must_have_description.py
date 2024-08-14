@@ -33,6 +33,7 @@ class O003(BaseOpinion):
             code="O003",
             description="All columns must have a description.",
             severity=OpinionSeverity.MUST,
+            tags=["metadata", "models"],
         )
 
     def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:

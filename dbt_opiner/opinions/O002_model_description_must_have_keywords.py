@@ -32,6 +32,7 @@ class O002(BaseOpinion):
             description="Model description must have keywords.",
             severity=OpinionSeverity.MUST,
             config=config,
+            tags=["metadata", "models"],
         )
 
     def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:

@@ -19,6 +19,7 @@ class O001(BaseOpinion):
             code="O001",
             description="Model must have a description.",
             severity=OpinionSeverity.MUST,
+            tags=["metadata", "models"],
         )
 
     def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:

@@ -15,6 +15,7 @@ class O005(BaseOpinion):
             code="O004",
             description="Model should have unique key.",
             severity=OpinionSeverity.SHOULD,
+            tags=["dbt config", "models"],
         )
 
     def _eval(self, file: SqlFileHandler) -> LintResult:

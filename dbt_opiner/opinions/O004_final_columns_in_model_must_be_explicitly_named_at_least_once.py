@@ -63,6 +63,7 @@ class O004(BaseOpinion):
             code="O004",
             description="The final columns of the model must be explicitly named at least once.",
             severity=OpinionSeverity.MUST,
+            tags=["sql style", "models"],
         )
 
     def _eval(self, file: SqlFileHandler) -> LintResult:
