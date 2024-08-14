@@ -34,6 +34,7 @@ Note: make sure to follow the [Conventional Commits](https://www.conventionalcom
 ### Setup
 We use poetry to manage dependencies. We recommend using pyenv to manage python versions.
 After installing both, you can run
+
 ```bash
 pyenv local 3.12.2
 poetry env use 3.12.2
