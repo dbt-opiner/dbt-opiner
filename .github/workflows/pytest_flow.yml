@@ -1,0 +1,65 @@
+name: pytest_flow
+
+on:
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    pytest_flow:
+        name: |
+            Pytest workflow - Python: ${{ matrix.python-version }}
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                python-version:
+                    - '3.10'
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ matrix.python-version }}
+
+            - name: Install Poetry
+              uses: snok/install-poetry@v1
+              with:
+                  virtualenvs-create: true
+                  virtualenvs-in-project: true
+                  installer-parallel: true
+
+            - name: Load cached venv
+              id: cached-poetry-dependencies
+              uses: actions/cache@v3
+              with:
+                  path: .venv
+                  key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ matrix.dbt-bigquery-version }}-${{ hashFiles('**/poetry.lock')
+                      }}
+
+            - name: Install dependencies
+              if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+              run: poetry install --no-interaction --no-ansi
+
+      # Necessary as previous step may have a cached venv
+            - name: Install dbt-opiner
+              run: |
+                  source .venv/bin/activate
+                  pip install -e .
+
+            - name: pre-commit
+              run: |
+                  poetry run pre-commit run -a
+
+            - name: pytest
+              run: |
+                  poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=src ./tests --numprocesses 10 | tee pytest-coverage.txt
+
+            - name: Pytest coverage comment
+              uses: MishaKav/pytest-coverage-comment@main
+              with:
+                  pytest-coverage-path: ./pytest-coverage.txt
+                  title: Coverage Report
+                  badge-title: Coverage
+                  junitxml-path: ./pytest.xml
