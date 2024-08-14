@@ -1,6 +1,8 @@
 # dbt-opiner
 Tool for keeping dbt standards aligned across dbt projects.
 
+** Disclaimer: This is an early stage project. Check the [License](https://github.com/dbt-opiner/dbt-opiner/blob/main/LICENSE) for more information. **
+
 # Table of Contents
 1. [Installation and usage](#installation-and-usage)
     1. [CLI](#cli)
@@ -17,6 +19,7 @@ Tool for keeping dbt standards aligned across dbt projects.
         5. [O005 model should have unique key](#o005-model-should-have-unique-key)
     3. [Adding custom opinions](#adding-custom-opinions)
 3. [Why?](#why)
+4. [Contributing](#contributing)
 
 ## Installation and usage
 
@@ -233,5 +236,7 @@ dbt-opiner tries to fill this gap. It can be used as a cli, as a pre-commit hook
 
 dbt-opiner is designed to be extensible and easy to configure, so it can be adapted to the specific needs of each organization.
 
-# Contributing
+This tool doesn't replace linters and formaters for sql code ([SQLFluff](https://github.com/sqlfluff/sqlfluff/), [sqlftm](https://github.com/tconbeer/sqlfmt)) that are highly encouraged.
+
+## Contributing
 Check the [CONTRIBUTING.md](https://github.com/dbt-opiner/dbt-opiner/blob/main/CONTRIBUTING.md) file for more information.

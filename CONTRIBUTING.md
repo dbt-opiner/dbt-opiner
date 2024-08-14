@@ -32,9 +32,17 @@ Note: make sure to follow the [Conventional Commits](https://www.conventionalcom
 ## Development Guide
 
 ### Setup
+We use poetry to manage dependencies. We recommend using pyenv to manage python versions.
+After installing both, you can run
+```bash
+pyenv local 3.12.2
+poetry env use 3.12.2
+poetry install
+```
+
 Run `make dev` to initialize the multi_repo dbt projects.
 These projects can be used to test stuff with the `dbt-opiner` cli.
-For example, you can run: `dbt-opiner --log-level DEBUG lint -a` to lint all the projects and files and see the full debug output.
+For example, you can run: `poetry run dbt-opiner --log-level DEBUG lint -a` to lint all the projects and files and see the full debug output.
 
 ### Testing
 We use pytest for unit testing. To run the tests, run `pytest`.
