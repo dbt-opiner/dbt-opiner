@@ -1,7 +1,7 @@
 # dbt-opiner
 Tool for keeping dbt standards aligned across dbt projects.
 
-** Disclaimer: This is an early stage project. Check the [License](https://github.com/dbt-opiner/dbt-opiner/blob/main/LICENSE) for more information. **
+**Disclaimer: This is an early stage project. Check the [License](https://github.com/dbt-opiner/dbt-opiner/blob/main/LICENSE) for more information.**
 
 # Table of Contents
 1. [Installation and usage](#installation-and-usage)
