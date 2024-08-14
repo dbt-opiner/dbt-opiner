@@ -1,4 +1,4 @@
-name: pytest_flow
+name: pre_commit_and_pytest_flow
 
 on:
     pull_request:
@@ -8,13 +8,14 @@ on:
 jobs:
     pytest_flow:
         name: |
-            Pytest workflow - Python: ${{ matrix.python-version }}
+            Pre-commit and Pytest workflow - Python: ${{ matrix.python-version }}
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
             matrix:
                 python-version:
                     - '3.10'
+                    - '3.12.2'
 
         steps:
             - uses: actions/checkout@v3
