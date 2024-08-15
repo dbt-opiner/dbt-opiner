@@ -162,3 +162,5 @@ class Linter:
         logger.add(sys.stdout, level=original_logger_config._levelno)
         logger.debug(f"Exit with code: {exit_code}")
         sys.exit(exit_code)
+
+    # TODO: add method to organize results by opinion tags.
