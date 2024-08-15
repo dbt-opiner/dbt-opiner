@@ -48,6 +48,7 @@ class O002(BaseOpinion):
 
         if keywords:
             logger.debug(f"Checking model descriptions for keywords: {keywords}")
+            nodes = []
             if file.type == ".sql" and file.dbt_node.type == "model":
                 nodes = [file.dbt_node]
 

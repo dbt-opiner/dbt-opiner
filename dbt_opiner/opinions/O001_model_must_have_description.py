@@ -23,6 +23,8 @@ class O001(BaseOpinion):
         )
 
     def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:
+        nodes = []
+
         if file.type == ".sql" and file.dbt_node.type == "model":
             nodes = [file.dbt_node]
         if file.type == ".yaml":

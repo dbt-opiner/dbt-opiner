@@ -119,7 +119,7 @@ class DbtProject:
 
                 elif file.suffix in [".yml", ".yaml"]:
                     try:
-                        file_pattern = self._config.get("files")["yaml"]
+                        file_pattern = self._config.get("files", {})["yaml"]
                     except KeyError:
                         file_pattern = self._config.get("files", {}).get(
                             "yml", MATCH_ALL

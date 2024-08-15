@@ -71,7 +71,6 @@ class O004(BaseOpinion):
             not_qualified_stars = [
                 star for star in file.dbt_node.ast_extracted_columns if "*" in star
             ]
-            print(not_qualified_stars)
             if not_qualified_stars:
                 return LintResult(
                     file=file,
