@@ -230,12 +230,12 @@ Although other similar tools exist, they fall short in some aspects:
   - [dbt-score](https://dbt-score.picnic.tech/) doesn't work as a pre-commit hook and it's oriented to check mainly the metadata of the nodes.
 
 dbt-opiner tries to fill this gap. It can be used as a cli, as a pre-commit hook, and in CI pipelines, and it allows to define custom opinions that check multiple aspects of dbt projects such as:
-    - Naming conventions
-    - Data and unit tests checks
-    - Documentation checks
-    - Dependency checks
-    - Security/Privacy checks
-    - etc.
+  - Naming conventions
+  - Data and unit tests checks
+  - Documentation checks
+  - Dependency checks
+  - Security/Privacy checks
+  - etc.
 
 dbt-opiner is designed to be extensible and easy to configure, so it can be adapted to the specific needs of each organization.
 
