@@ -33,10 +33,8 @@ class OpinionsPack:
 
         # Load custom opinions
         self._opinions.extend(self._load_custom_opinions())
-
-        logger.debug(
-            f"Loaded opinions:\n{'\n'.join([opinion.code for opinion in self._opinions])}"
-        )
+        opinions_str = "\n".join([opinion.code for opinion in self._opinions])
+        logger.debug(f"Loaded opinions:\n{opinions_str}")
 
     def get_opinions(self):
         """Returns all the loaded opinions."""
