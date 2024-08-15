@@ -219,6 +219,8 @@ The custom opinion can use the configuration set in the `dbt-opiner.yaml` file. 
 
 All the configurations for [ignoring opinions (noqa)](#ignoring-opinions-noqa) will also apply to the custom opinions. Make sure you don't create conflicting opinion codes. As a best practice, use a prefix for the opinion codes that are specific to your organization (e.g. `C001`).
 
+We use `loguru` for logging. We encourage to use the same for the custom opinions. See how to use it, [here](https://github.com/Delgan/loguru).
+
 ## Why?
 Inspired in Benn Stancil's [blog post](https://benn.substack.com/p/the-rise-of-the-analytics-pretendgineer) where he says:
 >My suspicion is that dbt [...] needs something that aggressively imposes [...] opinions on its users. It needs dbt on Rails: A framework that builds a project’s scaffolding, and tells us how to expand it—and not through education, but through functional requirements. Show where to put which bits of logic. Prevent me from doing circular things. Blare warnings at me when I use macros incorrectly. Force me to rigorously define “production.”
