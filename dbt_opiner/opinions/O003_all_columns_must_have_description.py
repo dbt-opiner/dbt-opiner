@@ -54,7 +54,7 @@ class O003(BaseOpinion):
                         opinion_code=self.code,
                         passed=False,
                         severity=self.severity,
-                        message=f"Model {node.alias} has no column descriptions. This {self.severity.value} not happen.",
+                        message=f"Model {node.alias} {self.severity.value} have column descriptions.",
                     )
                 )
 

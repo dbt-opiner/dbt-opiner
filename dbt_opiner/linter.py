@@ -146,7 +146,7 @@ class Linter:
                 str(output_file),
                 level=original_logger_config._levelno,
                 colorize=False,
-                format="{level} | {message}",
+                format="{level} | {message}\n",
             )
             logger.info("Lint results:")
 
