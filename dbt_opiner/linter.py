@@ -148,7 +148,6 @@ class Linter:
                 colorize=False,
                 format="{level} | {message}\n",
             )
-            logger.info("Lint results:")
 
         logger.add(
             original_logger_config._sink,
