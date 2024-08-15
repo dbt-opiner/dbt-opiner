@@ -15,7 +15,15 @@ repos:
       args: ["--fix"]
     - id: ruff-format
       types: ["python"]
+
 - repo: https://github.com/asottile/reorder-python-imports
   rev: v3.13.0
   hooks:
     - id: reorder-python-imports
+- repo: local
+  hooks:
+    - id: run-tox
+      name: Run Tox
+      entry: tox
+      language: system
+      pass_filenames: false
