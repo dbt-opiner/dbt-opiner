@@ -141,19 +141,29 @@ class OpinionsPack:
                     # We do it like this because:
                     #  - there are different ways of defining packages in python projects
                     #  - if an opinion is ignored and not loaded, we don't want to install the packages
-                    for package_name in obj.required_packages:
-                        logger.debug(
-                            f"Checking if package {package_name} is installed."
-                        )
-                        try:
-                            pkg_resources.get_distribution(package_name)
-                        except pkg_resources.DistributionNotFound:
+                    try:
+                        logger.debug(f"Checking required packages for opinion {name}")
+                        for package_name in obj.required_packages:
                             logger.debug(
-                                f"Package {package_name} not found. Installing."
+                                f"Checking if package {package_name} is installed."
                             )
-                            subprocess.check_call(
-                                [sys.executable, "-m", "pip", "install", package_name]
-                            )
+                            try:
+                                pkg_resources.get_distribution(package_name)
+                            except pkg_resources.DistributionNotFound:
+                                logger.debug(
+                                    f"Package {package_name} not found. Installing."
+                                )
+                                subprocess.check_call(
+                                    [
+                                        sys.executable,
+                                        "-m",
+                                        "pip",
+                                        "install",
+                                        package_name,
+                                    ]
+                                )
+                    except AttributeError:
+                        logger.debug(f"No required packages for opinion {name}")
                     # Inject the config to the opinion
                     loaded_opinions.append(obj(config=self._config))
         return loaded_opinions

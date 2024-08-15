@@ -2,6 +2,7 @@ import re
 import sys
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from loguru import logger
@@ -133,12 +134,23 @@ class Linter:
         """
         return sorted(self._lint_results, key=lambda x: x[0])
 
-    def log_results_and_exit(self) -> None:
+    def log_results_and_exit(self, output_file: Path = None) -> None:
         """Log the results of the linting and exit with the appropriate code."""
         # Change logger setup to make messages more clear
         original_logger_config = logger._core.handlers.copy().get(1)
         logger.remove()
-        logger_id = logger.add(
+
+        # Add file sink if specified
+        if output_file:
+            logger.add(
+                str(output_file),
+                level=original_logger_config._levelno,
+                colorize=False,
+                format="{level} | {message}",
+            )
+            logger.info("Lint results:")
+
+        logger.add(
             original_logger_config._sink,
             level=original_logger_config._levelno,
             colorize=True,
@@ -158,7 +170,7 @@ class Linter:
             if result.passed:
                 logger.debug(message)
 
-        logger.remove(logger_id)
+        logger.remove()
         logger.add(sys.stdout, level=original_logger_config._levelno)
         logger.debug(f"Exit with code: {exit_code}")
         sys.exit(exit_code)

@@ -12,7 +12,7 @@ class O005(BaseOpinion):
 
     def __init__(self, **kwargs) -> None:
         super().__init__(
-            code="O004",
+            code="O005",
             description="Model should have unique key.",
             severity=OpinionSeverity.SHOULD,
             tags=["dbt config", "models"],

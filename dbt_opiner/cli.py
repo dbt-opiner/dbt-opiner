@@ -144,7 +144,13 @@ def main(ctx, log_level):
     is_flag=True,
     help="Ignore all no-qa configurations",
 )
-def lint(files, all_files, target, force_compile, no_ignore):
+@click.option(
+    "-o",
+    "--output-file",
+    type=str,
+    help="If specified, a file to capture the lint results",
+)
+def lint(files, all_files, target, force_compile, no_ignore, output_file):
     if not files and not all_files:
         raise click.BadParameter(
             "Either --files or --all_files options must be provided"
@@ -156,4 +162,4 @@ def lint(files, all_files, target, force_compile, no_ignore):
         target = os.getenv("DBT_TARGET")
 
     # Run linter
-    entrypoint.lint(files, all_files, target, force_compile, no_ignore)
+    entrypoint.lint(files, all_files, target, force_compile, no_ignore, output_file)

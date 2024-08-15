@@ -13,6 +13,7 @@ def lint(
     target: str = None,
     force_compile: bool = False,
     no_ignore: bool = False,
+    output_file: str = None,
 ):
     """Lint the dbt project using the dbt-opiner package.
 
@@ -20,7 +21,8 @@ def lint(
         changed_files: List of files that have been changed. Defaults to [].
         all_files: Flag to lint all files. Defaults to False.
         target: Target to run the dbt project. Defaults to None.
-        force_compile: Flag to force compile the dbt project. Defaults to
+        force_compile: Flag to force compile the dbt project. Defaults to False
+        output_file: Output file to save the linting results. Defaults to None.
     """
     logger.info("Linting dbt projects...")
     loader = DbtProjectLoader(target, force_compile)
@@ -42,4 +44,4 @@ def lint(
             linter.lint_file(file)
     end = time.process_time()
     logger.info(f"Linting completed in {round(end - start, 3)} seconds")
-    linter.log_results_and_exit()
+    linter.log_results_and_exit(output_file)

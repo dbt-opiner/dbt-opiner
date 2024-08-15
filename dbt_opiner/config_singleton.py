@@ -43,7 +43,7 @@ class ConfigSingleton:
             dict: The configuration from the .dbt-opiner.yaml file.
         """
         for root, dirs, files in os.walk(root_dir):
-            if "dbt-opiner.yaml" in files:
+            if ".dbt-opiner.yaml" in files:
                 self._config_file_path = os.path.join(root, ".dbt-opiner.yaml")
                 break
         if self._config_file_path:
