@@ -57,6 +57,7 @@ class O003(BaseOpinion):
                         message=f"Model {node.alias} {self.severity.value} have column descriptions.",
                     )
                 )
+                continue
 
             # If it has columns, description shouldn't be empty
             descriptionless_columns = []
