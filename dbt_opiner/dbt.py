@@ -422,8 +422,16 @@ class DbtProjectLoader:
 
         if changed_files:
             logger.debug("Processing changed files")
-            changed_files = [Path(file) for file in changed_files]
-            dbt_projects = self._get_dbt_projects_changed_files(changed_files)
+            # If the parameter is a path to a directory
+            # get all files in the directory and its subdirectories
+            files = []
+            for file in changed_files:
+                path = Path(file)
+                if path.is_dir():
+                    files.extend(path.rglob("*"))
+                else:
+                    files.append(path)
+            dbt_projects = self._get_dbt_projects_changed_files(files)
 
         return dbt_projects
 

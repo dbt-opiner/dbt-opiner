@@ -131,7 +131,14 @@ def main(ctx, log_level):
 @main.command(help="Lint files")
 @click.option("-a", "--all-files", is_flag=True, help="Process all files")
 @click.option(
-    "-f", "--files", cls=MultiOption, type=tuple, multiple=True, help="Files to process"
+    "-f",
+    "--files",
+    cls=MultiOption,
+    type=tuple,
+    multiple=True,
+    help="""Files to process.
+            Can also be directory paths.
+            Multiple values can be provided separated by space e.g.: -f file_1.sql file_2.sql""",
 )
 @click.option("--target", type=str, help="DBT Target to compile manifest")
 @click.option(
