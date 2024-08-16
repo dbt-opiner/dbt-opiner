@@ -60,18 +60,19 @@ class FileHandler(ABC):
     def _add_no_qa_opinions_from_other_file(self, other_file_path: str) -> None:
         """Add no_qa_opinions from another file to the current file.
 
+        We use this to add the no_qa_opinions from SQL and YAML files that are related.
+
         Args:
             other_file_path: Str path to the file to get the no_qa_opinions from.
                              It's a string because dbt provides incomplete paths and we need to reconstruct them.
         """
-        original_file_path = list(Path(other_file_path).parts)
-        parent_path = list(self.path.parent.parts)
-        for part in parent_path:
-            if original_file_path and original_file_path[0] == part:
-                original_file_path.pop(0)
 
-        parent_path.extend(original_file_path)
-        sql_file_path = Path(*parent_path)
+        current_file_parts = list(self.path.resolve().parent.parts)
+        other_file_parts = list(Path(other_file_path).parts)  # Comes from manifest
+        index = current_file_parts.index(other_file_parts[0])
+        final_path = current_file_parts[:index] + other_file_parts
+
+        sql_file_path = Path(*final_path)
         with sql_file_path.open("r") as file:
             content = file.read()
         self.no_qa_opinions.extend(self._get_no_qa_opinions(content))
