@@ -38,7 +38,7 @@ repos:
     rev: 0.1.0 # Tag or commit sha
     hooks:
       - id: dbt-opiner-lint
-        args: [-f]
+        args: ["--force-compile", "-f"] # -f is mandatory. We recommend to use --force-compile to force the compilation of the dbt manifest in each run.
         additional_dependencies: [dbt-duckdb == 1.8.2] # Add the dbt connector you are using.
 ```
 
