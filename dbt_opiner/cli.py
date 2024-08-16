@@ -2,6 +2,7 @@ import inspect
 import os
 import sys
 import typing as t
+from pathlib import Path
 
 import click
 from loguru import logger
@@ -118,8 +119,13 @@ class MultiOption(click.Option):
 @click.pass_context
 def main(ctx, log_level):
     # Load config
-    config_root = os.getcwd()
-    ConfigSingleton(config_root)
+    current_path = Path(os.getcwd()).resolve()
+    while current_path != current_path.parent:
+        if (current_path / ".git").exists():
+            logger.debug(f"git root is: {current_path}")
+            break
+        current_path = current_path.parent
+    ConfigSingleton(current_path)
 
     # Set logger options
     logger.remove()
