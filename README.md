@@ -51,7 +51,7 @@ The tool can be used in CI pipelines. It will return a non-zero exit code if any
 
 An environment variable `DBT_TARGET` can be set to specify the target to use when compiling the dbt manifest. If not set, the default target will be used. The target can also be set using the `--target` option.
 
-Check [this github action example](https://github.com/dbt-opiner/demo-multi-dbt-project/blob/main/.github/workflows/run_dbt_opiner.yaml) where a CI run is implemented.
+Check [this github action example](https://github.com/dbt-opiner/demo-multi-dbt-project/blob/main/.github/workflows/run_dbt_opiner.yaml) where a CI run is implemented. Or see it in action in [this PR](https://github.com/dbt-opiner/demo-multi-dbt-project/pull/1).
 
 
 ### Important notes and additional configurations
@@ -102,7 +102,6 @@ To ignore an opinion at the node (model, macro, or test) level, add a comment wi
 Note that if multiple nodes are defined in the same yaml file, the noqa comment will apply to all the nodes defined in that file.
 To ignore opinions for certaing regex matching file paths, add the opinion code as key and a regex as value to the `ignore_files` list in the `dbt-opiner.yaml` file.
 
-TODO: add link to example repo.
 
 ### Default opinions
 
