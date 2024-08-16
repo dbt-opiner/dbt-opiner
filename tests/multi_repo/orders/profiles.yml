@@ -1,8 +1,0 @@
-orders:
-
-  target: dev
-  outputs:
-    dev:
-      type: duckdb
-      path: 'orders.duckdb'
-      threads: 24

@@ -1,8 +1,0 @@
-customers:
-
-  target: dev
-  outputs:
-    dev:
-      type: duckdb
-      path: 'customers.duckdb'
-      threads: 24

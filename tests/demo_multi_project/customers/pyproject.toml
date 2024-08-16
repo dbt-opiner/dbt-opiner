@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "customers"
+version = "0.1.0"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+dbt-duckdb = ">=1.7.3,<1.9.0"
+dbt-opiner = { git = "https://github.com/dbt-opiner/dbt-opiner.git", branch = "main" }
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

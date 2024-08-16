@@ -41,9 +41,9 @@ poetry env use 3.12.2
 poetry install
 ```
 
-Run `make dev` to initialize the multi_repo dbt projects.
+Run `make dev` to initialize the dbt projects in `tests/demo_multi_project`.
 These projects can be used to test stuff with the `dbt-opiner` cli.
-For example, you can run: `poetry run dbt-opiner --log-level DEBUG lint -a` to lint all the projects and files and see the full debug output.
+For example, you can run: `dbt-opiner --log-level DEBUG lint --target dev  -f tests/demo_multi_project/` to lint all the projects and files and see the full debug output.
 
 ### Testing
 We use pytest for unit testing. To run the tests, run `pytest`.
