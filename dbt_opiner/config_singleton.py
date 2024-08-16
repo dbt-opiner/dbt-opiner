@@ -34,12 +34,13 @@ class ConfigSingleton:
         """Find the .dbt-opiner.yaml file in the .git root directory and subdirectories.
         Load it into the _config attribute.
         """
+        logger.debug("Initializing ConfigSingleton")
         current_path = Path(os.getcwd()).resolve()
         while current_path != current_path.parent:
             if (current_path / ".git").exists():
                 logger.debug(f"git root is: {current_path}")
                 break
-        current_path = current_path.parent
+            current_path = current_path.parent
 
         for root, dirs, files in os.walk(current_path):
             dirs[:] = [
