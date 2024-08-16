@@ -2,13 +2,11 @@ import inspect
 import os
 import sys
 import typing as t
-from pathlib import Path
 
 import click
 from loguru import logger
 
 from dbt_opiner import entrypoint
-from dbt_opiner.config_singleton import ConfigSingleton
 
 
 class ChoiceTuple(click.Choice):
@@ -108,6 +106,11 @@ class MultiOption(click.Option):
 @click.version_option(
     message="dbt-opiner version: %(version)s",
 )
+def main():
+    pass
+
+
+@main.command(help="Lint files")
 @click.option(
     "--log-level",
     type=click.Choice(
@@ -116,25 +119,6 @@ class MultiOption(click.Option):
     default="INFO",
     help="Set log level",
 )
-@click.pass_context
-def main(ctx, log_level):
-    # Load config
-    current_path = Path(os.getcwd()).resolve()
-    while current_path != current_path.parent:
-        if (current_path / ".git").exists():
-            logger.debug(f"git root is: {current_path}")
-            break
-        current_path = current_path.parent
-    ConfigSingleton(current_path)
-
-    # Set logger options
-    logger.remove()
-    logger.add(sys.stdout, level=log_level.upper())
-    ctx.ensure_object(dict)
-    ctx.obj["log_level"] = log_level
-
-
-@main.command(help="Lint files")
 @click.option("-a", "--all-files", is_flag=True, help="Process all files")
 @click.option(
     "-f",
@@ -163,7 +147,10 @@ def main(ctx, log_level):
     type=str,
     help="If specified, a file to capture the lint results",
 )
-def lint(files, all_files, target, force_compile, no_ignore, output_file):
+@click.pass_context
+def lint(
+    ctx, log_level, files, all_files, target, force_compile, no_ignore, output_file
+):
     if not files and not all_files:
         raise click.BadParameter(
             "Either --files or --all_files options must be provided"
@@ -173,6 +160,12 @@ def lint(files, all_files, target, force_compile, no_ignore, output_file):
     # This is useful when things should run in CI
     if target is None:
         target = os.getenv("DBT_TARGET")
+
+    # Set log level
+    logger.remove()
+    logger.add(sys.stdout, level=log_level.upper())
+    ctx.ensure_object(dict)
+    ctx.obj["log_level"] = log_level
 
     # Run linter
     entrypoint.lint(files, all_files, target, force_compile, no_ignore, output_file)

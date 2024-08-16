@@ -16,7 +16,7 @@ class ConfigSingleton:
     _config = None
     _config_file_path = None
 
-    def __new__(cls, root_dir: Path = None) -> "ConfigSingleton":
+    def __new__(cls) -> "ConfigSingleton":
         """Initialize the singleton instance with the configuration from the dbt-opiner.yaml file.
 
         Args:
@@ -26,23 +26,22 @@ class ConfigSingleton:
         """
 
         if cls._instance is None:
-            if root_dir is None:
-                raise ValueError(
-                    "Root directory is required to initialize the ConfigSingleton."
-                )  # type: ignore[unreachable]
             cls._instance = super(ConfigSingleton, cls).__new__(cls)
-            cls._instance._initialize(root_dir)
+            cls._instance._initialize()
         return cls._instance
 
-    def _initialize(self, root_dir: Path) -> None:
-        """Find the dbt-opiner.yaml file in the specified directory or its subdirectories.
-
-        Args:
-            root_dir: The directory to start the search from.
-        Returns:
-            dict: The configuration from the .dbt-opiner.yaml file.
+    def _initialize(self) -> None:
+        """Find the .dbt-opiner.yaml file in the .git root directory and subdirectories.
+        Load it into the _config attribute.
         """
-        for root, dirs, files in os.walk(root_dir):
+        current_path = Path(os.getcwd()).resolve()
+        while current_path != current_path.parent:
+            if (current_path / ".git").exists():
+                logger.debug(f"git root is: {current_path}")
+                break
+        current_path = current_path.parent
+
+        for root, dirs, files in os.walk(current_path):
             dirs[:] = [
                 d for d in dirs if d != ".venv"
             ]  # ignore .venv directory in the search
@@ -52,6 +51,7 @@ class ConfigSingleton:
         if self._config_file_path:
             with open(self._config_file_path, "r") as file:
                 self._config = yaml.safe_load(file)
+            logger.debug(f"Config file loaded from: {self._config_file_path}")
         else:
             self._config = {}
             logger.warning(

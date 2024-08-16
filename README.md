@@ -35,11 +35,11 @@ Also, it can be used as a pre-commit hook. To use it as a pre-commit hook, add t
 ```yaml
 repos:
   - repo: https://github.com/dbt-opiner/dbt-opiner
-    rev: 0.1.0
+    rev: 0.1.0 # Tag or commit sha
     hooks:
       - id: dbt-opiner-lint
         args: [-f]
-        additional_dependencies: [dbt-duckdb == 1.8.2]
+        additional_dependencies: [dbt-duckdb == 1.8.2] # Add the dbt connector you are using.
 ```
 
 **Make sure to list in additional dependencies the dbt connector you are using. In this case, duckdb.**
@@ -47,7 +47,9 @@ repos:
 ### Usage in CI pipelines
 The tool can be used in CI pipelines. It will return a non-zero exit code if any opinion with severity `Must` is not met.
 
-An environment variable `DBT_TARGET` can be set to specify the target to use when compiling the dbt manifest. If not set, the default target will be used.
+An environment variable `DBT_TARGET` can be set to specify the target to use when compiling the dbt manifest. If not set, the default target will be used. The target can also be set using the `--target` option.
+
+Check [this github action example](https://github.com/dbt-opiner/demo-multi-dbt-project/blob/main/.github/workflows/run_dbt_opiner.yaml) where a CI run is implemented.
 
 
 ### Important notes and additional configurations
@@ -84,7 +86,7 @@ files: #Regex to match the files to lint. Optional.
 
 ```
 
-TODO: add link to example repo.
+Check this repo as an example: [demo-multi-dbt-project](https://github.com/dbt-opiner/demo-multi-dbt-project/blob/main/.dbt_opiner/.dbt-opiner.yaml)
 
 ## Opinions
 The opinions are defined in the `opinions` directory. They apply to certain dbt nodes (models, macros, or tests) and/or type of files (yaml, sql, md). The opinions have a code, a description, a severity, and a configuration.
@@ -209,13 +211,15 @@ Models should have a unique key defined in the config block of the model.
 This is useful to enforce the uniqueness of the model and to make the granularity of the model explicit.
 
 ### Adding custom opinions
-If you want to add your own opinions, you can do so by creating a new opinion classes in a custom_opinion directory in the same directory where the `dbt-opiner.yaml` file is located or in a github repository (see for example: this [repo](https://github.com/dbt-opiner/dbt-opiner-custom-opinions/tree/main))
+If you want to add your own opinions, you can do so by creating new opinion classes in a custom_opinion directory in the same directory where the `.dbt-opiner.yaml` file is located or in a github repository (see for example: this [repo](https://github.com/dbt-opiner/dbt-opiner-custom-opinions/tree/main))
 
-The opinion class should inherit from `dbt_opiner.opinions.BaseOpinion` and implement the `_eval` method. This method should check for file and node types (to avoid running the opinion in the wrong files or nodes) and evaluate the opinion and it can return a single or a list of `dbt_opiner.linter.LintResult`
+The opinion class should inherit from `dbt_opiner.opinions.BaseOpinion` and implement the `_eval` method. This method should check for file and node types (to avoid running the opinion in the wrong files or nodes) and evaluate the opinion. It can return a single or a list of `dbt_opiner.linter.LintResult`
 
-If the custom opinion is in a repository and requires extra dependencies, define a class variable `required_dependencies` with the required dependencies (e.g. "numpy==2.0.1").
+If the custom opinion is in a repository and requires extra dependencies, define a class variable `required_dependencies` with the required dependencies in a list (e.g. ["numpy==2.0.1", "pandas==2.0"]).
 
-The custom opinion can use the configuration set in the `dbt-opiner.yaml` file. The config dictionary is injected when the class is instantiated. To access it, define a `__init__` method with a `config` parameter (see for example [[this](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)])
+The `_eval` method will receive a file handler to lint. Familiarize with these file handlers in the [source code](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/file_handlers.py). These file handlers also contain dbt manifest information that can be accessed in the evaluation of the opinion.
+
+The custom opinion can use the configuration set in the `.dbt-opiner.yaml` file. The config dictionary is injected when the class is instantiated. To access it, define a `__init__` method with a `config` parameter (see for example [[this](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)])
 
 All the configurations for [ignoring opinions (noqa)](#ignoring-opinions-noqa) will also apply to the custom opinions. Make sure you don't create conflicting opinion codes. As a best practice, use a prefix for the opinion codes that are specific to your organization (e.g. `C001`).
 
