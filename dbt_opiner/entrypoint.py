@@ -43,5 +43,6 @@ def lint(
         for file in merged_files:
             linter.lint_file(file)
     end = time.process_time()
+
     logger.info(f"Linting completed in {round(end - start, 3)} seconds")
     linter.log_results_and_exit(output_file)

@@ -37,14 +37,11 @@ class O002(BaseOpinion):
 
     def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:
         # Check type of file and model.
-        try:
-            keywords = (
-                self._config.get("opinions_config", {})
-                .get("extra_opinions_config", {})
-                .get("O002_keywords")
-            )
-        except AttributeError:
-            keywords = None
+        keywords = (
+            self._config.get("opinions_config", {})
+            .get("extra_opinions_config", {})
+            .get("O002_keywords")
+        )
 
         if keywords:
             logger.debug(f"Checking model descriptions for keywords: {keywords}")

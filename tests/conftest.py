@@ -10,7 +10,10 @@ from dbt_opiner.file_handlers import YamlFileHandler
 def mock_sqlfilehandler(request):
     mock_handler = create_autospec(SqlFileHandler)
     mock_handler.type = ".sql"
-    mock_handler.dbt_node = request.param
+    try:
+        mock_handler.dbt_node = request.param
+    except AttributeError:
+        mock_handler.dbt_node = None
     return mock_handler
 
 
@@ -18,5 +21,8 @@ def mock_sqlfilehandler(request):
 def mock_yamlfilehandler(request):
     mock_handler = create_autospec(YamlFileHandler)
     mock_handler.type = ".yaml"
-    mock_handler.dbt_nodes = request.param
+    try:
+        mock_handler.dbt_nodes = request.param
+    except AttributeError:
+        mock_handler.dbt_nodes = []
     return mock_handler

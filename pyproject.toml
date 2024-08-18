@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dbt-opiner"
-version = "0.1.0-beta"
+version = "0.1.0"
 description = "A tool to keep dbt projects on rails"
 authors=["Rodrigo Loredo <loredo.rod@gmail.com>"]
 readme = "README.md"

@@ -89,6 +89,17 @@ from dbt_opiner.opinions import O003
             [False],
             id="Missing column identified by ast_extracted_columns",
         ),
+        pytest.param(
+            (
+                DbtNode(
+                    {
+                        "resource_type": "model",
+                    }
+                )
+            ),
+            [False],
+            id="No column keys",
+        ),
     ],
     indirect=["mock_sqlfilehandler"],
 )
