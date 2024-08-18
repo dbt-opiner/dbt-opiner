@@ -159,7 +159,11 @@ class SqlFileHandler(FileHandler):
 
         if not self.dbt_node:
             logger.critical(
-                f"Node not found for {self.path}. Try running dbt compile to generate the manifest file, or make sure the file is part of a well formed dbt project."
+                (
+                    f"Node not found for {self.path}. Try running dbt compile to "
+                    "generate the manifest file, or make sure the file is part of a "
+                    "well formed dbt project."
+                )
             )
             sys.exit(1)
 
