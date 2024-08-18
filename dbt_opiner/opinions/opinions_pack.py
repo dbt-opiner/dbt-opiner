@@ -4,8 +4,8 @@ import pathlib
 import subprocess
 import sys
 import tempfile
+from importlib import metadata
 
-import pkg_resources
 from loguru import logger
 
 from dbt_opiner.config_singleton import ConfigSingleton
@@ -146,8 +146,8 @@ class OpinionsPack:
                                 f"Checking if package {package_name} is installed."
                             )
                             try:
-                                pkg_resources.get_distribution(package_name)
-                            except pkg_resources.DistributionNotFound:
+                                metadata.version(package_name)
+                            except metadata.PackageNotFoundError:
                                 logger.debug(
                                     f"Package {package_name} not found. Installing."
                                 )
