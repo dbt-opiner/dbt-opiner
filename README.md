@@ -204,6 +204,8 @@ Models should have a unique key defined in the config block of the model.
 This is useful to enforce the uniqueness of the model and to make the granularity of the model explicit.
 
 ### Adding custom opinions
+> Opinions are like assholes, everyone has one. [_Popular wisdom_](https://en.wiktionary.org/wiki/opinions_are_like_assholes)
+
 If you want to add your own opinions, you can do so by creating new opinion classes in a custom_opinion directory in the same directory where the `.dbt-opiner.yaml` file is located or in a github repository (see for example: this [repo](https://github.com/dbt-opiner/dbt-opiner-custom-opinions/tree/main))
 
 The opinion class should inherit from `dbt_opiner.opinions.BaseOpinion` and implement the `_eval` method. This method should check for file and node types (to avoid running the opinion in the wrong files or nodes) and evaluate the opinion. It can return a single or a list of `dbt_opiner.linter.LintResult`

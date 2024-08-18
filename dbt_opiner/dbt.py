@@ -2,6 +2,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -504,10 +505,10 @@ class DbtProjectLoader:
 
 
 def run_dbt_command(
-    dbt_project_file_path: Path,
     command: str,
-    target: str = None,
+    dbt_project_file_path: Path,
     dbt_profile_path: Path = None,
+    target: str = None,
 ) -> subprocess.CompletedProcess:
     """Run dbt command for the given dbt project file path.
 
@@ -547,8 +548,13 @@ def run_dbt_command(
             ]
         )
     logger.debug(f"Running dbt command: {cmd}")
-    # TODO: Improve error logging when cmd run fails.
-    result = subprocess.run(cmd, capture_output=True, check=True)
+
+    try:
+        result = subprocess.run(cmd, capture_output=True, check=True)
+    except subprocess.CalledProcessError as e:
+        error_message = f"{e.stdout.decode('utf-8')}\n{e.stderr.decode('utf-8')}"
+        logger.critical(f"Error running dbt command: \n{error_message}")
+        sys.exit(1)
 
     # Reset working directory
     os.chdir(current_working_dir)
