@@ -30,3 +30,16 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 addopts = "--ignore=tests/multi_repo"
+
+[tool.tox]
+legacy_tox_ini = """
+  [tox]
+  envlist = py310, py311, py312
+
+  [testenv]
+  deps = poetry
+  commands_pre =
+    poetry lock --quiet
+    poetry install --no-root --quiet
+  commands = poetry run pytest
+"""

@@ -6,7 +6,7 @@ Tool for keeping dbt standards aligned across dbt projects.
 
 <img src="https://raw.githubusercontent.com/dbt-opiner/dbt-opiner/main/docs/demo.gif" width="742" height="342">
 
-**Or use it in a CI run! check out [this demo PR](https://github.com/dbt-opiner/demo-multi-dbt-project/pull/2)**
+**Or use it in a CI run! check out [this](https://github.com/dbt-opiner/demo-multi-dbt-project/pull/2) or [this](https://github.com/dbt-opiner/demo-multi-dbt-project/pull/4) demo PRs**
 
 # Table of Contents
 1. [Installation and usage](#installation-and-usage)
