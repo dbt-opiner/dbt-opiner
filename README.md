@@ -4,9 +4,9 @@
 # dbt-opiner
 Tool for keeping dbt standards aligned across dbt projects.
 
-![Demo](https://raw.githubusercontent.com/dbt-opiner/dbt-opiner/main/docs/demo.gif)
+<img src="https://raw.githubusercontent.com/dbt-opiner/dbt-opiner/main/docs/demo.gif" width="742" height="342">
 
-**Disclaimer: This is an early stage project. Check the [License](https://github.com/dbt-opiner/dbt-opiner/blob/main/LICENSE) for more information.**
+**Or use it in a CI run! check out [this demo PR](https://github.com/dbt-opiner/demo-multi-dbt-project/pull/2)**
 
 # Table of Contents
 1. [Installation and usage](#installation-and-usage)
@@ -15,14 +15,14 @@ Tool for keeping dbt standards aligned across dbt projects.
     3. [Usage in CI pipelines](#usage-in-ci-pipelines)
     4. [Important notes and additional configurations](#important-notes-and-additional-configurations)
 2. [Opinions](#opinions)
-    1. [Ignoring opinions (noqa)](#ignoring-opinions-noqa)
-    2. [Default opinions](#default-opinions)
+    1. [Default opinions](#default-opinions)
         1. [O001 model must have a description](#o001-model-must-have-a-description)
         2. [O002 model description must have keywords](#o002-model-description-must-have-keywords)
         3. [O003 all columns must have description](#o003-all-columns-must-have-description)
         4. [O004 All columns in model must be explicitly named at least once](#o004-all-columns-in-model-must-be-explicitly-named-at-least-once)
         5. [O005 model should have unique key](#o005-model-should-have-unique-key)
-    3. [Adding custom opinions](#adding-custom-opinions)
+    2. [Adding custom opinions](#adding-custom-opinions)
+    3. [Ignoring opinions (noqa)](#ignoring-opinions-noqa)
 3. [Why?](#why)
 4. [Contributing](#contributing)
 
@@ -94,14 +94,6 @@ Check this repo as an example: [demo-multi-dbt-project](https://github.com/dbt-o
 The opinions are defined in the `opinions` directory. They apply to certain dbt nodes (models, macros, or tests) and/or type of files (yaml, sql, md). The opinions have a code, a description, a severity, and a configuration.
 The severity levels are: `Must` (it's mandatory) and `Should` (it's highly recommended).
 The configuration is optional and can be used to set extra parameters for the opinion.
-
-### Ignoring opinions (noqa)
-Opinions can be ignored at the global level, at the node level, or by regex matching file paths.
-To ignore an opinion at the global level, add the opinion code to the `ignore_opinions` list in the `dbt-opiner.yaml` file.
-To ignore an opinion at the node (model, macro, or test) level, add a comment with the format: `noqa: dbt-opiner OXXX` at the beginning of the sql or yaml file, where `OXXX` is the opinion code. Use a comma separated list if you want to ignore more than one opinion (e.g. `noqa: dbt-opiner O001, O002`). You can also ignore all opinions in a node by using `noqa: dbt-opiner all`.
-Note that if multiple nodes are defined in the same yaml file, the noqa comment will apply to all the nodes defined in that file.
-To ignore opinions for certaing regex matching file paths, add the opinion code as key and a regex as value to the `ignore_files` list in the `dbt-opiner.yaml` file.
-
 
 ### Default opinions
 
@@ -218,13 +210,22 @@ The opinion class should inherit from `dbt_opiner.opinions.BaseOpinion` and impl
 
 If the custom opinion is in a repository and requires extra dependencies, define a class variable `required_dependencies` with the required dependencies in a list (e.g. ["numpy==2.0.1", "pandas==2.0"]).
 
-The `_eval` method will receive a file handler to lint. Familiarize with these file handlers in the [source code](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/file_handlers.py). These file handlers also contain dbt manifest information that can be accessed in the evaluation of the opinion.
+The `_eval` method will receive a file handler to lint. Familiarize with these file handlers in the [source code](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/file_handlers.py). In general, the file handlers contain the file raw content, dbt node(s) with manifest metadata, and the parent dbt project to which it belong. All these are useful to create and evaluate opinions.
 
 The custom opinion can use the configuration set in the `.dbt-opiner.yaml` file. The config dictionary is injected when the class is instantiated. To access it, define a `__init__` method with a `config` parameter (see for example [[this](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)])
 
 All the configurations for [ignoring opinions (noqa)](#ignoring-opinions-noqa) will also apply to the custom opinions. Make sure you don't create conflicting opinion codes. As a best practice, use a prefix for the opinion codes that are specific to your organization (e.g. `C001`).
 
 We use `loguru` for logging. We encourage to use the same for the custom opinions. See how to use it, [here](https://github.com/Delgan/loguru).
+
+### Ignoring opinions (noqa)
+> Strong opinions, weakly held. [_Paul Saffo_](https://bobsutton.typepad.com/my_weblog/2006/07/strong_opinions.html)
+
+Opinions can be ignored at the global level, at the node level, or by regex matching file paths.
+To ignore an opinion at the global level, add the opinion code to the `ignore_opinions` list in the `dbt-opiner.yaml` file.
+To ignore an opinion at the node (model, macro, or test) level, add a comment with the format: `noqa: dbt-opiner OXXX` at the beginning of the sql or yaml file, where `OXXX` is the opinion code. Use a comma separated list if you want to ignore more than one opinion (e.g. `noqa: dbt-opiner O001, O002`). You can also ignore all opinions in a node by using `noqa: dbt-opiner all`.
+Note that if multiple nodes are defined in the same yaml file, the noqa comment will apply to all the nodes defined in that file.
+To ignore opinions for certaing regex matching file paths, add the opinion code as key and a regex as value to the `ignore_files` list in the `dbt-opiner.yaml` file.
 
 ## Why?
 Inspired in Benn Stancil's [blog post](https://benn.substack.com/p/the-rise-of-the-analytics-pretendgineer) where he says:

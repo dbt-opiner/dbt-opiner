@@ -114,7 +114,7 @@ class DbtProject:
                     if re.match(
                         self._config.get("files", {}).get("sql", MATCH_ALL), str(file)
                     ):
-                        sql_file = SqlFileHandler(file, self.dbt_manifest)
+                        sql_file = SqlFileHandler(file, self.dbt_manifest, self)
                         self.files["sql"].append(sql_file)
 
                 elif file.suffix in [".yml", ".yaml"]:
@@ -125,13 +125,13 @@ class DbtProject:
                             "yml", MATCH_ALL
                         )
                     if re.match(file_pattern, str(file)):
-                        yaml_file = YamlFileHandler(file, self.dbt_manifest)
+                        yaml_file = YamlFileHandler(file, self.dbt_manifest, self)
                         self.files["yaml"].append(yaml_file)
 
                 elif file.suffix == ".md":
                     file_pattern = self._config.get("files", {}).get("md", MATCH_ALL)
                     if re.match(file_pattern, str(file)):
-                        self.files["markdown"].append(MarkdownFileHandler(file))
+                        self.files["markdown"].append(MarkdownFileHandler(file, self))
                 else:
                     logger.debug(f"{file.suffix} is not supported. Skipping.")
 
@@ -547,6 +547,7 @@ def run_dbt_command(
             ]
         )
     logger.debug(f"Running dbt command: {cmd}")
+    # TODO: Improve error logging when cmd run fails.
     result = subprocess.run(cmd, capture_output=True, check=True)
 
     # Reset working directory

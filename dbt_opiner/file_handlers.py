@@ -10,6 +10,7 @@ from loguru import logger
 
 if TYPE_CHECKING:
     from dbt_opiner.dbt import DbtManifest
+    from dbt_opiner.dbt import DbtProject
 
 
 class FileHandler(ABC):
@@ -19,12 +20,17 @@ class FileHandler(ABC):
         path: Path to the file.
         type: File extension.
         content: Raw content (as a string) of a file.
+        no_qa_opinions: List of no_qa_opinions in the file content or related files
+        parent_dbt_project: Parent dbt project of the file.
     """
 
-    def __init__(self, file_path: Path):
+    def __init__(
+        self, file_path: Path, parent_dbt_project: "DbtProject" = None
+    ) -> None:
         """
         Args:
             file_path: Path to the file.
+            parent_dbt_project: Parent dbt project of the file.
         """
         try:
             assert file_path.exists()
@@ -34,6 +40,7 @@ class FileHandler(ABC):
         self.type = self.path.suffix
         self._content = None
         self.no_qa_opinions = self._get_no_qa_opinions(self.content)
+        self.parent_dbt_project = parent_dbt_project
 
     @property
     def content(self):
@@ -96,18 +103,26 @@ class SqlFileHandler(FileHandler):
     It expects the SQL file to be a model, macro, or test of a dbt project.
 
     Attributes:
+        path: Path to the file.
+        type: File extension.
+        content: Raw content (as a string) of a file.
+        no_qa_opinions: List of no_qa_opinions in the file content or related files
+        parent_dbt_project: Parent dbt project of the file.
         dbt_node: DbtNode object associated with the SQL file.
         compiled_code: Compiled code of the dbt node
-
-    Methods:
-        set_dbt_node: Sets the dbt_node attribute.
     """
 
-    def __init__(self, file_path: Path, dbt_manifest: "DbtManifest") -> None:
+    def __init__(
+        self,
+        file_path: Path,
+        dbt_manifest: "DbtManifest" = None,
+        parent_dbt_project: "DbtProject" = None,
+    ) -> None:
         """
         Args:
             file_path: Path to the SQL file.
             dbt_manifest:  dbt manifest to search the DbtNode object associated with the SQL file.
+            parent_dbt_project: Parent dbt project of the file.
         """
         # Trying to instantiate SqlFileHandler with another extension should fail
         try:
@@ -116,7 +131,7 @@ class SqlFileHandler(FileHandler):
             raise ValueError(
                 f"SqlFileHandler requires a .sql file, got {file_path.suffix}"
             )
-        super().__init__(file_path)
+        super().__init__(file_path, parent_dbt_project)
         self.dbt_node = None
 
         # Add dbt node to the file handler
@@ -158,6 +173,11 @@ class YamlFileHandler(FileHandler):
     """Class for handling YAML files.
 
     Attributes:
+        path: Path to the file.
+        type: File extension.
+        content: Raw content (as a string) of a file.
+        no_qa_opinions: List of no_qa_opinions in the file content or related files
+        parent_dbt_project: Parent dbt project of the file.
         dbt_nodes: List of DbtNode objects for which the YAML file is a patch (contains docs of).
 
     Methods:
@@ -165,7 +185,12 @@ class YamlFileHandler(FileHandler):
         get: Returns the value of a key in the YAML file content.
     """
 
-    def __init__(self, file_path: Path, dbt_manifest: "DbtManifest" = None) -> None:
+    def __init__(
+        self,
+        file_path: Path,
+        dbt_manifest: "DbtManifest" = None,
+        parent_dbt_project: "DbtProject" = None,
+    ) -> None:
         """
         Args:
             file_path: Path to the YAML file.
@@ -178,7 +203,7 @@ class YamlFileHandler(FileHandler):
             raise ValueError(
                 f"YamlFileHandler requires a .yml or .yaml file, got {file_path.suffix}"
             )
-        super().__init__(file_path)
+        super().__init__(file_path, parent_dbt_project)
         self._dict = None
         self.type = ".yaml"
 
@@ -222,10 +247,22 @@ class MarkdownFileHandler(FileHandler):
     """Class for handling Markdown files.
 
     Attributes:
+        path: Path to the file.
+        type: File extension.
+        content: Raw content (as a string) of a file.
+        no_qa_opinions: List of no_qa_opinions in the file content or related files
+        parent_dbt_project: Parent dbt project of the file.
         content: Raw content (as a string) of a file.
     """
 
-    def __init__(self, file_path: Path):
+    def __init__(
+        self, file_path: Path, parent_dbt_project: "DbtProject" = None
+    ) -> None:
+        """
+        Args:
+            file_path: Path to the Markdown file.
+            parent_dbt_project: Parent dbt project of the file.
+        """
         # Trying to instantiate MarkdownFileHandler with another extension should fail
         try:
             assert file_path.suffix == ".md"
@@ -233,4 +270,4 @@ class MarkdownFileHandler(FileHandler):
             raise ValueError(
                 f"MarkdownFileHandler requires a .md file, got {file_path.suffix}"
             )
-        super().__init__(file_path)
+        super().__init__(file_path, parent_dbt_project)
