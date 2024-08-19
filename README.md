@@ -16,11 +16,11 @@ Tool for keeping dbt standards aligned across dbt projects.
     4. [Important notes and additional configurations](#important-notes-and-additional-configurations)
 2. [Opinions](#opinions)
     1. [Default opinions](#default-opinions)
-        1. [O001 model must have a description](#o001-model-must-have-a-description)
-        2. [O002 model description must have keywords](#o002-model-description-must-have-keywords)
-        3. [O003 all columns must have description](#o003-all-columns-must-have-description)
-        4. [O004 All columns in model must be explicitly named at least once](#o004-all-columns-in-model-must-be-explicitly-named-at-least-once)
-        5. [O005 model should have unique key](#o005-model-should-have-unique-key)
+        1. [O001 model must have a description](#O001-model-must-have-a-description)
+        2. [O002 model description must have keywords](#O002-model-description-must-have-keywords)
+        3. [O003 all columns must have description](#O003-all-columns-must-have-description)
+        4. [O004 All columns in model must be explicitly named at least once](#O004-all-columns-in-model-must-be-explicitly-named-at-least-once)
+        5. [O005 model should have unique key](#O005-model-should-have-unique-key)
     2. [Adding custom opinions](#adding-custom-opinions)
     3. [Ignoring opinions (noqa)](#ignoring-opinions-noqa)
 3. [Why?](#why)
@@ -57,10 +57,10 @@ Check [this github action example](https://github.com/dbt-opiner/demo-multi-dbt-
 ### Important notes and additional configurations
 The tool `expects all the linted files to belong to a git repository`: it won't work with files that are not part of a git repository.
 
-Extra configs can be set using a `dbt-opiner.yaml` file, that should be anywhere in the repository.
-If more than one `dbt-opiner.yaml` file is found, the tool will use the one in the highest path of the repository. If file is not provided, empty configuration will be used and default behaviour will be applied.
+Extra configs can be set using a `.dbt-opiner.yaml` file, that should be anywhere in the repository.
+If more than one `.dbt-opiner.yaml` file is found, the tool will use the one in the highest path of the repository. If file is not provided, empty configuration will be used and default behaviour will be applied.
 
-The `dbt-opiner.yaml` file should have the following structure:
+The `.dbt-opiner.yaml` file should have the following structure:
 
 ```yaml
 sqlglot_dialect: duckdb # The dialect to use when parsing the sql files with sqlglot.
@@ -97,16 +97,20 @@ The configuration is optional and can be used to set extra parameters for the op
 
 ### Default opinions
 
-#### **O001 model must have a description** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O001_model_must_have_description.py)]
-Applies to: dbt models when either sql or yaml files are changed.
+#### O001 model must have a description
+[[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O001_model_must_have_description.py)]
+
+Applies to: dbt models when either sql or yaml files are changed.  
 Models must have descriptions. Empty descriptions are not allowed.
 
 Descriptions are important for documentation and understanding the purpose of the model.
 A good description makes data more obvious.
 Include a description for the model in a yaml file or config block.
 
-#### **O002 model description must have keywords** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)]
-Applies to: dbt models when either sql or yaml files are changed.
+#### O002 model description must have keywords
+[[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)]
+
+Applies to: dbt models when either sql or yaml files are changed.  
 Models descriptions must have keywords.
 
 Keywords help standarizing the description of the models,
@@ -122,8 +126,10 @@ opinions_config:
 ```
 Keywords are case insensitive.
 
-#### **O003 all columns must have description** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O003_all_columns_must_have_description.py)]
-Applies to: dbt models when either sql or yaml files are changed
+#### O003 all columns must have description
+[[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O003_all_columns_must_have_description.py)]
+
+Applies to: dbt models when either sql or yaml files are changed.  
 All columns in the model should have a description. Empty descriptions are not allowed.
 
 Descriptions are important for documentation and understanding the purpose
@@ -145,8 +151,10 @@ the sqlglot parser, this opinion will omit those columns from the check.
 Rule O004 will check against this condition and will fail if
 unresolved `select *` are found.
 
-#### **O004 All columns in model must be explicitly named at least once** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O004_final_columns_in_model_must_be_explicitly_named_at_least_once.py)]
-Applies to: dbt models when sql files are changed
+#### O004 All columns in model must be explicitly named at least once 
+[[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O004_final_columns_in_model_must_be_explicitly_named_at_least_once.py)]
+
+Applies to: dbt models when sql files are changed.  
 The final columns of the model must be explicitly named at least once.
 
 This makes it easier to understand what columns are being selected at the end of the model,
@@ -203,9 +211,11 @@ joined as (
 select * from joined
 ```
 
-#### **O005 model should have unique key** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O005_model_should_have_unique_key.py)]
-Applies to: dbt models when sql files are changed
-Models should have a unique key defined in the config block of the model.
+#### O005 model should have unique key
+[[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O005_model_should_have_unique_key.py)]
+
+Applies to: dbt models when sql files are changed.   
+Models should have a unique key defined in the config block of the model.  
 This is useful to enforce the uniqueness of the model and to make the granularity of the model explicit.
 
 ### Adding custom opinions
@@ -229,10 +239,10 @@ We use `loguru` for logging. We encourage to use the same for the custom opinion
 > Strong opinions, weakly held. [_Paul Saffo_](https://bobsutton.typepad.com/my_weblog/2006/07/strong_opinions.html)
 
 Opinions can be ignored at the global level, at the node level, or by regex matching file paths.
-To ignore an opinion at the global level, add the opinion code to the `ignore_opinions` list in the `dbt-opiner.yaml` file.
+To ignore an opinion at the global level, add the opinion code to the `ignore_opinions` list in the `.dbt-opiner.yaml` file.
 To ignore an opinion at the node (model, macro, or test) level, add a comment with the format: `noqa: dbt-opiner OXXX` at the beginning of the sql or yaml file, where `OXXX` is the opinion code. Use a comma separated list if you want to ignore more than one opinion (e.g. `noqa: dbt-opiner O001, O002`). You can also ignore all opinions in a node by using `noqa: dbt-opiner all`.
 Note that if multiple nodes are defined in the same yaml file, the noqa comment will apply to all the nodes defined in that file.
-To ignore opinions for certaing regex matching file paths, add the opinion code as key and a regex as value to the `ignore_files` list in the `dbt-opiner.yaml` file.
+To ignore opinions for certaing regex matching file paths, add the opinion code as key and a regex as value to the `ignore_files` list in the `.dbt-opiner.yaml` file.
 
 ## Why?
 Inspired in Benn Stancil's [blog post](https://benn.substack.com/p/the-rise-of-the-analytics-pretendgineer) where he says:
