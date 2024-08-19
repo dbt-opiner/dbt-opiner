@@ -84,4 +84,3 @@ class BaseOpinion(ABC):
             A single ListResult with the evaluation result of the opinion.
             A list if the result evaluates more than one dbt node.
         """
-        pass
