@@ -29,7 +29,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
-addopts = "--ignore=tests/multi_repo"
+addopts = "--ignore=tests/demo_multi_project"
 
 [tool.tox]
 legacy_tox_ini = """

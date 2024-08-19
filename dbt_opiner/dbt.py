@@ -2,7 +2,6 @@ import json
 import os
 import re
 import subprocess
-import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -509,6 +508,7 @@ def run_dbt_command(
     dbt_project_file_path: Path,
     dbt_profile_path: Path = None,
     target: str = None,
+    silent: bool = False,
 ) -> subprocess.CompletedProcess:
     """Run dbt command for the given dbt project file path.
 
@@ -517,6 +517,7 @@ def run_dbt_command(
         command: The dbt command to run.
         target: The target to run the dbt command.
         dbt_profile_path: The path to the dbt profile file.
+        silent: flag to suppress logging. Use True for logging errors.
 
     Returns:
         The subprocess.CompletedProcess object.
@@ -552,12 +553,14 @@ def run_dbt_command(
     try:
         result = subprocess.run(cmd, capture_output=True, check=True)
     except subprocess.CalledProcessError as e:
-        error_message = f"{e.stdout.decode('utf-8')}\n{e.stderr.decode('utf-8')}"
-        logger.critical(f"Error running dbt command: \n{error_message}")
-        sys.exit(1)
+        if not silent:
+            error_message = f"{e.stdout.decode('utf-8')}\n{e.stderr.decode('utf-8')}"
+            logger.error(f"Error running dbt command: \n{error_message}")
+        raise e
+    finally:
+        # Reset working directory
+        os.chdir(current_working_dir)
 
-    # Reset working directory
-    os.chdir(current_working_dir)
     return result
 
 
@@ -565,28 +568,38 @@ def compile_dbt_manifest(
     dbt_project_file_path: Path, dbt_profile_path: Path = None, target: str = None
 ):
     """Compile the dbt manifest file for the given dbt project file path.
-    It runs deps, seed, and compile dbt commands that are required to generate the manifest file.
+    It tries to run compile but runs deps, seed, if just compile fails.
+    Sometimes those are required to run compile.
 
     Args:
         dbt_project_file_path: The path to the dbt project file.
         dbt_profile_path: The path to the dbt profile file.
         target: The target to run the dbt command
     """
-    run_dbt_command(
-        command="deps",
-        dbt_project_file_path=dbt_project_file_path,
-        dbt_profile_path=dbt_profile_path,
-        target=target,
-    )
-    run_dbt_command(
-        command="seed",
-        dbt_project_file_path=dbt_project_file_path,
-        dbt_profile_path=dbt_profile_path,
-        target=target,
-    )
-    run_dbt_command(
-        command="compile",
-        dbt_project_file_path=dbt_project_file_path,
-        dbt_profile_path=dbt_profile_path,
-        target=target,
-    )
+    try:
+        run_dbt_command(
+            command="compile",
+            dbt_project_file_path=dbt_project_file_path,
+            dbt_profile_path=dbt_profile_path,
+            target=target,
+            silent=True,
+        )
+    except subprocess.CalledProcessError:
+        run_dbt_command(
+            command="deps",
+            dbt_project_file_path=dbt_project_file_path,
+            dbt_profile_path=dbt_profile_path,
+            target=target,
+        )
+        run_dbt_command(
+            command="seed",
+            dbt_project_file_path=dbt_project_file_path,
+            dbt_profile_path=dbt_profile_path,
+            target=target,
+        )
+        run_dbt_command(
+            command="compile",
+            dbt_project_file_path=dbt_project_file_path,
+            dbt_profile_path=dbt_profile_path,
+            target=target,
+        )
