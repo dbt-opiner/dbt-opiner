@@ -17,10 +17,10 @@ Tool for keeping dbt standards aligned across dbt projects.
 2. [Opinions](#opinions)
     1. [Default opinions](#default-opinions)
         1. [O001 model must have a description](#O001-model-must-have-a-description-source)
-        2. [O002 model description must have keywords](#O002-model-description-must-have-keywords)
-        3. [O003 all columns must have description](#O003-all-columns-must-have-description)
-        4. [O004 All columns in model must be explicitly named at least once](#O004-all-columns-in-model-must-be-explicitly-named-at-least-once)
-        5. [O005 model should have unique key](#O005-model-should-have-unique-key)
+        2. [O002 model description must have keywords](#O002-model-description-must-have-keywords-source)
+        3. [O003 all columns must have description](#O003-all-columns-must-have-description-source)
+        4. [O004 All columns in model must be explicitly named at least once](#O004-all-columns-in-model-must-be-explicitly-named-at-least-once-source)
+        5. [O005 model should have unique key](#O005-model-should-have-unique-key-source)
     2. [Adding custom opinions](#adding-custom-opinions)
     3. [Ignoring opinions (noqa)](#ignoring-opinions-noqa)
 3. [Why?](#why)
@@ -106,8 +106,7 @@ Descriptions are important for documentation and understanding the purpose of th
 A good description makes data more obvious.
 Include a description for the model in a yaml file or config block.
 
-#### O002 model description must have keywords
-[[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)]
+#### O002 model description must have keywords [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)]
 
 Applies to: dbt models when either sql or yaml files are changed.  
 Models descriptions must have keywords.
@@ -125,8 +124,7 @@ opinions_config:
 ```
 Keywords are case insensitive.
 
-#### O003 all columns must have description
-[[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O003_all_columns_must_have_description.py)]
+#### O003 all columns must have description [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O003_all_columns_must_have_description.py)]
 
 Applies to: dbt models when either sql or yaml files are changed.  
 All columns in the model should have a description. Empty descriptions are not allowed.
@@ -150,8 +148,7 @@ the sqlglot parser, this opinion will omit those columns from the check.
 Rule O004 will check against this condition and will fail if
 unresolved `select *` are found.
 
-#### O004 All columns in model must be explicitly named at least once 
-[[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O004_final_columns_in_model_must_be_explicitly_named_at_least_once.py)]
+#### O004 All columns in model must be explicitly named at least once [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O004_final_columns_in_model_must_be_explicitly_named_at_least_once.py)]
 
 Applies to: dbt models when sql files are changed.  
 The final columns of the model must be explicitly named at least once.
@@ -210,8 +207,7 @@ joined as (
 select * from joined
 ```
 
-#### O005 model should have unique key
-[[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O005_model_should_have_unique_key.py)]
+#### O005 model should have unique key [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O005_model_should_have_unique_key.py)]
 
 Applies to: dbt models when sql files are changed.   
 Models should have a unique key defined in the config block of the model.  
