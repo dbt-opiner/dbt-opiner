@@ -9,7 +9,7 @@ from loguru import logger
 from dbt_opiner import entrypoint
 
 
-class ChoiceTuple(click.Choice):
+class ChoiceTuple(click.Choice):  # pragma: no cover
     """
     Required for MultiOption to work
     """
@@ -26,7 +26,7 @@ class ChoiceTuple(click.Choice):
         return value
 
 
-class MultiOption(click.Option):
+class MultiOption(click.Option):  # pragma: no cover
     """
     Taken from https://github.com/dbt-labs/dbt-core/blob/main/core/dbt/cli/options.py
     """
