@@ -16,7 +16,7 @@ Tool for keeping dbt standards aligned across dbt projects.
     4. [Important notes and additional configurations](#important-notes-and-additional-configurations)
 2. [Opinions](#opinions)
     1. [Default opinions](#default-opinions)
-        1. [O001 model must have a description](#O001-model-must-have-a-description)
+        1. [O001 model must have a description](#O001-model-must-have-a-description-source)
         2. [O002 model description must have keywords](#O002-model-description-must-have-keywords)
         3. [O003 all columns must have description](#O003-all-columns-must-have-description)
         4. [O004 All columns in model must be explicitly named at least once](#O004-all-columns-in-model-must-be-explicitly-named-at-least-once)
@@ -97,8 +97,7 @@ The configuration is optional and can be used to set extra parameters for the op
 
 ### Default opinions
 
-#### O001 model must have a description
-[[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O001_model_must_have_description.py)]
+#### O001 model must have a description [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O001_model_must_have_description.py)]
 
 Applies to: dbt models when either sql or yaml files are changed.  
 Models must have descriptions. Empty descriptions are not allowed.
