@@ -47,7 +47,8 @@ class ConfigSingleton:
                 d for d in dirs if d != ".venv"
             ]  # ignore .venv directory in the search
             if ".dbt-opiner.yaml" in files:
-                self._config_file_path = os.path.join(root, ".dbt-opiner.yaml")
+                self._config_file_path = Path(root) / ".dbt-opiner.yaml"
+
                 break
         if self._config_file_path:
             with open(self._config_file_path, "r") as file:
