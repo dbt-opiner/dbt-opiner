@@ -156,9 +156,10 @@ Ideally, all the columns should be named in the final select statement or CTE.
 This rule doesn't check for that condition, but it checks if there is any
 unresolved `select *` statement in the model.
 
-** For example **
+**For example**
 
 - Good:
+```sql
 with customers as (select * from {{ref('customers')}}),
 orders as (select * from {{ref('orders')}}),
 joined as (
@@ -171,8 +172,10 @@ joined as (
     join orders on customers.customer_id = orders.customer_id
 )
 select * from joined
+```
 
 - Also good:
+```sql
 with customers as (select customer_id, customer_name from {{ref('customers')}}),
 orders as (select * from {{ref('orders')}}),
 joined as (
@@ -184,8 +187,9 @@ joined as (
     join orders on customers.customer_id = orders.customer_id
 )
 select * from joined
-
+```
 - Bad:
+```sql
 with customers as (select * from {{ref('customers')}}),
 orders as (select * from {{ref('orders')}}),
 joined as (
@@ -197,6 +201,7 @@ joined as (
     join orders on customers.customer_id = orders.customer_id
 )
 select * from joined
+```
 
 #### **O005 model should have unique key** [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O005_model_should_have_unique_key.py)]
 Applies to: dbt models when sql files are changed
@@ -214,9 +219,9 @@ If the custom opinion is in a repository and requires extra dependencies, define
 
 The `_eval` method will receive a file handler to lint. Familiarize with these file handlers in the [source code](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/file_handlers.py). In general, the file handlers contain the file raw content, dbt node(s) with manifest metadata, and the parent dbt project to which it belong. All these are useful to create and evaluate opinions.
 
-The custom opinion can use the configuration set in the `.dbt-opiner.yaml` file. The config dictionary is injected when the class is instantiated. To access it, define a `__init__` method with a `config` parameter (see for example [[this](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)])
+The custom opinion can use the configuration set in the `.dbt-opiner.yaml` file. The config dictionary is injected when the class is instantiated. To access it, define a `__init__` method with a `config` parameter (see for example [this](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)])
 
-All the configurations for [ignoring opinions (noqa)](#ignoring-opinions-noqa) will also apply to the custom opinions. Make sure you don't create conflicting opinion codes. As a best practice, use a prefix for the opinion codes that are specific to your organization (e.g. `C001`).
+All the configurations for [ignoring opinions (noqa)](#ignoring-opinions-noqa) will also apply to the custom opinions. Make sure you don't create conflicting opinion codes. As a best practice, use a prefix for the opinion code specific to your organization (e.g. `C001`).
 
 We use `loguru` for logging. We encourage to use the same for the custom opinions. See how to use it, [here](https://github.com/Delgan/loguru).
 
@@ -233,13 +238,14 @@ To ignore opinions for certaing regex matching file paths, add the opinion code 
 Inspired in Benn Stancil's [blog post](https://benn.substack.com/p/the-rise-of-the-analytics-pretendgineer) where he says:
 >My suspicion is that dbt [...] needs something that aggressively imposes [...] opinions on its users. It needs dbt on Rails: A framework that builds a project’s scaffolding, and tells us how to expand it—and not through education, but through functional requirements. Show where to put which bits of logic. Prevent me from doing circular things. Blare warnings at me when I use macros incorrectly. Force me to rigorously define “production.”
 
-Far for being a dbt framework, this less ambitious tool aims to help enforcing standards and best practices in dbt projects at scale, as part of the federated data governance principle of a data mesh architecture.
+Far from being a dbt framework, this less ambitious tool aims to help enforce standards and best practices in dbt projects at scale, as part of the data mesh architecture’s federated governance principle.
 
 Although other similar tools exist, they fall short in some aspects:
-  - [dbt-checkpoint](https://github.com/dbt-checkpoint/dbt-checkpoint) doesn't work well with multi projects repositories and doesn't provide a way to define custom opinions.
-  - [dbt-score](https://dbt-score.picnic.tech/) doesn't work as a pre-commit hook and it's oriented to check mainly the metadata of the nodes.
+  - [dbt-checkpoint](https://github.com/dbt-checkpoint/dbt-checkpoint) doesn't work well with multi projects repositories and doesn't provide a way to define custom opinions (with different levels of severity).
+  - [dbt-score](https://dbt-score.picnic.tech/) doesn't work as a pre-commit hook and it's oriented to check mainly the metadata of the nodes. Other checks like one model per yml file or explicit column selection are not easy to integrate.
 
-dbt-opiner tries to fill this gap. It can be used as a cli, as a pre-commit hook, and in CI pipelines, and it allows to define custom opinions that check multiple aspects of dbt projects such as:
+dbt-opiner tries to fill this gap.
+It can be used as a CLI, pre-commit hook, and in CI pipelines. It allows the definition of custom opinions for checking multiple aspects of dbt projects such as:
   - Naming conventions
   - Data and unit tests checks
   - Documentation checks
@@ -247,7 +253,8 @@ dbt-opiner tries to fill this gap. It can be used as a cli, as a pre-commit hook
   - Security/Privacy checks
   - etc.
 
-dbt-opiner is designed to be extensible and easy to configure, so it can be adapted to the specific needs of each organization.
+dbt-opiner is designed to be extensible and easy to configure so that it can be adapted to the specific needs of each organization.
+Furthermore, the _opinion_ approach allows to suggest and educate the users about why something is a must (or why it is just suggested).
 
 This tool doesn't replace linters and formaters for sql code ([SQLFluff](https://github.com/sqlfluff/sqlfluff/), [sqlftm](https://github.com/tconbeer/sqlfmt)) that are highly encouraged.
 
