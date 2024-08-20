@@ -35,7 +35,7 @@ class DbtProject:
         self,
         dbt_project_file_path: Path,
         files: list = [],
-        all_files: bool = True,
+        all_files: bool = False,
         target: str = None,
         force_compile: bool = False,
     ) -> None:

@@ -48,16 +48,21 @@ def temp_complete_git_repo(temp_empty_git_repo):
     dbt_dir.mkdir()
     dbt_project_file = dbt_dir / "dbt_project.yml"
     dbt_project_file.touch()
+    project = {
+        "name": "project",
+    }
+    with open(dbt_project_file, "w") as f:
+        yaml.dump(project, f)
     dbt_profiles_file = dbt_dir / "profiles.yml"
     dbt_profiles_file.touch()
-    # Create an empty sql in models
+    # Create a sql in models
     models_dir = dbt_dir / "models" / "test"
     models_dir.mkdir(parents=True)
     sql_file = models_dir / "model.sql"
     sql_file.touch()
     with open(sql_file, "w") as f:
         f.write("select id, value from table")
-    # Create an empty yaml in models
+    # Create a yaml in models
     yaml_file = models_dir / "_model__models.yaml"
     yaml_file.touch()
     yml_dict = {
@@ -74,8 +79,13 @@ def temp_complete_git_repo(temp_empty_git_repo):
     }
     with open(yaml_file, "w") as f:
         yaml.dump(yml_dict, f)
+    # Create .md file in models
+    md_file = models_dir / "model.md"
+    md_file.touch()
+    with open(md_file, "w") as f:
+        f.write("{% docs id %} Id of the table {% enddocs %}")
     # Add target and manifest file
-    target_dir = temp_empty_git_repo / "target"
+    target_dir = dbt_dir / "target"
     target_dir.mkdir()
     manifest_dir = target_dir / "manifest.json"
     manifest_dir.touch()
