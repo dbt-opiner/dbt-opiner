@@ -20,21 +20,19 @@ class O005(BaseOpinion):
 
     def _eval(self, file: SqlFileHandler) -> LintResult:
         # Check type of file and model.
-        if file.type != ".sql" or file.dbt_node.type != "model":
-            return None
-
-        if file.dbt_node.unique_key:
+        if file.type == ".sql" and file.dbt_node.type == "model":
+            if file.dbt_node.unique_key:
+                return LintResult(
+                    file=file,
+                    opinion_code=self.code,
+                    passed=True,
+                    severity=self.severity,
+                    message="Model has a unique key.",
+                )
             return LintResult(
                 file=file,
                 opinion_code=self.code,
-                passed=True,
+                passed=False,
                 severity=self.severity,
-                message="Model has a unique key.",
+                message=f"Model {self.severity.value} have a unique key defined in the config block.",
             )
-        return LintResult(
-            file=file,
-            opinion_code=self.code,
-            passed=False,
-            severity=self.severity,
-            message=f"Model {self.severity.value} have a unique key defined in the config block.",
-        )

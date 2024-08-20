@@ -14,14 +14,13 @@ def test_singleton_instance(mock_initialize):
     mock_initialize.assert_called_once()
 
 
-def test_initialize_with_config(temp_git_repo_with_config):
-    os.chdir(temp_git_repo_with_config / "dbt-opiner")
+def test_initialize_with_config(temp_complete_git_repo):
+    os.chdir(temp_complete_git_repo / "dbt-opiner")
     config = ConfigSingleton().get_config()
     config_file_path = ConfigSingleton().get_config_file_path()
     assert config == {"config": "test"}
     assert (
-        config_file_path
-        == temp_git_repo_with_config / "dbt-opiner" / ".dbt-opiner.yaml"
+        config_file_path == temp_complete_git_repo / "dbt-opiner" / ".dbt-opiner.yaml"
     )
 
 
