@@ -5,83 +5,67 @@ from dbt_opiner.opinions import O001
 
 
 @pytest.mark.parametrize(
-    "mock_sqlfilehandler, expected_passed",
+    "node, expected_passed",
     [
         pytest.param(
-            (
-                DbtNode({"resource_type": "model", "description": "Some description"})
-            ),  # This is a tuple because pytest expects a tuple for each set of parameters.
+            DbtNode({"resource_type": "model", "description": "Some description"}),
             [True],
             id="model with description",
         ),
         pytest.param(
-            (DbtNode({"resource_type": "model", "description": ""})),
+            DbtNode({"resource_type": "model", "description": ""}),
             [False],
             id="model with empty description",
         ),
         pytest.param(
-            (DbtNode({"resource_type": "model"})),
+            DbtNode({"resource_type": "model"}),
             [False],
             id="model with no description",
         ),
     ],
-    indirect=["mock_sqlfilehandler"],
 )
-def test_sql_O001(mock_sqlfilehandler, expected_passed):
+def test_sql_O001(node, expected_passed, mock_sqlfilehandler):
+    mock_sqlfilehandler.dbt_node = node
     opinion = O001()
     results = opinion.check_opinion(mock_sqlfilehandler)
     assert [result.passed for result in results] == expected_passed
 
 
 @pytest.mark.parametrize(
-    "mock_yamlfilehandler, expected_passed",
+    "nodes, expected_passed",
     [
         pytest.param(
-            (
-                [
-                    DbtNode(
-                        {"resource_type": "model", "description": "Some description"}
-                    ),
-                    DbtNode(
-                        {"resource_type": "model", "description": "Some description"}
-                    ),
-                ]
-            ),  #
+            [
+                DbtNode({"resource_type": "model", "description": "Some description"}),
+                DbtNode({"resource_type": "model", "description": "Some description"}),
+            ],  #
             [True, True],
             id="two models with description",
         ),
         pytest.param(
-            (
-                [
-                    DbtNode(
-                        {"resource_type": "model", "description": "Some description"}
-                    ),
-                    DbtNode({"resource_type": "model", "description": ""}),
-                ]
-            ),
+            [
+                DbtNode({"resource_type": "model", "description": "Some description"}),
+                DbtNode({"resource_type": "model", "description": ""}),
+            ],
             [True, False],
             id="two models one with description, one empty",
         ),
         pytest.param(
-            (
-                [
-                    DbtNode(
-                        {"resource_type": "model", "description": "Some description"}
-                    ),
-                    DbtNode(
-                        {
-                            "resource_type": "model",
-                        }
-                    ),
-                ]
-            ),
+            [
+                DbtNode({"resource_type": "model", "description": "Some description"}),
+                DbtNode(
+                    {
+                        "resource_type": "model",
+                    }
+                ),
+            ],
             [True, False],
             id="two models one with description, one without",
         ),
     ],
-    indirect=["mock_yamlfilehandler"],
 )
-def test_yaml_O001(mock_yamlfilehandler, expected_passed):
+def test_yaml_O001(nodes, mock_yamlfilehandler, expected_passed):
+    mock_yamlfilehandler.dbt_nodes = nodes
     opinion = O001()
     results = opinion.check_opinion(mock_yamlfilehandler)
     assert [result.passed for result in results] == expected_passed

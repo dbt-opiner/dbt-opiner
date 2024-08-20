@@ -9,50 +9,46 @@ config_dict = {
 
 
 @pytest.mark.parametrize(
-    "mock_sqlfilehandler, config, expected_passed",
+    "node, config, expected_passed",
     [
         pytest.param(
-            (
-                DbtNode(
-                    {
-                        "resource_type": "model",
-                        "description": "Some description with keyword",
-                    }
-                )
+            DbtNode(
+                {
+                    "resource_type": "model",
+                    "description": "Some description with keyword",
+                }
             ),
             config_dict,
             [True],
             id="model with description with keyword",
         ),
         pytest.param(
-            (
-                DbtNode(
-                    {
-                        "resource_type": "model",
-                        "description": "Some description without",
-                    }
-                )
+            DbtNode(
+                {
+                    "resource_type": "model",
+                    "description": "Some description without",
+                }
             ),
             config_dict,
             [False],
             id="model with description without keyword",
         ),
         pytest.param(
-            (DbtNode({"resource_type": "model", "description": "Some description"})),
+            DbtNode({"resource_type": "model", "description": "Some description"}),
             {},
             True,
             id="No keywords config defined",
         ),
         pytest.param(
-            (DbtNode({"resource_type": "model"})),
+            DbtNode({"resource_type": "model"}),
             config_dict,
             True,
             id="model without description",
         ),
     ],
-    indirect=["mock_sqlfilehandler"],
 )
-def test__O002(mock_sqlfilehandler, config, expected_passed):
+def test__O002(node, mock_sqlfilehandler, config, expected_passed):
+    mock_sqlfilehandler.dbt_node = node
     opinion = O002(config)
     results = opinion.check_opinion(mock_sqlfilehandler)
     if results:
@@ -62,7 +58,7 @@ def test__O002(mock_sqlfilehandler, config, expected_passed):
 
 
 @pytest.mark.parametrize(
-    "mock_yamlfilehandler, config, expected_passed",
+    "nodes, config, expected_passed",
     [
         pytest.param(
             [
@@ -133,9 +129,9 @@ def test__O002(mock_sqlfilehandler, config, expected_passed):
             id="Two models one with description with keyword, another one without description",
         ),
     ],
-    indirect=["mock_yamlfilehandler"],
 )
-def test_sql_O002(mock_yamlfilehandler, config, expected_passed):
+def test_sql_O002(nodes, mock_yamlfilehandler, config, expected_passed):
+    mock_yamlfilehandler.dbt_nodes = nodes
     opinion = O002(config)
     results = opinion.check_opinion(mock_yamlfilehandler)
     assert [result.passed for result in results] == expected_passed
