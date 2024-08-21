@@ -59,6 +59,7 @@ def temp_complete_git_repo(temp_empty_git_repo):
     |   ├── .dbt-opiner.yaml
     │   └── custom_opinions
     │       ├── C001.py
+    │       ├── C002.py
     ├── dbt_project
     │   ├── dbt_project.yml
     │   ├── profiles.yml
@@ -108,6 +109,18 @@ def temp_complete_git_repo(temp_empty_git_repo):
                 "    required_packages=['some_pypi_package']\n"
                 "    def __init__(self, **kwargs):\n"
                 "        super().__init__(code='C001', description='', severity=OpinionSeverity.SHOULD)\n"
+                "    def _eval(self, file):\n"
+                "        pass\n"
+            ),
+        ],
+        [
+            ["dbt-opiner", "custom_opinions", "C002.py"],
+            (
+                "from dbt_opiner.opinions.base_opinion import BaseOpinion\n"
+                "from dbt_opiner.linter import OpinionSeverity\n"
+                "class C002(BaseOpinion):\n"
+                "    def __init__(self, **kwargs):\n"
+                "        super().__init__(code='C002', description='', severity=OpinionSeverity.SHOULD)\n"
                 "    def _eval(self, file):\n"
                 "        pass\n"
             ),

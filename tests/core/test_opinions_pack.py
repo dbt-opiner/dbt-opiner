@@ -14,6 +14,9 @@ from dbt_opiner.opinions.opinions_pack import OpinionsPack
         pytest.param("local", "Loading custom opinions from local source:"),
         pytest.param("git", "Loading custom opinions from git repository:"),
         pytest.param("invalid", "Custom opinions source invalid not supported"),
+        pytest.param(
+            None, "No custom opinions source defined. Skipping custom opinions loading."
+        ),
     ],
 )
 def test_opinions_pack(temp_complete_git_repo, source, expected, caplog):
@@ -45,9 +48,11 @@ def test_opinions_pack(temp_complete_git_repo, source, expected, caplog):
             assert expected in caplog.text
 
         if source == "local":
-            # Check that the custom opinion C001 was loaded from local source
-            assert "C001" in [opinion.code for opinion in opinions]
-            # Check that subprocess.run was called for installing the required packages
+            # Check that the custom opinion C001, and C002 were loaded from local source
+            opinion_codes = {opinion.code for opinion in opinions}
+            assert "C001" in opinion_codes
+            assert "C002" in opinion_codes
+            # Check that subprocess.run was called for installing the required packages (for C001)
             mock_subprocess_run.assert_called_once_with(
                 [
                     sys.executable,
@@ -57,6 +62,9 @@ def test_opinions_pack(temp_complete_git_repo, source, expected, caplog):
                     "some_pypi_package",
                 ]
             )
+            # Check that C002 didn't need any package installation
+            with caplog.at_level(logging.DEBUG):
+                assert "No required packages for opinion C002" in caplog.text
         elif source == "git":
             # Check that subprocess.run was called
             mock_subprocess_run.assert_called()
