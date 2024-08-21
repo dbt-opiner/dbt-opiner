@@ -3,8 +3,24 @@ from unittest.mock import patch
 
 import pytest
 import yaml
+from _pytest.logging import LogCaptureFixture
+from loguru import logger
 
 from dbt_opiner.config_singleton import ConfigSingleton
+
+
+# See https://loguru.readthedocs.io/en/stable/resources/migration.html#replacing-caplog-fixture-from-pytest-library
+@pytest.fixture
+def caplog(caplog: LogCaptureFixture):
+    handler_id = logger.add(
+        caplog.handler,
+        format="{message}",
+        level=0,
+        filter=lambda record: record["level"].no >= caplog.handler.level,
+        enqueue=False,
+    )
+    yield caplog
+    logger.remove(handler_id)
 
 
 @pytest.fixture
@@ -40,7 +56,9 @@ def temp_complete_git_repo(temp_empty_git_repo):
     It has the following structure:
     temp_empty_git_repo
     ├── dbt-opiner
-    │   └── .dbt-opiner.yaml
+    |   ├── .dbt-opiner.yaml
+    │   └── custom_opinions
+    │       ├── C001.py
     ├── dbt_project
     │   ├── dbt_project.yml
     │   ├── profiles.yml
@@ -70,7 +88,7 @@ def temp_complete_git_repo(temp_empty_git_repo):
     """
     # Create empty file structure
     directories_to_create = [
-        ["dbt-opiner"],
+        ["dbt-opiner", "custom_opinions"],
         ["dbt_project", "models", "test"],
         ["dbt_project", "target"],
         ["dbt_project", "dbt_packages", "package", "macros"],
@@ -81,6 +99,19 @@ def temp_complete_git_repo(temp_empty_git_repo):
 
     # File paths and contents
     files = [
+        [
+            ["dbt-opiner", "custom_opinions", "C001.py"],
+            (
+                "from dbt_opiner.opinions.base_opinion import BaseOpinion\n"
+                "from dbt_opiner.linter import OpinionSeverity\n"
+                "class C001(BaseOpinion):\n"
+                "    required_packages=['some_pypi_package']\n"
+                "    def __init__(self, **kwargs):\n"
+                "        super().__init__(code='C001', description='', severity=OpinionSeverity.SHOULD)\n"
+                "    def _eval(self, file):\n"
+                "        pass\n"
+            ),
+        ],
         [["dbt-opiner", ".dbt-opiner.yaml"], {"config": "test"}],
         [["dbt_project", "dbt_project.yml"], {"name": "project"}],
         [["dbt_project", "profiles.yml"], {}],
