@@ -88,52 +88,49 @@ class DbtProject:
             files: A list of files to load.
         """
         for file in files:
-            if file.is_file():
-                # Ignore files inside target directory
-                if (
-                    (
-                        self.dbt_project_file_path.parent
-                        / self.dbt_project_config.get("target-path", "target")
-                    ).resolve()
-                    in file.resolve().parents
-                    # Ignore files inside dbt deps directory
-                    or (
-                        self.dbt_project_file_path.parent
-                        / self.dbt_project_config.get(
-                            "packages-install-path", "dbt_packages"
-                        )
-                    ).resolve()
-                    in file.resolve().parents
-                    # Ignore files inside .venv directory
-                    or (self.dbt_project_file_path.parent / ".venv").resolve()
-                    in file.resolve().parents
+            # Ignore files inside target directory
+            if (
+                (
+                    self.dbt_project_file_path.parent
+                    / self.dbt_project_config.get("target-path", "target")
+                ).resolve()
+                in file.resolve().parents
+                # Ignore files inside dbt deps directory
+                or (
+                    self.dbt_project_file_path.parent
+                    / self.dbt_project_config.get(
+                        "packages-install-path", "dbt_packages"
+                    )
+                ).resolve()
+                in file.resolve().parents
+                # Ignore files inside .venv directory
+                or (self.dbt_project_file_path.parent / ".venv").resolve()
+                in file.resolve().parents
+            ):
+                continue
+
+            if file.suffix == ".sql":
+                if re.match(
+                    self._config.get("files", {}).get("sql", MATCH_ALL), str(file)
                 ):
-                    continue
+                    sql_file = SqlFileHandler(file, self.dbt_manifest, self)
+                    self.files["sql"].append(sql_file)
 
-                if file.suffix == ".sql":
-                    if re.match(
-                        self._config.get("files", {}).get("sql", MATCH_ALL), str(file)
-                    ):
-                        sql_file = SqlFileHandler(file, self.dbt_manifest, self)
-                        self.files["sql"].append(sql_file)
+            elif file.suffix in [".yml", ".yaml"]:
+                try:
+                    file_pattern = self._config.get("files", {})["yaml"]
+                except KeyError:
+                    file_pattern = self._config.get("files", {}).get("yml", MATCH_ALL)
+                if re.match(file_pattern, str(file)):
+                    yaml_file = YamlFileHandler(file, self.dbt_manifest, self)
+                    self.files["yaml"].append(yaml_file)
 
-                elif file.suffix in [".yml", ".yaml"]:
-                    try:
-                        file_pattern = self._config.get("files", {})["yaml"]
-                    except KeyError:
-                        file_pattern = self._config.get("files", {}).get(
-                            "yml", MATCH_ALL
-                        )
-                    if re.match(file_pattern, str(file)):
-                        yaml_file = YamlFileHandler(file, self.dbt_manifest, self)
-                        self.files["yaml"].append(yaml_file)
-
-                elif file.suffix == ".md":
-                    file_pattern = self._config.get("files", {}).get("md", MATCH_ALL)
-                    if re.match(file_pattern, str(file)):
-                        self.files["markdown"].append(MarkdownFileHandler(file, self))
-                else:
-                    logger.debug(f"{file.suffix} is not supported. Skipping.")
+            elif file.suffix == ".md":
+                file_pattern = self._config.get("files", {}).get("md", MATCH_ALL)
+                if re.match(file_pattern, str(file)):
+                    self.files["markdown"].append(MarkdownFileHandler(file, self))
+            else:
+                logger.debug(f"{file.suffix} is not supported. Skipping.")
 
     def _load_manifest(self, force_compile=False):
         """Load the dbt manifest file.
@@ -380,10 +377,7 @@ class DbtProjectLoader:
                 raise FileNotFoundError(f"{file} does not exist")
             dbt_project_file_path = self._find_dbt_project_yml(file)
             if dbt_project_file_path:
-                logger.debug(f"Found dbt_project.yml for file {file}")
                 file_to_project_map[dbt_project_file_path].append(file)
-            else:
-                logger.debug(f"No dbt_project.yml found for file {file}")
 
         dbt_projects = []
         for dbt_project_file_path, files in file_to_project_map.items():
@@ -445,19 +439,25 @@ class DbtProjectLoader:
         Returns: If found, the path to the dbt_project.yml file, otherwise None.
         """
         git_root_path = self._find_git_root(file)
+        dbt_project_yml_path = None
         if git_root_path:
             current_path = file.resolve()
             while current_path != git_root_path:
                 if (current_path / "dbt_project.yml").exists():
-                    return current_path / "dbt_project.yml"
+                    # Keep going up the directory tree to find the closest dbt_project.yml
+                    # to git root directory. This is to avoid finding nested dbt projects.
+                    # The nested file is filtered later in DbtProject._init_files method.
+                    dbt_project_yml_path = current_path / "dbt_project.yml"
                 current_path = current_path.parent
 
-            # Also check the git root directory itself
-            if (git_root_path / "dbt_project.yml").exists():
-                return git_root_path / "dbt_project.yml"
+            if dbt_project_yml_path:
+                logger.debug(
+                    f"Found dbt_project.yml for file {file} at {dbt_project_yml_path}"
+                )
+                return dbt_project_yml_path
+            logger.debug("dbt_project.yml not found")
 
         logger.debug("Not a git repository")
-        return None
 
     def _find_all_dbt_project_ymls(self) -> list[Path] | None:
         """Find all dbt_project.yml files in a git repository.
