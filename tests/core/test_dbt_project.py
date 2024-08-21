@@ -16,3 +16,6 @@ def test_dbt_project(temp_complete_git_repo):
         assert len(dbt_project_all_files.files[key]) == n_files
     # Check only one file was loaded
     assert len(dbt_project_one_file.files["sql"]) == 1
+
+
+# TODO: test the ignore files functionality

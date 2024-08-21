@@ -20,7 +20,7 @@ class OpinionsPack:
     def __init__(self):
         self._opinions = []
         self._config = ConfigSingleton().get_config()
-        self._ignored_opinions = self._config.get("opinions_configl", {}).get(
+        self._ignored_opinions = self._config.get("opinions_config", {}).get(
             "ignore_opinions", []
         )
 
@@ -32,7 +32,7 @@ class OpinionsPack:
                 self._opinions.append(opinion_class(config=self._config))
 
         # Load custom opinions
-        self._opinions.extend(self._load_custom_opinions())
+        self._load_custom_opinions()
         opinions_str = "\n".join([opinion.code for opinion in self._opinions])
         logger.debug(f"Loaded opinions:\n{opinions_str}")
 
@@ -41,86 +41,40 @@ class OpinionsPack:
         return [opinion for opinion in self._opinions]
 
     def _load_custom_opinions(self):
-        custom_opinions = []
-
         source = (
             self._config.get("opinions_config", {})
             .get("custom_opinions", {})
             .get("source")
         )
+
         if not source:
             logger.info(
                 "No custom opinions source defined. Skipping custom opinions loading."
             )
-        elif source == "local":
+            return
+
+        custom_opinions = []
+        if source == "local":
             path = (
                 pathlib.Path(ConfigSingleton().get_config_file_path()).parent
                 / "custom_opinions"
             )
             logger.debug(f"Loading custom opinions from local source: {path}")
             custom_opinions.extend(self._load_opinions_from_path(path))
-
         elif source == "git":
-            # TODO Use persistent directory path?
-            with tempfile.TemporaryDirectory() as temp_dir:
-                git_repo = (
-                    self._config.get("opinions_config", {})
-                    .get("custom_opinions", {})
-                    .get("repository")
-                )
-                revision = (
-                    self._config.get("opinions_config", {})
-                    .get("custom_opinions", {})
-                    .get("rev")
-                )
-
-                if not git_repo:
-                    logger.critical(
-                        "Custom opinions source is git but repository is not defined."
-                    )
-                    sys.exit(1)
-
-                logger.debug(
-                    f"Loading custom opinions from git repository: {git_repo}."
-                )
-                # TODO: handle git credentials for private repo as env variable
-                try:
-                    subprocess.run(
-                        ["git", "clone", "--quiet", git_repo, temp_dir],
-                        check=True,
-                        stderr=subprocess.PIPE,
-                    )
-                    if revision:
-                        # Revision is optional.
-                        # If not provided default main branch will be used.
-                        subprocess.run(
-                            ["git", "reset", "--quiet", "--hard", revision],
-                            check=True,
-                            stderr=subprocess.PIPE,
-                            cwd=temp_dir,
-                        )
-                    else:
-                        logger.warning(
-                            "Revision not defined. Main branch latest commit will be used. We advise to pin a revision."
-                        )
-                except subprocess.CalledProcessError as e:
-                    logger.critical(
-                        f"Could not clone git repository: {git_repo}. Error: {e.stderr.decode('utf-8')}"
-                    )
-                    sys.exit(1)
-                logger.debug(f"Cloned git repository: {git_repo} to {temp_dir}")
-                path = pathlib.Path(temp_dir) / "custom_opinions"
-                custom_opinions.extend(self._load_opinions_from_path(path))
+            custom_opinions.extend(self._load_opinions_from_git())
         else:
             logger.warning(
                 f"Custom opinions source {source} not supported. Skipping custom opinions loading."
             )
+            return
 
-        return custom_opinions
+        return self._opinions.extend(custom_opinions)
 
     def _load_opinions_from_path(self, path):
         loaded_opinions = []
         for file in path.glob("*.py"):
+            logger.debug(file)
             module_name = file.stem
             spec = importlib.util.spec_from_file_location(module_name, file)
             module = importlib.util.module_from_spec(spec)
@@ -151,7 +105,7 @@ class OpinionsPack:
                                 logger.debug(
                                     f"Package {package_name} not found. Installing."
                                 )
-                                subprocess.check_call(
+                                subprocess.run(
                                     [
                                         sys.executable,
                                         "-m",
@@ -165,3 +119,54 @@ class OpinionsPack:
                     # Inject the config to the opinion
                     loaded_opinions.append(obj(config=self._config))
         return loaded_opinions
+
+    def _load_opinions_from_git(self):
+        # TODO Use persistent directory path?
+        with tempfile.TemporaryDirectory() as temp_dir:
+            git_repo = (
+                self._config.get("opinions_config", {})
+                .get("custom_opinions", {})
+                .get("repository")
+            )
+            revision = (
+                self._config.get("opinions_config", {})
+                .get("custom_opinions", {})
+                .get("rev")
+            )
+
+            if not git_repo:
+                logger.critical(
+                    "Custom opinions source is git but repository is not defined."
+                )
+                sys.exit(1)
+
+            logger.debug(f"Loading custom opinions from git repository: {git_repo}.")
+            # TODO: handle git credentials for private repo as env variable
+            try:
+                subprocess.run(
+                    ["git", "clone", "--quiet", git_repo, temp_dir],
+                    check=True,
+                    stderr=subprocess.PIPE,
+                )
+                if revision:
+                    # Revision is optional.
+                    # If not provided default main branch will be used.
+                    logger.debug(f"Check out to revision: {revision}")
+                    subprocess.run(
+                        ["git", "reset", "--quiet", "--hard", revision],
+                        check=True,
+                        stderr=subprocess.PIPE,
+                        cwd=temp_dir,
+                    )
+                else:
+                    logger.warning(
+                        "Revision not defined. Main branch latest commit will be used. We advise to pin a revision."
+                    )
+            except subprocess.CalledProcessError as e:
+                logger.critical(
+                    f"Could not clone git repository: {git_repo}. Error: {e.stderr.decode('utf-8')}"
+                )
+                sys.exit(1)
+            logger.debug(f"Cloned git repository: {git_repo} to {temp_dir}")
+            path = pathlib.Path(temp_dir) / "custom_opinions"
+            return self._load_opinions_from_path(path)
