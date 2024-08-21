@@ -28,99 +28,151 @@ def reset_singletons():
 
 @pytest.fixture
 def temp_empty_git_repo(tmp_path):
-    git_dir = tmp_path / ".git"
-    git_dir.mkdir()
+    git_file = tmp_path / ".git"
+    git_file.touch()
     return tmp_path
 
 
 @pytest.fixture
 def temp_complete_git_repo(temp_empty_git_repo):
-    # Create the dbt-opiner directory and config
-    dbt_opiner_dir = temp_empty_git_repo / "dbt-opiner"
-    dbt_opiner_dir.mkdir()
-    dbt_opiner_file = dbt_opiner_dir / ".dbt-opiner.yaml"
-    dbt_opiner_file.touch()
-    config = {"config": "test"}
-    with open(dbt_opiner_file, "w") as f:
-        yaml.dump(config, f)
-    # Create a dbt directory
-    dbt_dir = temp_empty_git_repo / "dbt_project"
-    dbt_dir.mkdir()
-    dbt_project_file = dbt_dir / "dbt_project.yml"
-    dbt_project_file.touch()
-    project = {
-        "name": "project",
-    }
-    with open(dbt_project_file, "w") as f:
-        yaml.dump(project, f)
-    dbt_profiles_file = dbt_dir / "profiles.yml"
-    dbt_profiles_file.touch()
-    # Add a .venv directory
-    venv_dir = dbt_dir / ".venv"
-    venv_dir.mkdir()
-    # Create a sql in models
-    models_dir = dbt_dir / "models" / "test"
-    models_dir.mkdir(parents=True)
-    sql_file = models_dir / "model.sql"
-    sql_file.touch()
-    with open(sql_file, "w") as f:
-        f.write("select id, value from table")
-    # Create a yaml in models
-    yaml_file = models_dir / "_model__models.yaml"
-    yaml_file.touch()
-    yml_dict = {
-        "version": 2,
-        "models": [
+    """Create a complete git repo that can be used for testing.
+
+    It has the following structure:
+    temp_empty_git_repo
+    ├── dbt-opiner
+    │   └── .dbt-opiner.yaml
+    ├── dbt_project
+    │   ├── dbt_project.yml
+    │   ├── profiles.yml
+    │   ├── models
+    │   │   └── test
+    │   │       ├── model.sql
+    │   │       ├── model.md
+    │   │       └── _model__models.yaml
+    │   ├── target
+    │   |    └── manifest.json
+    |   └── dbt_packages
+    |   |    └── package
+    |   |        ├── dbt_project.yml
+    |   |        └── macros
+    |   |            └── macro.sql
+    │   └── .venv
+    │        └── dbt_project
+    |             └──dbt_project.yml
+    |             └── models
+    |                 └── test
+    |                     ├── model.sql
+    |                     ├── model.md
+    |                     └── _model__models.yaml
+    └── .git
+
+    Returns: The root path (temp_empty_git_repo)
+    """
+    # Create empty file structure
+    directories_to_create = [
+        ["dbt-opiner"],
+        ["dbt_project", "models", "test"],
+        ["dbt_project", "target"],
+        ["dbt_project", "dbt_packages", "package", "macros"],
+        ["dbt_project", ".venv", "dbt_project", "models", "test"],
+    ]
+    for directory in directories_to_create:
+        temp_empty_git_repo.joinpath(*directory).mkdir(parents=True)
+
+    # File paths and contents
+    files = [
+        [["dbt-opiner", ".dbt-opiner.yaml"], {"config": "test"}],
+        [["dbt_project", "dbt_project.yml"], {"name": "project"}],
+        [["dbt_project", "profiles.yml"], {}],
+        [["dbt_project", "models", "test", "model.sql"], "select id, value from table"],
+        [
+            ["dbt_project", "models", "test", "_model__models.yaml"],
             {
-                "name": "model",
-                "columns": [
-                    {"name": "id", "description": "id"},
-                    {"name": "value", "description": "value"},
+                "version": 2,
+                "models": [
+                    {
+                        "name": "model",
+                        "columns": [
+                            {"name": "id", "description": "id"},
+                            {"name": "value", "description": "value"},
+                        ],
+                    }
                 ],
-            }
+            },
         ],
-    }
-    with open(yaml_file, "w") as f:
-        yaml.dump(yml_dict, f)
-    # Create .md file in models
-    md_file = models_dir / "model.md"
-    md_file.touch()
-    with open(md_file, "w") as f:
-        f.write("{% docs id %} Id of the table {% enddocs %}")
-    # Add target and manifest file
-    target_dir = dbt_dir / "target"
-    target_dir.mkdir()
-    manifest_dir = target_dir / "manifest.json"
-    manifest_dir.touch()
-    manifest_dict = {
-        "nodes": {
-            "model.project.model": {
-                "database": "project",
-                "schema": "test",
-                "name": "model",
-                "alias": "model",
-                "resource_type": "model",
-                "compiled_code": "",
-                "original_file_path": "",
-                "patch_path": "",
-            }
-        },
-        "macros": {},
-    }
-    with open(manifest_dir, "w") as f:
-        json.dump(manifest_dict, f)
-    # Create dbt_packages directory and a package with a sql file and a dbt_project.yml file
-    dbt_packages_dir = dbt_dir / "dbt_packages" / "package"
-    dbt_packages_dir.mkdir(parents=True)
-    package_sql_file = dbt_packages_dir / "model.sql"
-    package_sql_file.touch()
-    with open(package_sql_file, "w") as f:
-        f.write("select id, value from table")
-    package_dbt_project_file = dbt_packages_dir / "dbt_project.yml"
-    package_dbt_project_file.touch()
-    package_project = {
-        "name": "package",
-    }
-    with open(package_dbt_project_file, "w") as f:
-        yaml.dump(package_project, f)
+        [
+            ["dbt_project", "models", "test", "model.md"],
+            "{% docs id %} Id of the table {% enddocs %}",
+        ],
+        [
+            ["dbt_project", "target", "manifest.json"],
+            {
+                "nodes": {
+                    "model.project.model": {
+                        "database": "project",
+                        "schema": "test",
+                        "name": "model",
+                        "alias": "model",
+                        "resource_type": "model",
+                        "compiled_code": "",
+                        "original_file_path": "",
+                        "patch_path": "",
+                    }
+                },
+                "macros": {},
+            },
+        ],
+        [
+            ["dbt_project", "dbt_packages", "package", "dbt_project.yml"],
+            {"name": "package"},
+        ],
+        [
+            ["dbt_project", "dbt_packages", "package", "macros", "macro.sql"],
+            "select id, value from table",
+        ],
+        [
+            ["dbt_project", ".venv", "dbt_project", "dbt_project.yml"],
+            {"name": "project"},
+        ],
+        [
+            ["dbt_project", ".venv", "dbt_project", "models", "test", "model.sql"],
+            "select id, value from table",
+        ],
+        [
+            [
+                "dbt_project",
+                ".venv",
+                "dbt_project",
+                "models",
+                "test",
+                "_model__models.yaml",
+            ],
+            {
+                "version": 2,
+                "models": [
+                    {
+                        "name": "model",
+                        "columns": [
+                            {"name": "id", "description": "id"},
+                            {"name": "value", "description": "value"},
+                        ],
+                    }
+                ],
+            },
+        ],
+        [
+            ["dbt_project", ".venv", "dbt_project", "models", "test", "model.md"],
+            "{% docs id %} Id of the table {% enddocs %}",
+        ],
+    ]
+    for file_path, content in files:
+        path = temp_empty_git_repo.joinpath(*file_path)
+        with open(temp_empty_git_repo.joinpath(*file_path), "w") as f:
+            if path.suffix in [".yaml", ".yml"]:
+                yaml.dump(content, f)
+            elif path.suffix == ".json":
+                json.dump(content, f)
+            else:
+                f.write(content)
+
     return temp_empty_git_repo

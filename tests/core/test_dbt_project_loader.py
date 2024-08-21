@@ -17,7 +17,7 @@ from dbt_opiner.dbt import DbtProjectLoader
         ),
         pytest.param(
             False,
-            [["dbt_project", "dbt_packages", "package", "model.sql"]],
+            [["dbt_project", "dbt_packages", "package", "macros", "macro.sql"]],
             id="One changed file, a model in a dbt package",
         ),
         pytest.param(
