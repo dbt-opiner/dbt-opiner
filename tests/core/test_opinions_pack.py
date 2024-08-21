@@ -19,7 +19,7 @@ from dbt_opiner.opinions.opinions_pack import OpinionsPack
         ),
     ],
 )
-def test_opinions_pack(temp_complete_git_repo, source, expected, caplog):
+def test_opinions_pack(caplog, temp_complete_git_repo, source, expected):
     os.chdir(temp_complete_git_repo)
     with patch(
         "dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config"
@@ -31,6 +31,7 @@ def test_opinions_pack(temp_complete_git_repo, source, expected, caplog):
                 "custom_opinions": {
                     "source": source,
                     "repository": "https://github.com/some/repo.git",
+                    "revision": "some-sha",
                 },
             }
         }
