@@ -11,8 +11,8 @@ def test_dbt_project(temp_complete_git_repo):
         dbt_project_path,
         files=[(dbt_project_path.parent / "models" / "test" / "model.sql")],
     )
-    # Check all files loaded
+    # Check all files were loaded
     for key, n_files in [("sql", 1), ("yaml", 3), ("markdown", 1)]:
         assert len(dbt_project_all_files.files[key]) == n_files
-    # Check only one file loaded
+    # Check only one file was loaded
     assert len(dbt_project_one_file.files["sql"]) == 1
