@@ -1,5 +1,6 @@
 import logging
 import os
+import subprocess
 import sys
 from unittest.mock import patch
 
@@ -69,3 +70,46 @@ def test_opinions_pack(caplog, temp_complete_git_repo, source, expected):
         elif source == "git":
             # Check that subprocess.run was called
             mock_subprocess_run.assert_called()
+
+
+@pytest.mark.parametrize(
+    "repository, revision, expected",
+    [
+        pytest.param(
+            "git-repo",
+            "some-sha",
+            "Could not clone git repository:",
+            id="Fails because subprocess.run fails and raises exception with 1",
+        ),
+        pytest.param(
+            None,
+            None,
+            "Custom opinions source is git but repository is not defined.",
+            id="Fails because source is git and repo is not defined exits with 1",
+        ),
+    ],
+)
+def test_opinions_pack_exit_one(caplog, repository, revision, expected):
+    with patch(
+        "dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config"
+    ) as mock_get_config, patch(
+        "subprocess.run",
+        side_effect=subprocess.CalledProcessError(
+            1, ["cmd", "command"], stderr=b"Some error occurred"
+        ),
+    ):
+        mock_get_config.return_value = {
+            "opinions_config": {
+                "custom_opinions": {
+                    "source": "git",
+                    "repository": repository,
+                    "revision": revision,
+                },
+            }
+        }
+        with pytest.raises(SystemExit) as excinfo:
+            opinions_pack = OpinionsPack()
+            opinions_pack.get_opinions()
+        assert excinfo.value.code == 1
+        with caplog.at_level(logging.DEBUG):
+            assert expected in caplog.text
