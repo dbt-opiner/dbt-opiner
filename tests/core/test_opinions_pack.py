@@ -32,7 +32,7 @@ def test_opinions_pack(caplog, temp_complete_git_repo, source, expected):
                 "custom_opinions": {
                     "source": source,
                     "repository": "https://github.com/some/repo.git",
-                    "revision": "some-sha",
+                    "rev": "some-sha",
                 },
             }
         }
