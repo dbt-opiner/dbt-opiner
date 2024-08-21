@@ -1,4 +1,4 @@
-name: pre_commit_and_pytest_flow
+name: Pre-Commit and Pytest
 
 on:
     pull_request:
