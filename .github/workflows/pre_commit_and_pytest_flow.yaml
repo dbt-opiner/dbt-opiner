@@ -37,23 +37,22 @@ jobs:
                   virtualenvs-in-project: true
                   installer-parallel: true
 
-            - name: Load cached venv
-              id: cached-poetry-dependencies
-              uses: actions/cache@v3
-              with:
-                  path: .venv
-                  key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock')
-                      }}
+            # - name: Load cached venv
+            #   id: cached-poetry-dependencies
+            #   uses: actions/cache@v3
+            #   with:
+            #       path: .venv
+            #       key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock')
+            #           }}
 
             - name: Install dependencies
-              if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
               run: poetry install --no-interaction --no-ansi
 
-      # Necessary as previous step may have a cached venv
-            - name: Install dbt-opiner
-              run: |
-                  source .venv/bin/activate
-                  pip install -e .
+      # # Necessary as previous step may have a cached venv
+      #       - name: Install dbt-opiner
+      #         run: |
+      #             source .venv/bin/activate
+      #             pip install -e .
 
             - name: pre-commit
               run: |
