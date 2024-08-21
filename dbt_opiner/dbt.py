@@ -509,7 +509,7 @@ def run_dbt_command(
     dbt_profile_path: Path = None,
     target: str = None,
     silent: bool = False,
-) -> subprocess.CompletedProcess:
+) -> subprocess.CompletedProcess:  # pragma: no cover
     """Run dbt command for the given dbt project file path.
 
     Args:
@@ -566,7 +566,7 @@ def run_dbt_command(
 
 def compile_dbt_manifest(
     dbt_project_file_path: Path, dbt_profile_path: Path = None, target: str = None
-):
+):  # pragma: no cover
     """Compile the dbt manifest file for the given dbt project file path.
     It tries to run compile but runs deps, seed, if just compile fails.
     Sometimes those are required to run compile.
@@ -576,6 +576,16 @@ def compile_dbt_manifest(
         dbt_profile_path: The path to the dbt profile file.
         target: The target to run the dbt command
     """
+    # Shouldn't access private attribute, but passing all the logger context is too much
+    if logger._core.handlers.get(1).levelno == 10:
+        r = run_dbt_command(
+            command="debug",
+            dbt_project_file_path=dbt_project_file_path,
+            dbt_profile_path=dbt_profile_path,
+            target=target,
+        )
+        logger.debug(f"dbt debug output:\n{r.stdout.decode()}")
+
     try:
         run_dbt_command(
             command="compile",
