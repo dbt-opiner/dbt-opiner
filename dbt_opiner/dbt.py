@@ -187,8 +187,9 @@ class DbtManifest:
 
 
 class DbtCatalog:
+    """Class to represent a dbt catalog file."""
+
     # TODO
-    pass
 
 
 class DbtNode:
