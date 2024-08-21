@@ -1,5 +1,6 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/dbt-opiner)](https://pypi.org/project/dbt-opiner/)
 [![PyPi Python Versions](https://img.shields.io/pypi/pyversions/dbt-opiner.svg?style=flat-square)](https://pypi.org/project/dbt-opiner/)
+[![Coverage Status](https://coveralls.io/repos/github/dbt-opiner/dbt-opiner/badge.svg?branch=main)](https://coveralls.io/github/dbt-opiner/dbt-opiner?branch=main)
 
 # dbt-opiner
 Tool for keeping dbt standards aligned across dbt projects.
