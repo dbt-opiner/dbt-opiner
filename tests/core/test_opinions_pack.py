@@ -10,17 +10,22 @@ from dbt_opiner.opinions.opinions_pack import OpinionsPack
 
 
 @pytest.mark.parametrize(
-    "source, expected",
+    "source, revision, expected",
     [
-        pytest.param("local", "Loading custom opinions from local source:"),
-        pytest.param("git", "Loading custom opinions from git repository:"),
-        pytest.param("invalid", "Custom opinions source invalid not supported"),
+        pytest.param("local", None, "Loading custom opinions from local source:"),
+        pytest.param("git", "some_rev", "Check out to revision:"),
         pytest.param(
-            None, "No custom opinions source defined. Skipping custom opinions loading."
+            "git", None, "Revision not defined. Main branch latest commit will be used."
+        ),
+        pytest.param("invalid", None, "Custom opinions source invalid not supported"),
+        pytest.param(
+            None,
+            None,
+            "No custom opinions source defined. Skipping custom opinions loading.",
         ),
     ],
 )
-def test_opinions_pack(caplog, temp_complete_git_repo, source, expected):
+def test_opinions_pack(caplog, temp_complete_git_repo, source, revision, expected):
     os.chdir(temp_complete_git_repo)
     with patch(
         "dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config"
@@ -32,7 +37,7 @@ def test_opinions_pack(caplog, temp_complete_git_repo, source, expected):
                 "custom_opinions": {
                     "source": source,
                     "repository": "https://github.com/some/repo.git",
-                    "rev": "some-sha",
+                    "rev": revision,
                 },
             }
         }

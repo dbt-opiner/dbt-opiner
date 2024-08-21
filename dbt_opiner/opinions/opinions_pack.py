@@ -151,6 +151,7 @@ class OpinionsPack:
                 if revision:
                     # Revision is optional.
                     # If not provided default main branch will be used.
+                    logger.debug(f"Check out to revision: {revision}")
                     subprocess.run(
                         ["git", "reset", "--quiet", "--hard", revision],
                         check=True,
