@@ -5,8 +5,14 @@ import typing as t
 
 import click
 from loguru import logger
+from pyfiglet import Figlet
 
 from dbt_opiner import entrypoint
+from dbt_opiner.package import recommend_version_upgrade
+
+f = Figlet(font="big")
+click.echo(f.renderText("dbt  opiner"))
+recommend_version_upgrade()
 
 
 class ChoiceTuple(click.Choice):  # pragma: no cover
