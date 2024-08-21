@@ -55,6 +55,9 @@ def temp_complete_git_repo(temp_empty_git_repo):
         yaml.dump(project, f)
     dbt_profiles_file = dbt_dir / "profiles.yml"
     dbt_profiles_file.touch()
+    # Add a .venv directory
+    venv_dir = dbt_dir / ".venv"
+    venv_dir.mkdir()
     # Create a sql in models
     models_dir = dbt_dir / "models" / "test"
     models_dir.mkdir(parents=True)
@@ -106,5 +109,18 @@ def temp_complete_git_repo(temp_empty_git_repo):
     }
     with open(manifest_dir, "w") as f:
         json.dump(manifest_dict, f)
-
+    # Create dbt_packages directory and a package with a sql file and a dbt_project.yml file
+    dbt_packages_dir = dbt_dir / "dbt_packages" / "package"
+    dbt_packages_dir.mkdir(parents=True)
+    package_sql_file = dbt_packages_dir / "model.sql"
+    package_sql_file.touch()
+    with open(package_sql_file, "w") as f:
+        f.write("select id, value from table")
+    package_dbt_project_file = dbt_packages_dir / "dbt_project.yml"
+    package_dbt_project_file.touch()
+    package_project = {
+        "name": "package",
+    }
+    with open(package_dbt_project_file, "w") as f:
+        yaml.dump(package_project, f)
     return temp_empty_git_repo
