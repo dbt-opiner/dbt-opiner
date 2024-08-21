@@ -1,4 +1,4 @@
-name: coveralls_upload
+name: Coveralls Sync
 
 on:
     push:
@@ -11,7 +11,7 @@ permissions:
 jobs:
     pytest_flow:
         name: |
-            Coveralls upload workflow
+            Coveralls sync workflow
         runs-on: ubuntu-latest
 
         steps:
