@@ -137,7 +137,8 @@ class Linter:
     def log_results_and_exit(self, output_file: Path = None) -> None:
         """Log the results of the linting and exit with the appropriate code."""
         # Change logger setup to make messages more clear
-        original_logger_config = logger._core.handlers.copy().get(1)
+        # Get exiting logger config
+        original_logger_config = next(iter(logger._core.handlers.copy().values()))
         logger.remove()
 
         # Add file sink if specified

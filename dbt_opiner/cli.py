@@ -172,6 +172,5 @@ def lint(
     logger.add(sys.stdout, level=log_level.upper())
     ctx.ensure_object(dict)
     ctx.obj["log_level"] = log_level
-
     # Run linter
     entrypoint.lint(files, all_files, target, force_compile, no_ignore, output_file)
