@@ -154,13 +154,19 @@ def temp_complete_git_repo(temp_empty_git_repo):
                 "nodes": {
                     "model.project.model": {
                         "database": "project",
+                        "resource_type": "model",
                         "schema": "test",
+                        "description": "model",
                         "name": "model",
                         "alias": "model",
-                        "resource_type": "model",
                         "compiled_code": "",
                         "original_file_path": "",
                         "patch_path": "",
+                        "config": {"unique_key": "pk"},
+                        "columns": {
+                            "id": {"description": "id"},
+                            "value": {"description": "value"},
+                        },
                     }
                 },
                 "macros": {},

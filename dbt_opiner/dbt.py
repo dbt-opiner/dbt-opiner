@@ -263,7 +263,7 @@ class DbtNode:
 
     @property
     def unique_key(self):
-        return self._node.get("config").get("unique_key")
+        return self._node.get("config", {}).get("unique_key")
 
     @property
     def sql_code_ast(self) -> sqlglot.expressions.Select:
@@ -357,8 +357,10 @@ class DbtProjectLoader:
                 dbt_project_file_path=dbt_project_file_path,
                 target=self._target,
                 force_compile=self._force_compile,
+                all_files=True,
             )
             dbt_projects.append(dbt_project)
+
         return dbt_projects
 
     def _get_dbt_projects_changed_files(
