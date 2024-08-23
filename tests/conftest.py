@@ -65,9 +65,14 @@ def temp_complete_git_repo(temp_empty_git_repo):
     │   ├── profiles.yml
     │   ├── models
     │   │   └── test
-    │   │       ├── model.sql
-    │   │       ├── model.md
-    │   │       └── _model__models.yaml
+    │   │       ├── model
+    |   |       |   ├── model.sql
+    │   │       |   ├── model.md
+    │   │       |   └── _model__models.yaml
+    |   |       └── model_2
+    │   │           ├── model_2.sql
+    │   │           ├── model_2.md
+    │   │           └── _model_2__models.yaml
     │   ├── target
     │   |    └── manifest.json
     |   └── dbt_packages
@@ -90,7 +95,8 @@ def temp_complete_git_repo(temp_empty_git_repo):
     # Create empty file structure
     directories_to_create = [
         ["dbt-opiner", "custom_opinions"],
-        ["dbt_project", "models", "test"],
+        ["dbt_project", "models", "test", "model"],
+        ["dbt_project", "models", "test", "model_2"],
         ["dbt_project", "target"],
         ["dbt_project", "dbt_packages", "package", "macros"],
         ["dbt_project", ".venv", "dbt_project", "models", "test"],
@@ -128,9 +134,12 @@ def temp_complete_git_repo(temp_empty_git_repo):
         [["dbt-opiner", ".dbt-opiner.yaml"], {"config": "test"}],
         [["dbt_project", "dbt_project.yml"], {"name": "project"}],
         [["dbt_project", "profiles.yml"], {}],
-        [["dbt_project", "models", "test", "model.sql"], "select id, value from table"],
         [
-            ["dbt_project", "models", "test", "_model__models.yaml"],
+            ["dbt_project", "models", "test", "model", "model.sql"],
+            "select id, value from table",
+        ],
+        [
+            ["dbt_project", "models", "test", "model", "_model__models.yaml"],
             {
                 "version": 2,
                 "models": [
@@ -145,7 +154,7 @@ def temp_complete_git_repo(temp_empty_git_repo):
             },
         ],
         [
-            ["dbt_project", "models", "test", "model.md"],
+            ["dbt_project", "models", "test", "model", "model.md"],
             "{% docs id %} Id of the table {% enddocs %}",
         ],
         [

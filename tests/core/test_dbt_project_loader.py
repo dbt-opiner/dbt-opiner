@@ -6,13 +6,14 @@ import pytest
 from dbt_opiner.dbt import DbtProjectLoader
 
 
+# Test project loader
 @pytest.mark.parametrize(
     "all_files, changed_files_parts, expected_sql_files, expected_yaml_files, expected_md_files",
     [
         pytest.param(True, None, 1, 3, 1, id="all_files is True"),
         pytest.param(
             False,
-            [["dbt_project", "models", "test", "model.sql"]],
+            [["dbt_project", "models", "test", "model", "model.sql"]],
             1,
             0,
             0,
@@ -67,6 +68,7 @@ def test_dbt_project_loader(
     assert len(project_loaded_files.get("markdown", [])) == expected_md_files
 
 
+# Test value error for all_files and changed_files
 @pytest.mark.parametrize(
     "all_files, changed_files",
     [

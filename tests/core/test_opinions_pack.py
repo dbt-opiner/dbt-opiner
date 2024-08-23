@@ -9,6 +9,7 @@ import pytest
 from dbt_opiner.opinions.opinions_pack import OpinionsPack
 
 
+# Test general loading of opinions and custom opinions
 @pytest.mark.parametrize(
     "source, revision, expected",
     [
@@ -75,8 +76,33 @@ def test_opinions_pack(caplog, temp_complete_git_repo, source, revision, expecte
         elif source == "git":
             # Check that subprocess.run was called
             mock_subprocess_run.assert_called()
+            # Check logs
+            with caplog.at_level(logging.DEBUG):
+                assert "Loading custom opinions from git repository" in caplog.text
+                if revision:
+                    assert "Check out to revision" in caplog.text
+                else:
+                    "Revision not defined" in caplog.text
 
 
+# Test noqa no ignore flag
+def test_opinions_pack_no_ignore(caplog, temp_complete_git_repo):
+    os.chdir(temp_complete_git_repo)
+    with patch(
+        "dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config"
+    ) as mock_get_config:
+        mock_get_config.return_value = {
+            "opinions_config": {"ignore_opinions": ["O001"]}
+        }
+        opinions_pack = OpinionsPack(no_ignore=True)
+        opinions = opinions_pack.get_opinions()
+        # There should be at least 1 opinion from opinion classes
+        assert len(opinions) > 0
+        # Check that the opinion O001 was not ignored
+        assert "O001" in [opinion.code for opinion in opinions]
+
+
+# Test exit(1) conditions
 @pytest.mark.parametrize(
     "repository, revision, expected",
     [
