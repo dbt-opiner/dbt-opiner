@@ -48,7 +48,13 @@ def test_linter_run_changed_files(runner, temp_complete_git_repo):
     os.chdir(temp_complete_git_repo)
     result = runner.invoke(
         main,
-        ["lint", "-f", "dbt_project/models/test/model.sql", "--log-level", "DEBUG"],
+        [
+            "lint",
+            "-f",
+            "dbt_project/models/test/model/model.sql",
+            "--log-level",
+            "DEBUG",
+        ],
     )
     assert result.exit_code == 0
-    assert "Linting file dbt_project/models/test/model.sql" in result.output
+    assert "Linting file dbt_project/models/test/model/model.sql" in result.output

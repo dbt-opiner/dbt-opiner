@@ -17,12 +17,18 @@ class OpinionsPack:
     Loads and holds all the opinions and the custom opinions.
     """
 
-    def __init__(self):
+    def __init__(self, no_ignore: bool = False) -> None:
+        """
+        Args:
+            no_ignore: Flag to supress the noqa ignored opinions. Defaults to False.
+        """
         self._opinions = []
         self._config = ConfigSingleton().get_config()
         self._ignored_opinions = self._config.get("opinions_config", {}).get(
             "ignore_opinions", []
         )
+        if no_ignore:
+            self._ignored_opinions = []
 
         # Load default opinions
         from dbt_opiner.opinions import opinion_classes

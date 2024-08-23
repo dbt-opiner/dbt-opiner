@@ -31,7 +31,7 @@ def lint(
         changed_files=changed_files, all_files=all_files
     )
 
-    opinions_pack = OpinionsPack()
+    opinions_pack = OpinionsPack(no_ignore)
     linter = Linter(opinions_pack, no_ignore)
 
     # TODO: make it parallel?
