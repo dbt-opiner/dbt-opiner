@@ -42,7 +42,8 @@ def test_sql_file_handler_macro(temp_complete_git_repo, manifest):
     assert handler.dbt_node.type == "macro"
 
 
-def test_get_no_qa_opinion(temp_complete_git_repo, manifest):
+@pytest.mark.parametrize("no_qa_opinions", ["all", "C001"])
+def test_get_no_qa_opinion(temp_complete_git_repo, manifest, no_qa_opinions):
     file_path = (
         temp_complete_git_repo
         / "dbt_project"
@@ -57,10 +58,10 @@ def test_get_no_qa_opinion(temp_complete_git_repo, manifest):
 
     # Write the new line followed by the original content
     with open(file_path, "w") as file:
-        file.write("-- noqa: dbt-opiner all" + "\n" + original_content)
+        file.write(f"-- noqa: dbt-opiner {no_qa_opinions}" + "\n" + original_content)
 
     handler = SqlFileHandler(file_path, manifest)
-    assert handler.no_qa_opinions == ["all"]
+    assert handler.no_qa_opinions == [no_qa_opinions]
 
 
 def test_not_found_in_manifest(temp_complete_git_repo, manifest):
