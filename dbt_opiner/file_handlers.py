@@ -115,7 +115,7 @@ class SqlFileHandler(FileHandler):
     def __init__(
         self,
         file_path: Path,
-        dbt_manifest: "DbtManifest" = None,
+        dbt_manifest: "DbtManifest",
         parent_dbt_project: "DbtProject" = None,
     ) -> None:
         """

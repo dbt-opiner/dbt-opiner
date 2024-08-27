@@ -42,6 +42,27 @@ def test_sql_file_handler_macro(temp_complete_git_repo, manifest):
     assert handler.dbt_node.type == "macro"
 
 
+def test_get_no_qa_opinion(temp_complete_git_repo, manifest):
+    file_path = (
+        temp_complete_git_repo
+        / "dbt_project"
+        / "models"
+        / "test"
+        / "model"
+        / "model.sql"
+    )
+    # Modify file and include no_qa_opinions
+    with open(file_path, "r") as file:
+        original_content = file.read()
+
+    # Write the new line followed by the original content
+    with open(file_path, "w") as file:
+        file.write("-- noqa: dbt-opiner C001" + "\n" + original_content)
+
+    handler = SqlFileHandler(file_path, manifest)
+    assert handler.no_qa_opinions == ["C001"]
+
+
 def test_not_found_in_manifest(temp_complete_git_repo, manifest):
     file = (
         temp_complete_git_repo
@@ -57,6 +78,12 @@ def test_not_found_in_manifest(temp_complete_git_repo, manifest):
     assert excinfo.value.code == 1
 
 
+def test_file_does_not_exist(tmp_path, manifest):
+    file = tmp_path / "dbt_project" / "model_2.sql"
+    with pytest.raises(FileNotFoundError):
+        SqlFileHandler(file, manifest)
+
+
 def test_wrong_extension_sql(temp_complete_git_repo, manifest):
     file = (
         temp_complete_git_repo
@@ -68,7 +95,7 @@ def test_wrong_extension_sql(temp_complete_git_repo, manifest):
     )
     file.touch()
     with pytest.raises(ValueError):
-        SqlFileHandler(file)
+        SqlFileHandler(file, manifest)
 
 
 # Test YamlFileHandler
