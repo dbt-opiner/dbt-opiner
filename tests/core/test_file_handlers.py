@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
+import yaml
 
 from dbt_opiner.dbt import DbtManifest
 from dbt_opiner.file_handlers import MarkdownFileHandler
@@ -30,6 +32,7 @@ def test_sql_file_handler_model(temp_complete_git_repo, manifest):
     handler = SqlFileHandler(file, manifest)
     assert handler.content == "select id, value from table"
     assert handler.dbt_node.type == "model"
+    assert str(handler) == str(file)
 
 
 def test_sql_file_handler_macro(temp_complete_git_repo, manifest):
@@ -94,9 +97,23 @@ def test_wrong_extension_sql(temp_complete_git_repo, manifest):
         / "model"
         / "model.md"
     )
-    file.touch()
     with pytest.raises(ValueError):
         SqlFileHandler(file, manifest)
+
+
+def test_runtime_open(temp_complete_git_repo, manifest):
+    file = (
+        temp_complete_git_repo
+        / "dbt_project"
+        / "models"
+        / "test"
+        / "model"
+        / "model.sql"
+    )
+    with patch("pathlib.Path.open") as mock_open:
+        mock_open.side_effect = Exception("Mocked exception")
+        with pytest.raises(RuntimeError, match="Error reading file: Mocked exception"):
+            SqlFileHandler(file, manifest)
 
 
 # Test YamlFileHandler
@@ -120,7 +137,7 @@ def test_yaml_file_handler(temp_complete_git_repo, manifest):
     assert handler.get("version") == 2
 
 
-def test_wrong_extension_yaml(temp_complete_git_repo, manifest):
+def test_wrong_extension_yaml(temp_complete_git_repo):
     file = (
         temp_complete_git_repo
         / "dbt_project"
@@ -129,9 +146,27 @@ def test_wrong_extension_yaml(temp_complete_git_repo, manifest):
         / "model"
         / "model.md"
     )
-    file.touch()
     with pytest.raises(ValueError):
         YamlFileHandler(file)
+
+
+def test_runtime_safe_load(temp_complete_git_repo, manifest):
+    file = (
+        temp_complete_git_repo
+        / "dbt_project"
+        / "models"
+        / "test"
+        / "model"
+        / "_model__models.yaml"
+    )
+    with patch("yaml.safe_load") as mock_safe_load:
+        mock_safe_load.side_effect = yaml.YAMLError
+        handler = YamlFileHandler(file, manifest)
+        with pytest.raises(RuntimeError, match="Error parsing YAML file"):
+            handler.to_dict()
+        mock_safe_load.side_effect = Exception
+        with pytest.raises(RuntimeError, match="Error reading YAML file"):
+            handler.to_dict()
 
 
 # Test markdown file handler
@@ -146,3 +181,16 @@ def test_markdown_file_handler(temp_complete_git_repo):
     )
     handler = MarkdownFileHandler(file)
     assert handler.content == "{% docs id %} Id of the table {% enddocs %}"
+
+
+def test_wrong_extension_md(temp_complete_git_repo):
+    file = (
+        temp_complete_git_repo
+        / "dbt_project"
+        / "models"
+        / "test"
+        / "model"
+        / "model.sql"
+    )
+    with pytest.raises(ValueError):
+        MarkdownFileHandler(file)

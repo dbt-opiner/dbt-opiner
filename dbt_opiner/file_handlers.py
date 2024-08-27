@@ -9,8 +9,8 @@ from loguru import logger
 
 
 if TYPE_CHECKING:
-    from dbt_opiner.dbt import DbtManifest
-    from dbt_opiner.dbt import DbtProject
+    from dbt_opiner.dbt import DbtManifest  # pragma: no cover
+    from dbt_opiner.dbt import DbtProject  # pragma: no cover
 
 
 class FileHandler(ABC):
