@@ -63,16 +63,14 @@ def temp_complete_git_repo(temp_empty_git_repo):
     ├── dbt_project
     │   ├── dbt_project.yml
     │   ├── profiles.yml
+    |   ├── macros
+    |   |   └── macro.sql
     │   ├── models
     │   │   └── test
     │   │       ├── model
-    |   |       |   ├── model.sql
-    │   │       |   ├── model.md
-    │   │       |   └── _model__models.yaml
-    |   |       └── model_2
-    │   │           ├── model_2.sql
-    │   │           ├── model_2.md
-    │   │           └── _model_2__models.yaml
+    |   |           ├── model.sql
+    │   │           ├── model.md
+    │   │           └── _model__models.yaml
     │   ├── target
     │   |    └── manifest.json
     |   └── dbt_packages
@@ -95,6 +93,7 @@ def temp_complete_git_repo(temp_empty_git_repo):
     # Create empty file structure
     directories_to_create = [
         ["dbt-opiner", "custom_opinions"],
+        ["dbt_project", "macros"],
         ["dbt_project", "models", "test", "model"],
         ["dbt_project", "models", "test", "model_2"],
         ["dbt_project", "target"],
@@ -135,6 +134,10 @@ def temp_complete_git_repo(temp_empty_git_repo):
         [["dbt_project", "dbt_project.yml"], {"name": "project"}],
         [["dbt_project", "profiles.yml"], {}],
         [
+            ["dbt_project", "macros", "my_macro.sql"],
+            "{% macro my_macro() %} select id, value from table {% endmacro %}",
+        ],
+        [
             ["dbt_project", "models", "test", "model", "model.sql"],
             "select id, value from table",
         ],
@@ -169,8 +172,8 @@ def temp_complete_git_repo(temp_empty_git_repo):
                         "name": "model",
                         "alias": "model",
                         "compiled_code": "",
-                        "original_file_path": "",
-                        "patch_path": "",
+                        "original_file_path": "test/model/model.sql",
+                        "patch_path": "dbt_project://models/test/model/_model__models.yaml",
                         "config": {"unique_key": "pk"},
                         "columns": {
                             "id": {"description": "id"},
@@ -178,7 +181,13 @@ def temp_complete_git_repo(temp_empty_git_repo):
                         },
                     }
                 },
-                "macros": {},
+                "macros": {
+                    "macro.project.my_macro": {
+                        "name": "my_macro",
+                        "resource_type": "macro",
+                        "original_file_path": "macros/my_macro.sql",
+                    }
+                },
             },
         ],
         [

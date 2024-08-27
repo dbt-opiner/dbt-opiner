@@ -10,7 +10,7 @@ from dbt_opiner.dbt import DbtProjectLoader
 @pytest.mark.parametrize(
     "all_files, changed_files_parts, expected_sql_files, expected_yaml_files, expected_md_files",
     [
-        pytest.param(True, None, 1, 3, 1, id="all_files is True"),
+        pytest.param(True, None, 2, 3, 1, id="all_files is True"),
         pytest.param(
             False,
             [["dbt_project", "models", "test", "model", "model.sql"]],
@@ -30,7 +30,7 @@ from dbt_opiner.dbt import DbtProjectLoader
         pytest.param(
             False,
             [["dbt_project"]],
-            1,
+            2,
             3,
             1,
             id="Changed files is the dbt root directory",
