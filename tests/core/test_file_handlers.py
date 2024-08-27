@@ -57,10 +57,10 @@ def test_get_no_qa_opinion(temp_complete_git_repo, manifest):
 
     # Write the new line followed by the original content
     with open(file_path, "w") as file:
-        file.write("-- noqa: dbt-opiner C001" + "\n" + original_content)
+        file.write("-- noqa: dbt-opiner all" + "\n" + original_content)
 
     handler = SqlFileHandler(file_path, manifest)
-    assert handler.no_qa_opinions == ["C001"]
+    assert handler.no_qa_opinions == ["all"]
 
 
 def test_not_found_in_manifest(temp_complete_git_repo, manifest):
