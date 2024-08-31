@@ -166,7 +166,9 @@ class OpinionsPack:
                     )
                 else:
                     logger.warning(
-                        "Revision not defined. Main branch latest commit will be used. We advise to pin a revision."
+                        "Custom opinion repository revision not defined. "
+                        "Main branch latest commit will be used. "
+                        "We advise to pin a revision."
                     )
             except subprocess.CalledProcessError as e:
                 logger.critical(
