@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 
 import yaml
@@ -48,11 +49,20 @@ class ConfigSingleton:
             ]  # ignore .venv directory in the search
             if ".dbt-opiner.yaml" in files:
                 self._config_file_path = Path(root) / ".dbt-opiner.yaml"
-
                 break
+
         if self._config_file_path:
             with open(self._config_file_path, "r") as file:
-                self._config = yaml.safe_load(file)
+                config_content = file.read()
+            env_vars = re.findall(r"\$\{\s*(.*?)\s*\}", config_content)
+            for match in env_vars:
+                env_var_value = os.getenv(match, "")
+                config_content = re.sub(
+                    r"\$\{\s*" + re.escape(match) + r"\s*\}",
+                    env_var_value,
+                    config_content,
+                )
+            self._config = yaml.safe_load(config_content)
             logger.debug(f"Config file loaded from: {self._config_file_path}")
         else:
             self._config = {}

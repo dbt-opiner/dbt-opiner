@@ -16,9 +16,22 @@ def test_singleton_instance(mock_initialize):
 
 def test_initialize_with_config(temp_complete_git_repo):
     os.chdir(temp_complete_git_repo / "dbt-opiner")
+    with open(".dbt-opiner.yaml", "w") as file:
+        file.write(
+            "config: test\n"
+            "env_var_yaml: ${ ENV_VAR }\n"
+            "env_var_yaml_twice: ${ENV_VAR}${ ENV_VAR }"
+        )
+
+    env_var = "test"
+    os.environ["ENV_VAR"] = env_var
     config = ConfigSingleton().get_config()
     config_file_path = ConfigSingleton().get_config_file_path()
-    assert config == {"config": "test"}
+    assert config == {
+        "config": "test",
+        "env_var_yaml": env_var,
+        "env_var_yaml_twice": f"{env_var}{env_var}",
+    }
     assert (
         config_file_path == temp_complete_git_repo / "dbt-opiner" / ".dbt-opiner.yaml"
     )
