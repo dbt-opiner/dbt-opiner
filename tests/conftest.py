@@ -130,7 +130,10 @@ def temp_complete_git_repo(temp_empty_git_repo):
                 "        pass\n"
             ),
         ],
-        [["dbt-opiner", ".dbt-opiner.yaml"], {"config": "test"}],
+        [
+            ["dbt-opiner", ".dbt-opiner.yaml"],
+            {"config": "test"},
+        ],
         [["dbt_project", "dbt_project.yml"], {"name": "project"}],
         [["dbt_project", "profiles.yml"], {}],
         [
