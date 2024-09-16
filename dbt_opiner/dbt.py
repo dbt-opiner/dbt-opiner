@@ -23,6 +23,7 @@ class DbtProject:
     """Class to represent a dbt project and its artifacts.
 
     Attributes:
+        name: The name of the dbt project.
         dbt_project_file_path: The path to the dbt_project.yml file.
         dbt_project_config: The configuration of the dbt project.
         dbt_profile_path: The path to the profiles.yml file.
@@ -56,6 +57,7 @@ class DbtProject:
             assert dbt_project_file_path.exists()
             self.dbt_project_file_path = dbt_project_file_path
             self.dbt_project_config = YamlFileHandler(dbt_project_file_path)
+            self.name = self.dbt_project_config.get("name")
         except AssertionError:
             raise FileNotFoundError(f"{dbt_project_file_path} does not exist")
         # Set profiles file

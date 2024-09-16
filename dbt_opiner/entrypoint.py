@@ -1,4 +1,6 @@
+import sys
 import time
+from pathlib import Path
 
 from loguru import logger
 
@@ -46,3 +48,47 @@ def lint(
 
     logger.info(f"Linting completed in {round(end - start, 3)} seconds")
     linter.log_results_and_exit(output_file)
+
+
+def audit(
+    type: str,
+    dbt_project_dir: str = None,
+    target: str = None,
+    force_compile: bool = False,
+    no_ignore: bool = False,
+    output_file: str = None,
+):
+    """Audit the dbt project using the dbt-opiner package.
+
+    Args:
+        dbt_project_dir: Directory of the dbt project to audit.
+                         If not provided, all dbt projects in the git repository
+                         will be audited.
+        type: Type of audit to log. Defaults to all.
+        target: Target to run the dbt project. Defaults to None.
+        force_compile: Flag to force compile the dbt project. Defaults to False
+        no_ignore: Flag to ignore the no qa configurations. Defaults to False.
+        output_file: Output file to save the linting results. Defaults to None.
+    """
+    logger.info("Auditing dbt projects...")
+    loader = DbtProjectLoader(target, force_compile)
+
+    if dbt_project_dir:
+        if (Path(dbt_project_dir) / "dbt_project.yml").exists():
+            dbt_projects = loader.initialize_dbt_projects(changed_files=dbt_project_dir)
+        else:
+            logger.critical(f"Directory {dbt_project_dir} is not a dbt project")
+            sys.exit(1)
+    else:
+        dbt_projects = loader.initialize_dbt_projects(all_files=True)
+
+    opinions_pack = OpinionsPack(no_ignore)
+    linter = Linter(opinions_pack, no_ignore)
+    for dbt_project in dbt_projects:
+        merged_files = [
+            item for files_list in dbt_project.files.values() for item in files_list
+        ]
+        for file in merged_files:
+            linter.lint_file(file)
+
+    linter.log_audit_and_exit(type=type, output_file=output_file)

@@ -22,3 +22,46 @@ def test_lint_result(mock_yamlfilehandler):
     assert result.passed == passed
     assert result.severity == severity
     assert result.message == message
+
+
+def test_lint_result_sorting(mock_yamlfilehandler, mock_sqlfilehandler):
+    result1 = LintResult(
+        file=mock_yamlfilehandler,
+        opinion_code="C001",
+        passed=True,
+        severity=OpinionSeverity.MUST,
+        message="message",
+    )
+    result2 = LintResult(
+        file=mock_sqlfilehandler,
+        opinion_code="C001",
+        passed=True,
+        severity=OpinionSeverity.MUST,
+        message="message",
+    )
+
+    assert not (
+        result1 > result2
+    )  # They are not the same, but they are not greater than each other
+
+    result3 = LintResult(
+        file=mock_sqlfilehandler,
+        opinion_code="C002",
+        passed=True,
+        severity=OpinionSeverity.MUST,
+        message="message",
+    )
+
+    assert result3 > result2  # result3 has a greater opinion code than result2
+
+    result4 = LintResult(
+        file=mock_sqlfilehandler,
+        opinion_code="C004",
+        passed=True,
+        severity=OpinionSeverity.SHOULD,
+        message="message",
+    )
+
+    assert (
+        result3 > result4
+    )  # result3 has a greater severity than result4 (ignore opinion code)

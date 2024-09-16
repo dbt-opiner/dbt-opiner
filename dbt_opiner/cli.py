@@ -10,9 +10,21 @@ from pyfiglet import Figlet
 from dbt_opiner import entrypoint
 from dbt_opiner.package import recommend_version_upgrade
 
-f = Figlet(font="big")
-click.echo(f.renderText("dbt  opiner"))
+fig = Figlet(font="big")
+click.echo(fig.renderText("dbt  opiner"))
 recommend_version_upgrade()
+
+
+def common_options(f):
+    f = click.option(
+        "--log-level",
+        type=click.Choice(
+            ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
+        ),
+        default="INFO",
+        help="Set the logging level.",
+    )(f)
+    return f
 
 
 class ChoiceTuple(click.Choice):  # pragma: no cover
@@ -117,14 +129,7 @@ def main():
 
 
 @main.command(help="Lint files")
-@click.option(
-    "--log-level",
-    type=click.Choice(
-        ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
-    ),
-    default="INFO",
-    help="Set log level",
-)
+@common_options
 @click.option("-a", "--all-files", is_flag=True, help="Process all files")
 @click.option(
     "-f",
@@ -153,10 +158,7 @@ def main():
     type=str,
     help="If specified, a file to capture the lint results",
 )
-@click.pass_context
-def lint(
-    ctx, log_level, files, all_files, target, force_compile, no_ignore, output_file
-):
+def lint(log_level, files, all_files, target, force_compile, no_ignore, output_file):
     if not files and not all_files:
         raise click.BadParameter(
             "Either --files or --all_files options must be provided"
@@ -170,7 +172,57 @@ def lint(
     # Set log level
     logger.remove()
     logger.add(sys.stdout, level=log_level.upper())
-    ctx.ensure_object(dict)
-    ctx.obj["log_level"] = log_level
+
     # Run linter
     entrypoint.lint(files, all_files, target, force_compile, no_ignore, output_file)
+
+
+@main.command(help="Audit dbt project(s)")
+@common_options
+@click.option(
+    "--type",
+    type=click.Choice(["general", "by_tag", "detailed", "all"], case_sensitive=False),
+    default="general",
+    help="""Type of audit to log. Defaults to general.
+    general: logs for each project and severity level the total, passed, failed, and
+             percentage of passed opinions.
+    by_tag: logs for each project, severity level and opinion tag the total, passed,
+            failed, and percentage of passed opinions.
+    detailed: logs for every file with its detailed linting results.
+    """,
+)
+@click.option(
+    "--dbt_project_dir", type=str, help="Directory of the dbt project to audit"
+)
+@click.option("--target", type=str, help="DBT Target to compile manifest")
+@click.option(
+    "--force-compile",
+    is_flag=True,
+    help="Compile dbt project manifest even if it exists",
+)
+@click.option(
+    "--no-ignore",
+    is_flag=True,
+    help="Ignore all no-qa configurations",
+)
+@click.option(
+    "-o",
+    "--output-file",
+    type=str,
+    help="If specified, a file to capture the audit results",
+)
+def audit(
+    log_level, type, dbt_project_dir, target, force_compile, no_ignore, output_file
+):
+    # Try to set a target from an environment variable
+    # This is useful when things should run in CI
+    if target is None:
+        target = os.getenv("DBT_TARGET")
+
+    # Set log level
+    logger.remove()
+    logger.add(sys.stdout, level=log_level.upper())
+
+    entrypoint.audit(
+        type, dbt_project_dir, target, force_compile, no_ignore, output_file
+    )
