@@ -144,6 +144,7 @@ class Linter:
             return sorted(self._deduplicate_results())
 
         return sorted(self._lint_results)
+        # TODO: add option to organize results by opinion tags.
 
     def log_results_and_exit(self, output_file: Path = None) -> None:
         """Log the results of the linting and exit with the appropriate code."""
@@ -295,5 +296,3 @@ class Linter:
                 ("detailed_results", audit_df),
             ]
         )
-
-    # TODO: add method to organize results by opinion tags.

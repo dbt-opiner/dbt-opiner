@@ -55,11 +55,13 @@ class DbtProject:
         # Set dbt project file
         try:
             assert dbt_project_file_path.exists()
-            self.dbt_project_file_path = dbt_project_file_path
-            self.dbt_project_config = YamlFileHandler(dbt_project_file_path)
-            self.name = self.dbt_project_config.get("name")
         except AssertionError:
             raise FileNotFoundError(f"{dbt_project_file_path} does not exist")
+
+        self.dbt_project_file_path = dbt_project_file_path
+        self.dbt_project_config = YamlFileHandler(dbt_project_file_path)
+        self.name = self.dbt_project_config.get("name")
+
         # Set profiles file
         self.dbt_profile_path = None
         if (dbt_project_file_path.parent / "profiles.yml").exists():
