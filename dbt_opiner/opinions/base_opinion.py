@@ -67,7 +67,20 @@ class BaseOpinion(ABC):
         """
         # Public interface that provides better encapsulation, flexibility,
         # consistency, extensibility, and ease of testing.
-        return self._eval(file)
+        result = self._eval(file)
+
+        # Add opinion tags to the result and check that the result is a LintResult
+        if isinstance(result, LintResult):
+            result.tags = self.tags
+            return result
+
+        if isinstance(result, list):
+            for res in result:
+                if not isinstance(res, LintResult):
+                    return None
+                res.tags = self.tags or "not tagged"
+
+        return result
 
     @abstractmethod
     def _eval(

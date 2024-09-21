@@ -58,3 +58,60 @@ def test_linter_run_changed_files(runner, temp_complete_git_repo):
     )
     assert result.exit_code == 0
     assert "Linting file dbt_project/models/test/model/model.sql" in result.output
+
+
+def test_audit_all(runner, temp_complete_git_repo):
+    os.chdir(temp_complete_git_repo)
+    result = runner.invoke(
+        main,
+        [
+            "audit",
+            "--log-level",
+            "DEBUG",
+        ],
+    )
+    assert result.exit_code == 0
+    assert "Auditing dbt projects" in result.output
+    assert (
+        "dbt_project_name|severity|total_evaluated|passed|failed|percentage_passed".replace(
+            " ", ""
+        )
+        in result.output.replace(" ", "")
+    )
+
+
+def test_audit_project_error(runner, temp_complete_git_repo):
+    os.chdir(temp_complete_git_repo)
+    result = runner.invoke(
+        main,
+        [
+            "audit",
+            "--dbt_project_dir",
+            "dbt_opiner",
+            "--log-level",
+            "DEBUG",
+        ],
+    )
+    assert result.exit_code == 1
+    assert "is not a dbt project" in result.output
+
+
+def test_audit_project(runner, temp_complete_git_repo):
+    os.chdir(temp_complete_git_repo)
+    result = runner.invoke(
+        main,
+        [
+            "audit",
+            "--dbt_project_dir",
+            "dbt_project",
+            "--log-level",
+            "DEBUG",
+        ],
+    )
+    assert result.exit_code == 0
+    assert (
+        "dbt_project_name|severity|total_evaluated|passed|failed|percentage_passed".replace(
+            " ", ""
+        )
+        in result.output.replace(" ", "")
+    )
