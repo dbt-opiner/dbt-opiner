@@ -1,7 +1,10 @@
+import os
+
 from dbt_opiner.dbt import DbtManifest
 
 
 def test_dbt_manifest(temp_complete_git_repo):
+    os.chdir(temp_complete_git_repo)
     manifest = DbtManifest(
         temp_complete_git_repo / "dbt_project" / "target" / "manifest.json"
     )

@@ -1,14 +1,15 @@
 import importlib.util
 import inspect
 import pathlib
+import shutil
 import subprocess
 import sys
-import tempfile
 from importlib import metadata
 
 from loguru import logger
 
 from dbt_opiner.config_singleton import ConfigSingleton
+from dbt_opiner.git import clone_git_repo_and_checkout_revision
 from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
@@ -127,54 +128,26 @@ class OpinionsPack:
         return loaded_opinions
 
     def _load_opinions_from_git(self):
-        # TODO Use persistent directory path?
-        with tempfile.TemporaryDirectory() as temp_dir:
-            git_repo = (
-                self._config.get("opinions_config", {})
-                .get("custom_opinions", {})
-                .get("repository")
-            )
-            revision = (
-                self._config.get("opinions_config", {})
-                .get("custom_opinions", {})
-                .get("rev")
-            )
+        git_repo = (
+            self._config.get("opinions_config", {})
+            .get("custom_opinions", {})
+            .get("repository")
+        )
+        revision = (
+            self._config.get("opinions_config", {})
+            .get("custom_opinions", {})
+            .get("rev")
+        )
 
-            if not git_repo:
-                logger.critical(
-                    "Custom opinions source is git but repository is not defined."
-                )
-                sys.exit(1)
+        if not git_repo:
+            logger.critical(
+                "Custom opinions source is git but repository is not defined."
+            )
+            sys.exit(1)
 
-            logger.debug(f"Loading custom opinions from git repository: {git_repo}.")
-            # TODO: handle git credentials for private repo as env variable
-            try:
-                subprocess.run(
-                    ["git", "clone", "--quiet", git_repo, temp_dir],
-                    check=True,
-                    stderr=subprocess.PIPE,
-                )
-                if revision:
-                    # Revision is optional.
-                    # If not provided default main branch will be used.
-                    logger.debug(f"Check out to revision: {revision}")
-                    subprocess.run(
-                        ["git", "reset", "--quiet", "--hard", revision],
-                        check=True,
-                        stderr=subprocess.PIPE,
-                        cwd=temp_dir,
-                    )
-                else:
-                    logger.warning(
-                        "Custom opinion repository revision not defined. "
-                        "Main branch latest commit will be used. "
-                        "We advise to pin a revision."
-                    )
-            except subprocess.CalledProcessError as e:
-                logger.critical(
-                    f"Could not clone git repository: {git_repo}. Error: {e.stderr.decode('utf-8')}"
-                )
-                sys.exit(1)
-            logger.debug(f"Cloned git repository: {git_repo} to {temp_dir}")
-            path = pathlib.Path(temp_dir) / "custom_opinions"
-            return self._load_opinions_from_path(path)
+        logger.debug(f"Loading custom opinions from git repository: {git_repo}.")
+        temp_dir = clone_git_repo_and_checkout_revision(git_repo, revision)
+        path = pathlib.Path(temp_dir) / "custom_opinions"
+        opinions = self._load_opinions_from_path(path)
+        shutil.rmtree(temp_dir)  # Clean up the temporary directory
+        return opinions

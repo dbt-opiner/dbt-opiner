@@ -1,5 +1,13 @@
 sqlglot_dialect: duckdb
 
+shared_config:
+  repository: https://github.com/dbt-opiner/dbt-opiner-custom-opinions.git
+  rev: # Tag or commit sha, not branches.
+  # overwrite: If true, all configurations will be overwritten by the shared configuration.
+  # If false, only new configurations will be added.
+  # Empty defaults to true.
+  overwrite: false
+
 opinions_config:
   ignore_opinions: None # No opinion is globally ignored
   ignore_files:
