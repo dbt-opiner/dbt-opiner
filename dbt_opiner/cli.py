@@ -192,7 +192,10 @@ def lint(log_level, files, all_files, target, force_compile, no_ignore, output_f
     """,
 )
 @click.option(
-    "--dbt_project_dir", type=str, help="Directory of the dbt project to audit"
+    "--dbt_project_dir",
+    type=str,
+    help="""Directory of the dbt project to audit. If not provided,
+    all dbt projects in the git repository will be audited.""",
 )
 @click.option("--target", type=str, help="DBT Target to compile manifest")
 @click.option(

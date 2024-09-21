@@ -75,7 +75,9 @@ def audit(
 
     if dbt_project_dir:
         if (Path(dbt_project_dir) / "dbt_project.yml").exists():
-            dbt_projects = loader.initialize_dbt_projects(changed_files=dbt_project_dir)
+            dbt_projects = loader.initialize_dbt_projects(
+                changed_files=[dbt_project_dir]
+            )
         else:
             logger.critical(f"Directory {dbt_project_dir} is not a dbt project")
             sys.exit(1)
