@@ -87,24 +87,37 @@ class ConfigSingleton:
             # Load configuration
             config = self._load_config_from_file(self._config_file_path)
 
-            # Check for shared configuration defnition
-            if config.get("shared_config"):
-                config = self._get_shared_config(config)
-
-            # Validate final configuration
+            # Validate inital config
             is_valid, validation_error = self._validate_config(
                 config, self._config_schema
             )
-            if is_valid:
-                self._config = config
-                logger.debug(f"Config file loaded from: {self._config_file_path}")
-            else:
+
+            if not is_valid:
                 logger.critical(
-                    "Configuration file is not valid. "
+                    "Local configuration file is not valid. "
                     f"{validation_error}. "
                     "Please check the configuration documentation and adjust accordingly."
                 )
                 sys.exit(1)
+
+            # Check for shared configuration defnition
+            if config.get("shared_config"):
+                config = self._get_shared_config(config)
+
+                # Validate final configuration
+                is_valid, validation_error = self._validate_config(
+                    config, self._config_schema
+                )
+                if is_valid:
+                    logger.debug(f"Config file loaded from: {self._config_file_path}")
+                else:
+                    logger.critical(
+                        "Configuration loaded from shared file is not valid. "
+                        f"{validation_error}. "
+                        "Please check the configuration documentation and adjust accordingly."
+                    )
+                    sys.exit(1)
+            self._config = config
         else:
             self._config = {}
             logger.warning(

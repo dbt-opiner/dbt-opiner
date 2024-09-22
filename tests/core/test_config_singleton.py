@@ -70,6 +70,11 @@ def test_initialize_without_config(temp_empty_git_repo):
             "Expected sqlglot_dialect to be of type str, but got int",
             id="invalid_type_key",
         ),
+        pytest.param(
+            "shared_config:\n  rev: test",
+            "Missing required key: repository",
+            id="missing_key",
+        ),
     ],
 )
 def test_initialize_with_invalid_config(
@@ -120,6 +125,8 @@ def test_initialize_with_shared_config(temp_complete_git_repo, overwrite, expect
     os.chdir(temp_complete_git_repo / "dbt-opiner")
     if overwrite is not None:
         overwrite = f"  overwrite: {overwrite}\n"
+    else:
+        overwrite = ""
 
     with open(".dbt-opiner.yaml", "w") as file:
         file.write(
