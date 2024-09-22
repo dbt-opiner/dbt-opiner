@@ -51,6 +51,7 @@ jobs:
 
             - name: Pytest coverage comment
               uses: MishaKav/pytest-coverage-comment@main
+              if: always()
               with:
                   pytest-coverage-path: ./pytest-coverage.txt
                   title: Coverage Report
