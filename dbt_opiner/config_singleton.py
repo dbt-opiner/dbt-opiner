@@ -86,7 +86,6 @@ class ConfigSingleton:
         if self._config_file_path:
             # Load configuration
             config = self._load_config_from_file(self._config_file_path)
-            logger.critical(config)
 
             # Check for shared configuration defnition
             if config.get("shared_config"):
@@ -111,6 +110,7 @@ class ConfigSingleton:
             logger.warning(
                 "Config file 'dbt-opiner.yaml' not found. Empty configuration loaded."
             )
+        logger.debug(f"Loaded config:\n{self._config}")
 
     @staticmethod
     def _load_config_from_file(file_path: Path) -> dict:
