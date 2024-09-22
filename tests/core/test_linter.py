@@ -15,46 +15,59 @@ from dbt_opiner.opinions import O001
 from dbt_opiner.opinions.opinions_pack import OpinionsPack
 
 
+@pytest.fixture
 @patch("dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config")
-def test_no_qa_opinion_in_file(
-    get_config_mock, temp_empty_git_repo, mock_yamlfilehandler
-):
+def base_linter(get_config_mock, temp_empty_git_repo):
     os.chdir(temp_empty_git_repo)
     get_config_mock.return_value = {}
     linter = Linter(OpinionsPack())
-    linter.opinions = [
+    return linter
+
+
+@pytest.fixture
+def linter_with_results(base_linter, mock_yamlfilehandler):
+    mock_dbt_project = Mock(spec=DbtProject)
+    mock_dbt_project.name = "test_project"
+
+    yaml_file = mock_yamlfilehandler
+    yaml_file.path = "test.yaml"
+    yaml_file.parent_dbt_project = mock_dbt_project
+
+    lint_result_1 = LintResult(
+        yaml_file, "C001", False, OpinionSeverity.SHOULD, "message", ["tag1"]
+    )
+    lint_result_2 = LintResult(
+        yaml_file, "C002", False, OpinionSeverity.MUST, "message", ["tag1", "tag2"]
+    )
+    lint_result_3 = LintResult(
+        yaml_file, "C003", False, OpinionSeverity.MUST, "message"
+    )
+
+    base_linter._lint_results = [lint_result_1, lint_result_2, lint_result_3]
+
+    return base_linter
+
+
+def test_noqa_opinion_in_file(base_linter, mock_yamlfilehandler):
+    base_linter.opinions = [
         O001(),
     ]
     yaml_file = mock_yamlfilehandler
     yaml_file.path = "test.yaml"
     yaml_file.no_qa_opinions = "O001"
-    linter.lint_file(yaml_file)
-    assert linter.get_lint_results() == []
+    base_linter.lint_file(yaml_file)
+    assert base_linter.get_lint_results() == []
 
 
-@patch("dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config")
-def test_no_qa_opinion_in_config(
-    get_config_mock, temp_empty_git_repo, mock_yamlfilehandler
-):
-    os.chdir(temp_empty_git_repo)
-    get_config_mock.return_value = {
-        "opinions_config": {"ignore_files": {"O001": ".*test.*"}}
-    }
-    linter = Linter(OpinionsPack())
-    linter.opinions = [O001()]
+def test_noqa_opinion_in_config(base_linter, mock_yamlfilehandler):
+    base_linter.opinions = [O001()]
     yaml_file = mock_yamlfilehandler
     yaml_file.path = "test.yaml"
-    linter.lint_file(yaml_file)
-    assert linter.get_lint_results() == []
+    base_linter.lint_file(yaml_file)
+    assert base_linter.get_lint_results() == []
 
 
-@patch("dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config")
-def test_get_lint_results(
-    get_config_mock, temp_empty_git_repo, mock_sqlfilehandler, mock_yamlfilehandler
-):
-    os.chdir(temp_empty_git_repo)
-    get_config_mock.return_value = {}
-    linter = Linter(OpinionsPack())
+def test_get_lint_results(base_linter, mock_sqlfilehandler, mock_yamlfilehandler):
     yaml_file = mock_yamlfilehandler
     yaml_file.path = "test.yaml"
     sql_file = mock_sqlfilehandler
@@ -73,14 +86,13 @@ def test_get_lint_results(
         sql_file, "C001", False, OpinionSeverity.SHOULD, "message"
     )
 
-    linter._lint_results = [lint_result_1, lint_result_2]
+    base_linter._lint_results = [lint_result_1, lint_result_2]
     # Test get_lint_results without deduplication
-    assert linter.get_lint_results(False) == [lint_result_1, lint_result_2]
+    assert base_linter.get_lint_results(False) == [lint_result_1, lint_result_2]
     # Test get_lint_results with deduplication
-    assert linter.get_lint_results(True) == [lint_result_1]
+    assert base_linter.get_lint_results(True) == [lint_result_1]
 
 
-@patch("dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config")
 @pytest.mark.parametrize(
     "result_type, expected",
     [
@@ -106,44 +118,40 @@ def test_get_lint_results(
     ],
 )
 def test_audit(
-    get_config_mock,
-    temp_empty_git_repo,
+    linter_with_results,
     caplog,
-    mock_yamlfilehandler,
     result_type,
     expected,
 ):
-    os.chdir(temp_empty_git_repo)
-    get_config_mock.return_value = {}
-    linter = Linter(OpinionsPack())
-    mock_dbt_project = Mock(spec=DbtProject)
-    mock_dbt_project.name = "test_project"
-
-    yaml_file = mock_yamlfilehandler
-    yaml_file.path = "test.yaml"
-    yaml_file.parent_dbt_project = mock_dbt_project
-
-    lint_result_1 = LintResult(
-        yaml_file, "C001", False, OpinionSeverity.SHOULD, "message", ["tag1"]
-    )
-    lint_result_2 = LintResult(
-        yaml_file, "C002", False, OpinionSeverity.MUST, "message", ["tag1", "tag2"]
-    )
-    lint_result_3 = LintResult(
-        yaml_file, "C003", False, OpinionSeverity.MUST, "message"
-    )
-
-    linter._lint_results = [lint_result_1, lint_result_2, lint_result_3]
-
     # Patch logger.remove to prevent weird loguru error
     with patch("sys.exit") as mock_exit, patch.object(
         logger, "remove", lambda *args, **kwargs: None
     ):
-        linter.log_audit_and_exit(type=result_type, format="md")
+        linter_with_results.log_audit_and_exit(
+            type=result_type, format="md", output_file="audit.md"
+        )
 
         with caplog.at_level(logging.INFO):
             for expectation in expected:
                 assert expectation in caplog.text
 
+        # Check output file was created
+        assert os.path.exists("audit.md")
         # Check that sys.exit was called with 0
         mock_exit.assert_called_once_with(0)
+
+
+def test_log_results_and_exit(linter_with_results, caplog):
+    with patch("sys.exit") as mock_exit, patch.object(
+        logger, "remove", lambda *args, **kwargs: None
+    ):
+        linter_with_results.log_results_and_exit(output_file="results.txt")
+        expectations = ["C001 | message", "WARNING", "ERROR"]
+        with caplog.at_level(logging.INFO):
+            for expectation in expectations:
+                assert expectation in caplog.text
+
+        # Check output file was created
+        assert os.path.exists("results.txt")
+        # Check that sys.exit was called with 1 because there are failed results
+        mock_exit.assert_called_once_with(1)
