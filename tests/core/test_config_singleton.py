@@ -26,8 +26,8 @@ def test_initialize_with_config(temp_complete_git_repo):
         file.write(
             "sqlglot_dialect: test\n"
             "files:\n"
-            "  sql: ${ ENV_VAR }\n"
-            "  md: ${ENV_VAR}${ ENV_VAR }"
+            "  sql: ${{ ENV_VAR }}\n"
+            "  md: ${{ENV_VAR}}${{ ENV_VAR }}"
         )
 
     env_var = "test"

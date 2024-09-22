@@ -121,11 +121,11 @@ class ConfigSingleton:
         # Add environment variables to the configuration
         with open(file_path, "r") as file:
             config_content = file.read()
-        env_vars = re.findall(r"\$\{\s*(.*?)\s*\}", config_content)
+        env_vars = re.findall(r"\${{\s*(.*?)\s*}}", config_content)
         for match in env_vars:
             env_var_value = os.getenv(match, "")
             config_content = re.sub(
-                r"\$\{\s*" + re.escape(match) + r"\s*\}",
+                r"\$\{{\s*" + re.escape(match) + r"\s*\}}",
                 env_var_value,
                 config_content,
             )
