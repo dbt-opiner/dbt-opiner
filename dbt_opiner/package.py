@@ -22,19 +22,20 @@ def get_latest_package_version() -> Optional[str]:
 
 
 def recommend_version_upgrade():
-    try:
-        latest_version = get_latest_package_version()
-        current_version = get_package_version()
+    latest_version = get_latest_package_version()
+    current_version = get_package_version()
 
-        if not latest_version:
-            # Failed to obtain the latest version, so skip the check
-            return
+    if not latest_version:
+        # Failed to obtain the latest version, so skip the check
+        return
 
-        if version.parse(current_version) < version.parse(latest_version):
-            click.secho(
-                f"You are using dbt-opiner {current_version}, however version {latest_version} is available.\n"
-                f"Consider upgrading to the latest version.\n",
-                fg="yellow",
-            )
-    except Exception:
-        pass
+    if version.parse(current_version) < version.parse(latest_version):
+        click.secho(
+            f"You are using dbt-opiner {current_version}, however version {latest_version} is available.\n"
+            f"Consider upgrading to the latest version.\n",
+            fg="yellow",
+        )
+    elif version.parse(current_version) == version.parse(latest_version):
+        click.secho(
+            f"Using the latest version of dbt-opiner: {current_version}.", fg="green"
+        )

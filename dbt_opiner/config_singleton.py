@@ -28,21 +28,21 @@ class ConfigSingleton:
         "shared_config": (
             {
                 "repository": (str, False),
-                "rev": ((str, type(None)), True),
+                "rev": (str, True),
                 "overwrite": (bool, True),
             },
             True,
         ),
         "opinions_config": (
             {
-                "ignore_opinions": ((str, type(None)), True),
+                "ignore_opinions": (str, True),
                 "ignore_files": (dict, True),
                 "extra_opinions_config": (dict, True),
                 "custom_opinions": (
                     {
                         "source": (str, False),
                         "repository": (str, False),
-                        "rev": ((str, type(None)), True),
+                        "rev": (str, True),
                     },
                     True,
                 ),
@@ -87,6 +87,7 @@ class ConfigSingleton:
             # Load configuration
             config = self._load_config_from_file(self._config_file_path)
             logger.critical(config)
+
             # Check for shared configuration defnition
             if config.get("shared_config"):
                 config = self._get_shared_config(config)
@@ -178,12 +179,6 @@ class ConfigSingleton:
                     return False, error
             else:
                 if not isinstance(value, expected_type):
-                    if (
-                        isinstance(expected_type, tuple)
-                        and type(None) in expected_type
-                        and value is None
-                    ):
-                        continue  # Allow None if it's specified as an allowed type
                     return (
                         False,
                         f"Expected {key} to be of type {expected_type.__name__}, but got {type(value).__name__}",
@@ -197,12 +192,8 @@ class ConfigSingleton:
 
     def _get_shared_config(self, original_config):
         """Load the shared configuration from a git repository."""
-        try:
-            git_repo = original_config["shared_config"]["repository"]
-        except KeyError:
-            logger.critical("A repository should be defined in shared_config")
-            sys.exit(1)
 
+        git_repo = original_config["shared_config"]["repository"]
         revision = original_config["shared_config"].get("rev")
         temp_dir = clone_git_repo_and_checkout_revision(git_repo, revision)
         shared_config_path = self._search_config_file(Path(temp_dir))

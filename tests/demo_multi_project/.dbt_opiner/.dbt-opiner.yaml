@@ -8,20 +8,6 @@ shared_config:
   # Empty defaults to true.
   overwrite: false
 
-opinions_config:
-  ignore_opinions: None # No opinion is globally ignored
-  ignore_files:
-    O002: ".*/models/staging/.*" # Ignore keyword requirement in staging
-    O005: ".*/models/staging/.*" # Ignore primary key requirement in staging
-  extra_opinions_config:
-    O002_keywords:
-      - summary
-      - granularity
-  custom_opinions:
-    source: git
-    repository: https://github.com/dbt-opiner/dbt-opiner-custom-opinions.git
-    #rev: 2348b98 # Tag or commit sha, not branches.
-
 files:
   sql: ".*/(models|macros|tests)/.*" # Exlcide sql files that don't match this regex
   #yaml:

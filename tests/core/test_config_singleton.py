@@ -52,6 +52,18 @@ def test_initialize_without_config(temp_empty_git_repo):
     assert config == {}
 
 
+def test_initialize_with_invalid_config(caplog, temp_complete_git_repo):
+    os.chdir(temp_complete_git_repo / "dbt-opiner")
+    with open(".dbt-opiner.yaml", "w") as file:
+        file.write("sqlglot_dialect: test\nfiles: {}\ninvalid_key: test")
+
+    with pytest.raises(SystemExit) as excinfo:
+        ConfigSingleton().get_config()
+    assert excinfo.value.code == 1
+    with caplog.at_level(logging.CRITICAL):
+        assert "Configuration file is not valid." in caplog.text
+
+
 @pytest.mark.parametrize(
     "overwrite, expected",
     [
@@ -120,15 +132,3 @@ def test_initialize_with_shared_config(temp_complete_git_repo, overwrite, expect
         # This should raise an error because it should be deleted in the _initialize method
         with pytest.raises(FileNotFoundError):
             shutil.rmtree(shared_config_repo)
-
-
-def test_initialize_with_invalid_config(caplog, temp_complete_git_repo):
-    os.chdir(temp_complete_git_repo / "dbt-opiner")
-    with open(".dbt-opiner.yaml", "w") as file:
-        file.write("sqlglot_dialect: test\nfiles: {}\ninvalid_key: test")
-
-    with pytest.raises(SystemExit) as excinfo:
-        ConfigSingleton().get_config()
-    assert excinfo.value.code == 1
-    with caplog.at_level(logging.CRITICAL):
-        assert "Configuration file is not valid." in caplog.text
