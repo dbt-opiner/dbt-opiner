@@ -142,6 +142,13 @@ def test_audit(
         mock_exit.assert_called_once_with(0)
 
 
+def test_audit_unsupported_format(linter_with_results):
+    # Patch logger.remove to prevent weird loguru error
+    with patch.object(logger, "remove", lambda *args, **kwargs: None):
+        with pytest.raises(ValueError):
+            linter_with_results.log_audit_and_exit(type="all", format="json")
+
+
 def test_log_results_and_exit(linter_with_results, caplog):
     with patch("sys.exit") as mock_exit, patch.object(
         logger, "remove", lambda *args, **kwargs: None
