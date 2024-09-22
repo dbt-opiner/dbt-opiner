@@ -119,7 +119,7 @@ def test_runtime_open(temp_complete_git_repo, manifest):
 
 # Test YamlFileHandler
 def test_yaml_file_handler(temp_complete_git_repo, manifest):
-    # os.chdir(temp_complete_git_repo)
+    os.chdir(temp_complete_git_repo)
     file = Path("dbt_project") / "models" / "test" / "model" / "_model__models.yaml"
     handler = YamlFileHandler(file, manifest)
     assert handler.dbt_nodes[0].type == "model"
