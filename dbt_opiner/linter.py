@@ -117,7 +117,7 @@ class Linter:
                     .get(opinion.code)
                 )
                 if ignore_files:
-                    if re.match(ignore_files, str(file)):
+                    if re.match(ignore_files, str(file.path)):
                         logger.debug(f"Skipping opinion {opinion.code} because of noqa")
                         continue
 

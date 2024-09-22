@@ -46,7 +46,7 @@ def linter_with_results(base_linter, mock_yamlfilehandler):
     return base_linter
 
 
-def test_noqa_opinion_in_file(base_linter, mock_yamlfilehandler):
+def test_noqa_opinion_in_file(base_linter, mock_yamlfilehandler, caplog):
     base_linter.opinions = [
         O001(),
     ]
@@ -54,15 +54,18 @@ def test_noqa_opinion_in_file(base_linter, mock_yamlfilehandler):
     yaml_file.path = "test.yaml"
     yaml_file.no_qa_opinions = "O001"
     base_linter.lint_file(yaml_file)
-    assert base_linter.get_lint_results() == []
+    with caplog.at_level(logging.DEBUG):
+        assert "Skipping opinion O001 because of noqa" in caplog.text
 
 
-def test_noqa_opinion_in_config(base_linter, mock_yamlfilehandler):
+def test_noqa_opinion_in_config(base_linter, mock_yamlfilehandler, caplog):
+    base_linter._config = {"opinions_config": {"ignore_files": {"O001": ".*test.*"}}}
     base_linter.opinions = [O001()]
     yaml_file = mock_yamlfilehandler
     yaml_file.path = "test.yaml"
     base_linter.lint_file(yaml_file)
-    assert base_linter.get_lint_results() == []
+    with caplog.at_level(logging.DEBUG):
+        assert "Skipping opinion O001 because of noqa" in caplog.text
 
 
 def test_get_lint_results(base_linter, mock_sqlfilehandler, mock_yamlfilehandler):
