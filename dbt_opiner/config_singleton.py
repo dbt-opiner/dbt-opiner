@@ -87,24 +87,37 @@ class ConfigSingleton:
             # Load configuration
             config = self._load_config_from_file(self._config_file_path)
 
-            # Check for shared configuration defnition
-            if config.get("shared_config"):
-                config = self._get_shared_config(config)
-
-            # Validate final configuration
+            # Validate inital config
             is_valid, validation_error = self._validate_config(
                 config, self._config_schema
             )
-            if is_valid:
-                self._config = config
-                logger.debug(f"Config file loaded from: {self._config_file_path}")
-            else:
+
+            if not is_valid:
                 logger.critical(
-                    "Configuration file is not valid. "
+                    "Local configuration file is not valid. "
                     f"{validation_error}. "
                     "Please check the configuration documentation and adjust accordingly."
                 )
                 sys.exit(1)
+
+            # Check for shared configuration defnition
+            if config.get("shared_config"):
+                config = self._get_shared_config(config)
+
+                # Validate final configuration
+                is_valid, validation_error = self._validate_config(
+                    config, self._config_schema
+                )
+                if is_valid:
+                    logger.debug(f"Config file loaded from: {self._config_file_path}")
+                else:
+                    logger.critical(
+                        "Configuration loaded from shared file is not valid. "
+                        f"{validation_error}. "
+                        "Please check the configuration documentation and adjust accordingly."
+                    )
+                    sys.exit(1)
+            self._config = config
         else:
             self._config = {}
             logger.warning(
@@ -152,14 +165,12 @@ class ConfigSingleton:
             if ".dbt-opiner.yaml" in files:
                 return Path(root) / ".dbt-opiner.yaml"
 
-    def _validate_config(self, config, schema) -> tuple[bool, str]:
+    def _validate_config(self, config: dict, schema: dict) -> tuple[bool, str]:
         """Validates the dictionary structure based on the provided schema.
         Args:
           config: The config dictionary to validate.
         Returns True if valid, else False. An error string describing the error if invalid.
         """
-        if not isinstance(config, dict):
-            return False, f"Expected a dictionary but got {type(config).__name__}"
 
         for key, (expected_type, optional) in schema.items():
             if key not in config:
@@ -200,7 +211,11 @@ class ConfigSingleton:
         if shared_config_path:
             shared_config = self._load_config_from_file(shared_config_path)
         else:
-            shared_config = {}
+            logger.critical(
+                f"Shared configuration file 'dbt-opiner.yaml' not found in repository {git_repo}."
+            )
+            shutil.rmtree(temp_dir)
+            sys.exit(1)
         shutil.rmtree(temp_dir)
 
         if (

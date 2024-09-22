@@ -17,7 +17,7 @@ from dbt_opiner.file_handlers import SqlFileHandler
 from dbt_opiner.file_handlers import YamlFileHandler
 
 if TYPE_CHECKING:
-    from dbt_opiner.opinions.opinions_pack import OpinionsPack
+    from dbt_opiner.opinions.opinions_pack import OpinionsPack  # pragma: no cover
 
 
 class OpinionSeverity(Enum):
@@ -117,7 +117,7 @@ class Linter:
                     .get(opinion.code)
                 )
                 if ignore_files:
-                    if re.match(ignore_files, str(file)):
+                    if re.match(ignore_files, str(file.path)):
                         logger.debug(f"Skipping opinion {opinion.code} because of noqa")
                         continue
 

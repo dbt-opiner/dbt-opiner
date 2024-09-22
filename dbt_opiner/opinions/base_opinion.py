@@ -79,8 +79,7 @@ class BaseOpinion(ABC):
                 if not isinstance(res, LintResult):
                     return None
                 res.tags = self.tags or "not tagged"
-
-        return result
+            return result
 
     @abstractmethod
     def _eval(
