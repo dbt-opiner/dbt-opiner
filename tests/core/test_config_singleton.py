@@ -52,16 +52,38 @@ def test_initialize_without_config(temp_empty_git_repo):
     assert config == {}
 
 
-def test_initialize_with_invalid_config(caplog, temp_complete_git_repo):
+@pytest.mark.parametrize(
+    "config, expected",
+    [
+        pytest.param(
+            "sqlglot_dialect: test\ninvalid_key: test",
+            "Unexpected key:",
+            id="invalid_key",
+        ),
+        pytest.param(
+            "opinions_config: test",
+            "Expected opinions_config to be a dictionary but got str",
+            id="invalid_type_main_key",
+        ),
+        pytest.param(
+            "sqlglot_dialect: 1",
+            "Expected sqlglot_dialect to be of type str, but got int",
+            id="invalid_type_key",
+        ),
+    ],
+)
+def test_initialize_with_invalid_config(
+    caplog, temp_complete_git_repo, config, expected
+):
     os.chdir(temp_complete_git_repo / "dbt-opiner")
     with open(".dbt-opiner.yaml", "w") as file:
-        file.write("sqlglot_dialect: test\nfiles: {}\ninvalid_key: test")
+        file.write(config)
 
     with pytest.raises(SystemExit) as excinfo:
         ConfigSingleton().get_config()
     assert excinfo.value.code == 1
     with caplog.at_level(logging.CRITICAL):
-        assert "Configuration file is not valid." in caplog.text
+        assert expected in caplog.text
 
 
 @pytest.mark.parametrize(

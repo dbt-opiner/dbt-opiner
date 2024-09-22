@@ -152,14 +152,12 @@ class ConfigSingleton:
             if ".dbt-opiner.yaml" in files:
                 return Path(root) / ".dbt-opiner.yaml"
 
-    def _validate_config(self, config, schema) -> tuple[bool, str]:
+    def _validate_config(self, config: dict, schema: dict) -> tuple[bool, str]:
         """Validates the dictionary structure based on the provided schema.
         Args:
           config: The config dictionary to validate.
         Returns True if valid, else False. An error string describing the error if invalid.
         """
-        if not isinstance(config, dict):
-            return False, f"Expected a dictionary but got {type(config).__name__}"
 
         for key, (expected_type, optional) in schema.items():
             if key not in config:
