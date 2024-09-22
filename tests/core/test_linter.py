@@ -1,4 +1,5 @@
 import logging
+import os
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -10,15 +11,20 @@ from dbt_opiner.dbt import DbtProject
 from dbt_opiner.linter import Linter
 from dbt_opiner.linter import LintResult
 from dbt_opiner.linter import OpinionSeverity
-from dbt_opiner.opinions.O001_model_must_have_description import O001
+from dbt_opiner.opinions import O001
 from dbt_opiner.opinions.opinions_pack import OpinionsPack
 
 
 @patch("dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config")
-def test_no_qa_opinion_in_file(get_config_mock, mock_yamlfilehandler):
+def test_no_qa_opinion_in_file(
+    get_config_mock, temp_empty_git_repo, mock_yamlfilehandler
+):
+    os.chdir(temp_empty_git_repo)
     get_config_mock.return_value = {}
     linter = Linter(OpinionsPack())
-    linter.opinions = [O001()]
+    linter.opinions = [
+        O001(),
+    ]
     yaml_file = mock_yamlfilehandler
     yaml_file.path = "test.yaml"
     yaml_file.no_qa_opinions = "O001"
@@ -27,7 +33,26 @@ def test_no_qa_opinion_in_file(get_config_mock, mock_yamlfilehandler):
 
 
 @patch("dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config")
-def test_get_lint_results(get_config_mock, mock_sqlfilehandler, mock_yamlfilehandler):
+def test_no_qa_opinion_in_config(
+    get_config_mock, temp_empty_git_repo, mock_yamlfilehandler
+):
+    os.chdir(temp_empty_git_repo)
+    get_config_mock.return_value = {
+        "opinions_config": {"ignore_files": {"O001": ".*test.*"}}
+    }
+    linter = Linter(OpinionsPack())
+    linter.opinions = [O001()]
+    yaml_file = mock_yamlfilehandler
+    yaml_file.path = "test.yaml"
+    linter.lint_file(yaml_file)
+    assert linter.get_lint_results() == []
+
+
+@patch("dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config")
+def test_get_lint_results(
+    get_config_mock, temp_empty_git_repo, mock_sqlfilehandler, mock_yamlfilehandler
+):
+    os.chdir(temp_empty_git_repo)
     get_config_mock.return_value = {}
     linter = Linter(OpinionsPack())
     yaml_file = mock_yamlfilehandler
@@ -80,7 +105,15 @@ def test_get_lint_results(get_config_mock, mock_sqlfilehandler, mock_yamlfilehan
         pytest.param("detailed", ["file_name", "opinion_code", "tags"], id="detailed"),
     ],
 )
-def test_audit(get_config_mock, caplog, mock_yamlfilehandler, result_type, expected):
+def test_audit(
+    get_config_mock,
+    temp_empty_git_repo,
+    caplog,
+    mock_yamlfilehandler,
+    result_type,
+    expected,
+):
+    os.chdir(temp_empty_git_repo)
     get_config_mock.return_value = {}
     linter = Linter(OpinionsPack())
     mock_dbt_project = Mock(spec=DbtProject)
