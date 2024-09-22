@@ -123,7 +123,7 @@ def test_initialize_with_shared_config(temp_complete_git_repo, overwrite, expect
                 "  md: d\n"
                 "  yaml: e\n"
             )
-        mock_clone.return_value = shared_config_repo
+        mock_clone.return_value = Path(shared_config_repo)
 
         config = ConfigSingleton().get_config()
         mock_clone.assert_called_once()

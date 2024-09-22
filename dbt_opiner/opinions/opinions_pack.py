@@ -147,7 +147,7 @@ class OpinionsPack:
 
         logger.debug(f"Loading custom opinions from git repository: {git_repo}.")
         temp_dir = clone_git_repo_and_checkout_revision(git_repo, revision)
-        path = pathlib.Path(temp_dir) / "custom_opinions"
+        path = temp_dir / "custom_opinions"
         opinions = self._load_opinions_from_path(path)
         shutil.rmtree(temp_dir)  # Clean up the temporary directory
         return opinions

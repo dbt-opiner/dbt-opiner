@@ -196,7 +196,7 @@ class ConfigSingleton:
         git_repo = original_config["shared_config"]["repository"]
         revision = original_config["shared_config"].get("rev")
         temp_dir = clone_git_repo_and_checkout_revision(git_repo, revision)
-        shared_config_path = self._search_config_file(Path(temp_dir))
+        shared_config_path = self._search_config_file(temp_dir)
         if shared_config_path:
             shared_config = self._load_config_from_file(shared_config_path)
         else:

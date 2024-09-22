@@ -1,3 +1,4 @@
+import pathlib
 import shutil
 import subprocess
 import sys
@@ -13,9 +14,9 @@ def clone_git_repo_and_checkout_revision(repository, revision):
         revision: Revision to check out to (tag or commit hash).
 
     Returns:
-        A tempfile.TemporaryDirectory object with the cloned repository.
+        A pathlib.Path pointing to a temporary directory with the cloned repository.
 
-    To clean up the temporary directory, call the cleanup() method on the returned object after it is no longer needed.
+    To clean up the temporary directory, use shutil.rmtree(temp_dir).
     """
     temp_dir = tempfile.mkdtemp()
 
@@ -48,4 +49,4 @@ def clone_git_repo_and_checkout_revision(repository, revision):
         shutil.rmtree(temp_dir)
         sys.exit(1)
     logger.debug(f"Cloned git repository: {repository} to {temp_dir}")
-    return temp_dir
+    return pathlib.Path(temp_dir)
