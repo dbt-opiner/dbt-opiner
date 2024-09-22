@@ -96,12 +96,29 @@ def test_audit_project_error(runner, temp_complete_git_repo):
     assert "is not a dbt project" in result.output
 
 
-def test_audit_project(runner, temp_complete_git_repo):
+@pytest.mark.parametrize(
+    "format, expected",
+    [
+        pytest.param(
+            "md",
+            "dbt_project_name|severity|total_evaluated|passed|failed|percentage_passed",
+            id="md",
+        ),
+        pytest.param(
+            "csv",
+            "dbt_project_name,severity,total_evaluated,passed,failed,percentage_passed",
+            id="csv",
+        ),
+    ],
+)
+def test_audit_project(runner, temp_complete_git_repo, format, expected):
     os.chdir(temp_complete_git_repo)
     result = runner.invoke(
         main,
         [
             "audit",
+            "--format",
+            format,
             "--dbt_project_dir",
             "dbt_project",
             "--log-level",
@@ -109,9 +126,4 @@ def test_audit_project(runner, temp_complete_git_repo):
         ],
     )
     assert result.exit_code == 0
-    assert (
-        "dbt_project_name|severity|total_evaluated|passed|failed|percentage_passed".replace(
-            " ", ""
-        )
-        in result.output.replace(" ", "")
-    )
+    assert expected in result.output.replace(" ", "")

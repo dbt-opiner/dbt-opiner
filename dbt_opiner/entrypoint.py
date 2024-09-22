@@ -16,7 +16,7 @@ def lint(
     force_compile: bool = False,
     no_ignore: bool = False,
     output_file: str = None,
-):
+) -> None:
     """Lint the dbt project using the dbt-opiner package.
 
     Args:
@@ -52,19 +52,21 @@ def lint(
 
 def audit(
     type: str,
+    format: str = "md",
     dbt_project_dir: str = None,
     target: str = None,
     force_compile: bool = False,
     no_ignore: bool = False,
     output_file: str = None,
-):
+) -> None:
     """Audit the dbt project using the dbt-opiner package.
 
     Args:
+        type: Type of audit to log. Defaults to all.
+        format: Format of the printed output md or csv. Defaults to md.
         dbt_project_dir: Directory of the dbt project to audit.
                          If not provided, all dbt projects in the git repository
                          will be audited.
-        type: Type of audit to log. Defaults to all.
         target: Target to run the dbt project. Defaults to None.
         force_compile: Flag to force compile the dbt project. Defaults to False
         no_ignore: Flag to ignore the no qa configurations. Defaults to False.
@@ -93,4 +95,4 @@ def audit(
         for file in merged_files:
             linter.lint_file(file)
 
-    linter.log_audit_and_exit(type=type, output_file=output_file)
+    linter.log_audit_and_exit(type=type, format=format, output_file=output_file)
