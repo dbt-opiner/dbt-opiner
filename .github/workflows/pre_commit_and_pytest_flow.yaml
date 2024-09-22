@@ -46,6 +46,7 @@ jobs:
 
             - name: pytest
               run: |
+                  set -o pipefail
                   poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=dbt_opiner tests/ --numprocesses 10 | tee pytest-coverage.txt
 
             - name: Pytest coverage comment
