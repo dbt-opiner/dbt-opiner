@@ -17,7 +17,7 @@ from dbt_opiner.file_handlers import SqlFileHandler
 from dbt_opiner.file_handlers import YamlFileHandler
 
 if TYPE_CHECKING:
-    from dbt_opiner.opinions.opinions_pack import OpinionsPack
+    from dbt_opiner.opinions.opinions_pack import OpinionsPack  # pragma: no cover
 
 
 class OpinionSeverity(Enum):

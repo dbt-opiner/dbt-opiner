@@ -10,10 +10,25 @@ from dbt_opiner.dbt import DbtProject
 from dbt_opiner.linter import Linter
 from dbt_opiner.linter import LintResult
 from dbt_opiner.linter import OpinionSeverity
+from dbt_opiner.opinions.O001_model_must_have_description import O001
 from dbt_opiner.opinions.opinions_pack import OpinionsPack
 
 
-def test_get_lint_results(mock_sqlfilehandler, mock_yamlfilehandler):
+@patch("dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config")
+def test_no_qa_opinion_in_file(get_config_mock, mock_yamlfilehandler):
+    get_config_mock.return_value = {}
+    linter = Linter(OpinionsPack())
+    linter.opinions = [O001()]
+    yaml_file = mock_yamlfilehandler
+    yaml_file.path = "test.yaml"
+    yaml_file.no_qa_opinions = "O001"
+    linter.lint_file(yaml_file)
+    assert linter.get_lint_results() == []
+
+
+@patch("dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config")
+def test_get_lint_results(get_config_mock, mock_sqlfilehandler, mock_yamlfilehandler):
+    get_config_mock.return_value = {}
     linter = Linter(OpinionsPack())
     yaml_file = mock_yamlfilehandler
     yaml_file.path = "test.yaml"
@@ -40,6 +55,7 @@ def test_get_lint_results(mock_sqlfilehandler, mock_yamlfilehandler):
     assert linter.get_lint_results(True) == [lint_result_1]
 
 
+@patch("dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config")
 @pytest.mark.parametrize(
     "result_type, expected",
     [
@@ -64,7 +80,8 @@ def test_get_lint_results(mock_sqlfilehandler, mock_yamlfilehandler):
         pytest.param("detailed", ["file_name", "opinion_code", "tags"], id="detailed"),
     ],
 )
-def test_audit(caplog, mock_yamlfilehandler, result_type, expected):
+def test_audit(get_config_mock, caplog, mock_yamlfilehandler, result_type, expected):
+    get_config_mock.return_value = {}
     linter = Linter(OpinionsPack())
     mock_dbt_project = Mock(spec=DbtProject)
     mock_dbt_project.name = "test_project"
