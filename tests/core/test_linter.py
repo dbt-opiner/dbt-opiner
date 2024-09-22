@@ -39,9 +39,7 @@ def linter_with_results(base_linter, mock_yamlfilehandler):
     lint_result_2 = LintResult(
         yaml_file, "C002", False, OpinionSeverity.MUST, "message", ["tag1", "tag2"]
     )
-    lint_result_3 = LintResult(
-        yaml_file, "C003", False, OpinionSeverity.MUST, "message"
-    )
+    lint_result_3 = LintResult(yaml_file, "C003", True, OpinionSeverity.MUST, "message")
 
     base_linter._lint_results = [lint_result_1, lint_result_2, lint_result_3]
 
@@ -146,12 +144,18 @@ def test_log_results_and_exit(linter_with_results, caplog):
         logger, "remove", lambda *args, **kwargs: None
     ):
         linter_with_results.log_results_and_exit(output_file="results.txt")
-        expectations = ["C001 | message", "WARNING", "ERROR"]
-        with caplog.at_level(logging.INFO):
+        expectations = [
+            "C001 | message",
+            "C002 | message",
+            "C003 | message",
+            "WARNING",
+            "ERROR",
+            "DEBUG",
+        ]
+        with caplog.at_level(logging.DEBUG):
             for expectation in expectations:
                 assert expectation in caplog.text
 
-        # Check output file was created
         assert os.path.exists("results.txt")
         # Check that sys.exit was called with 1 because there are failed results
         mock_exit.assert_called_once_with(1)
