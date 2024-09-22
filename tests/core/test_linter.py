@@ -89,7 +89,7 @@ def test_audit(caplog, mock_yamlfilehandler, result_type, expected):
     with patch("sys.exit") as mock_exit, patch.object(
         logger, "remove", lambda *args, **kwargs: None
     ):
-        linter.log_audit_and_exit(type=result_type)
+        linter.log_audit_and_exit(type=result_type, format="md")
 
         with caplog.at_level(logging.INFO):
             for expectation in expected:

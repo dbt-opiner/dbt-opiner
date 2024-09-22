@@ -180,6 +180,7 @@ def lint(log_level, files, all_files, target, force_compile, no_ignore, output_f
 @main.command(help="Audit dbt project(s)")
 @common_options
 @click.option(
+    "-t",
     "--type",
     type=click.Choice(["general", "by_tag", "detailed", "all"], case_sensitive=False),
     default="general",
@@ -190,6 +191,12 @@ def lint(log_level, files, all_files, target, force_compile, no_ignore, output_f
             failed, and percentage of passed opinions.
     detailed: logs for every file with its detailed linting results.
     """,
+)
+@click.option(
+    "-f",
+    "--format",
+    type=click.Choice(["md", "csv"], case_sensitive=False),
+    default="md",
 )
 @click.option(
     "--dbt_project_dir",
@@ -215,7 +222,14 @@ def lint(log_level, files, all_files, target, force_compile, no_ignore, output_f
     help="If specified, a file to capture the audit results",
 )
 def audit(
-    log_level, type, dbt_project_dir, target, force_compile, no_ignore, output_file
+    log_level,
+    type,
+    format,
+    dbt_project_dir,
+    target,
+    force_compile,
+    no_ignore,
+    output_file,
 ):
     # Try to set a target from an environment variable
     # This is useful when things should run in CI
@@ -227,5 +241,5 @@ def audit(
     logger.add(sys.stdout, level=log_level.upper())
 
     entrypoint.audit(
-        type, dbt_project_dir, target, force_compile, no_ignore, output_file
+        type, format, dbt_project_dir, target, force_compile, no_ignore, output_file
     )

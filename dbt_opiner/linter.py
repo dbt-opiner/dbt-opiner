@@ -4,6 +4,7 @@ from collections import defaultdict
 from collections import OrderedDict
 from dataclasses import dataclass
 from enum import Enum
+from io import StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -194,7 +195,9 @@ class Linter:
         logger.debug(f"Exit with code: {exit_code}")
         sys.exit(exit_code)
 
-    def log_audit_and_exit(self, type: str, output_file: Path = None) -> None:
+    def log_audit_and_exit(
+        self, type: str, format: str, output_file: Path = None
+    ) -> None:
         """Log the audit results and exit.
         Args:
             type: The type of audit to perform. Can be "all", "general", "by_tag", or "detailed".
@@ -222,21 +225,32 @@ class Linter:
 
         audit_results = self._audit()
 
-        # TODO: add option to log in csv format
+        def dataframe_to_string(df, format_type):
+            buffer = StringIO()
+            if format_type == "md":
+                return df.to_markdown(index=False)
+            elif format_type == "csv":
+                df.to_csv(buffer, index=False)
+                return buffer.getvalue().strip()
+            else:
+                raise ValueError(f"Unsupported format: {format_type}")
+
         if type == "all":
             for name, df in audit_results.items():
                 title = name.title().replace("_", " ")
-                logger.info(f"# {title}\n{df.to_markdown(index=False)}\n\n")
+                logger.info(f"# {title}\n{dataframe_to_string(df, format)}\n\n")
         if type == "general":
             logger.info(
-                f"{audit_results['general_statistics'].to_markdown(index=False)}"
+                f"{dataframe_to_string(audit_results['general_statistics'], format)}"
             )
         if type == "by_tag":
             logger.info(
-                f"{audit_results['statistics_by_tag'].to_markdown(index=False)}"
+                f"{dataframe_to_string(audit_results['statistics_by_tag'], format)}"
             )
         if type == "detailed":
-            logger.info(f"{audit_results['detailed_results'].to_markdown(index=False)}")
+            logger.info(
+                f"{dataframe_to_string(audit_results['detailed_results'], format)}"
+            )
 
         logger.remove()
         logger.add(sys.stdout, level=original_logger_config._levelno)
