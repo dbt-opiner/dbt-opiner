@@ -211,7 +211,11 @@ class ConfigSingleton:
         if shared_config_path:
             shared_config = self._load_config_from_file(shared_config_path)
         else:
-            shared_config = {}
+            logger.critical(
+                f"Shared configuration file 'dbt-opiner.yaml' not found in repository {git_repo}."
+            )
+            shutil.rmtree(temp_dir)
+            sys.exit(1)
         shutil.rmtree(temp_dir)
 
         if (

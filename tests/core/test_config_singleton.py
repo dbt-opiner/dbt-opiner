@@ -161,3 +161,48 @@ def test_initialize_with_shared_config(temp_complete_git_repo, overwrite, expect
         # This should raise an error because it should be deleted in the _initialize method
         with pytest.raises(FileNotFoundError):
             shutil.rmtree(shared_config_repo)
+
+
+def test_initialize_with_invalid_shared_config(temp_complete_git_repo):
+    os.chdir(temp_complete_git_repo / "dbt-opiner")
+    with open(".dbt-opiner.yaml", "w") as file:
+        file.write("shared_config:\n  repository: some_git_repo\n  overwrite: true\n")
+
+    with patch(
+        "dbt_opiner.config_singleton.clone_git_repo_and_checkout_revision"
+    ) as mock_clone:
+        shared_config_repo = tempfile.mkdtemp()
+        (Path(shared_config_repo) / ".git").touch()
+        with open(Path(shared_config_repo) / ".dbt-opiner.yaml", "w") as file:
+            file.write(
+                "invalid_key: test_2\n"
+                "files:\n"
+                "  sql: c\n"
+                "  md: d\n"
+                "  yaml: e\n"
+            )
+        mock_clone.return_value = Path(shared_config_repo)
+        with pytest.raises(SystemExit) as excinfo:
+            ConfigSingleton().get_config()
+        assert excinfo.value.code == 1
+
+
+def test_initialize_with_missing_shared_config(caplog, temp_complete_git_repo):
+    os.chdir(temp_complete_git_repo / "dbt-opiner")
+    with open(".dbt-opiner.yaml", "w") as file:
+        file.write("shared_config:\n  repository: some_git_repo\n  overwrite: true\n")
+
+    with patch(
+        "dbt_opiner.config_singleton.clone_git_repo_and_checkout_revision"
+    ) as mock_clone:
+        shared_config_repo = tempfile.mkdtemp()
+        (Path(shared_config_repo) / ".git").touch()
+        mock_clone.return_value = Path(shared_config_repo)
+        with pytest.raises(SystemExit) as excinfo:
+            ConfigSingleton().get_config()
+        assert excinfo.value.code == 1
+        with caplog.at_level(logging.CRITICAL):
+            assert (
+                "Shared configuration file 'dbt-opiner.yaml' not found in repository"
+                in caplog.text
+            )
