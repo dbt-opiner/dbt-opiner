@@ -139,6 +139,10 @@ class Linter:
         opinion code (alphabetically).
         Files can be in different order and not necessarily together if
         more than one opinion for the file fails.
+        Args:
+            deduplicate: If True, remove duplicated results from the lint results.
+        Returns:
+            A list with sorted lint results
         """
         if deduplicate:
             return sorted(self._deduplicate_results())
@@ -147,7 +151,10 @@ class Linter:
         # TODO: add option to organize results by opinion tags.
 
     def log_results_and_exit(self, output_file: Path = None) -> None:
-        """Log the results of the linting and exit with the appropriate code."""
+        """Log the results of the linting and exit with the appropriate code.
+        Args:
+          output_file: The file to write the lint results to.
+        """
         # Change logger setup to make messages more clear
         # Get exiting logger config
         original_logger_config = next(iter(logger._core.handlers.copy().values()))
@@ -188,6 +195,11 @@ class Linter:
         sys.exit(exit_code)
 
     def log_audit_and_exit(self, type: str, output_file: Path = None) -> None:
+        """Log the audit results and exit.
+        Args:
+            type: The type of audit to perform. Can be "all", "general", "by_tag", or "detailed".
+            output_file: The file to write the audit results to.
+        """
         # Change logger setup to make messages more clear
         # Get exiting logger config
         original_logger_config = next(iter(logger._core.handlers.copy().values()))
@@ -209,6 +221,8 @@ class Linter:
         )
 
         audit_results = self._audit()
+
+        # TODO: add option to log in csv format
         if type == "all":
             for name, df in audit_results.items():
                 title = name.title().replace("_", " ")
