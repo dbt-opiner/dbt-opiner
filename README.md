@@ -32,7 +32,7 @@ Tool for keeping dbt standards aligned across dbt projects.
 
 ## Installation and usage
 
-### CLI commands
+### CLI
 It can be installed as a python package (with pip `pip install dbt-opiner`, poetry `poetry add dbt-opiner`, etc.) and used as a cli. Run `dbt-opiner -h` to see the available commands and options.
 #### Lint
 `dbt-opiner lint [ARGS]` will run the linter on the changed files or dbt projects and return a non-zero exit code if any opinion with severity `Must` is not met. It will also return a summary of the opinions that failed.
