@@ -12,9 +12,12 @@ Tool for keeping dbt standards aligned across dbt projects.
 # Table of Contents
 1. [Installation and usage](#installation-and-usage)
     1. [CLI](#cli)
+        1. [Lint](#lint)
+        2. [Audit](#audit)
     2. [Pre-commit hook](#pre-commit-hook)
     3. [Usage in CI pipelines](#usage-in-ci-pipelines)
     4. [Important notes and additional configurations](#important-notes-and-additional-configurations)
+        1. [Load configuration from a github repository](#load-configuration-from-a-github-repository)
 2. [Opinions](#opinions)
     1. [Default opinions](#default-opinions)
         1. [O001 model must have a description](#O001-model-must-have-a-description-source)
@@ -29,8 +32,13 @@ Tool for keeping dbt standards aligned across dbt projects.
 
 ## Installation and usage
 
-### CLI
+### CLI commands
 It can be installed as a python package (with pip `pip install dbt-opiner`, poetry `poetry add dbt-opiner`, etc.) and used as a cli. Run `dbt-opiner -h` to see the available commands and options.
+#### Lint
+`dbt-opiner lint [ARGS]` will run the linter on the changed files or dbt projects and return a non-zero exit code if any opinion with severity `Must` is not met. It will also return a summary of the opinions that failed.
+
+#### Audit
+`dbt-opiner audit [ARGS]` will run the linter on full dbt project(s) and log a summary of the opinions that failed and passed. It's customizable to log with different levels of detail and aggregation. It is especially useful to check for the quality of the dbt project(s).
 
 ### Pre-commit hook
 Also, it can be used as a pre-commit hook. To use it as a pre-commit hook, add the following to your `.pre-commit-config.yaml` file:
@@ -59,12 +67,19 @@ Check [this github action example](https://github.com/dbt-opiner/demo-multi-dbt-
 The tool `expects all the linted files to belong to a git repository`: it won't work with files that are not part of a git repository.
 
 Extra configs can be set using a `.dbt-opiner.yaml` file, that should be anywhere in the repository.
-If more than one `.dbt-opiner.yaml` file is found, the tool will use the one in the highest path of the repository. If file is not provided, empty configuration will be used and default behaviour will be applied.
+If more than one `.dbt-opiner.yaml` file is found, the tool will use the one in the highest path of the repository. If the file is not provided, an empty configuration will be used and default behavior will be applied.
 
 The `.dbt-opiner.yaml` file should have the following structure:
 
 ```yaml
 sqlglot_dialect: duckdb # The dialect to use when parsing the sql files with sqlglot.
+
+shared_config: # Load config from a repository.
+  repository: https://github.com/dbt-opiner/dbt-opiner-custom-opinions.git
+  rev: 0.1.0 # Tag or commit sha, not branches. Revision is optional but encouraged. If not provided default main branch will be used.
+  overwrite: false # If true, all configurations will be overwritten by the shared configuration.
+  # If false, only new configurations will be added.
+  # Empty defaults to true.
 
 opinions_config: # Extra config for opinions. Check the opinions documentation for more info.
   ignore_opinions: # To ignore some opinions list the opinion codes. Optional.
@@ -79,17 +94,23 @@ opinions_config: # Extra config for opinions. Check the opinions documentation f
       - granularity
   custom_opinions: # To set custom opinions. Optional.
     source: git # git or local. If local, it will load opinions from "the directory where this config file is"/custom_opinion/ directory.
-    repository: https://github.com/dbt-opiner/dbt-opiner-custom-opinions.git # Only required if the source is git. TODO: Add support for private repositories.
+    repository: https://github.com/dbt-opiner/dbt-opiner-custom-opinions.git # Only required if the source is git.
     rev: 0.1.0 # Tag or commit sha, not branches. Revision is optional but encouraged. If not provided default main branch will be used.
 
 files: #Regex to match the files to lint. Optional.
-  sql: ".*/(models|macros|tests)/.*" #
-  #yaml:
-  #md:
+  sql: ".*/(models|macros|tests)/.*"
+  yaml: ".*/(models|macros|tests)/.*"
+  md: ".*/(docs)/.*"
 
 ```
 
-Check this repo as an example: [demo-multi-dbt-project](https://github.com/dbt-opiner/demo-multi-dbt-project/blob/main/.dbt_opiner/.dbt-opiner.yaml)
+Check this repo as an example: [demo-multi-dbt-project](https://github.com/dbt-opiner/demo-multi-dbt-project/blob/main/.dbt_opiner/.dbt-opiner.yaml).
+
+The configuration file also accepts simple environment variables filling. The only supported environment variables are string types and must be set with `${{ env_var_name }}` syntax. 
+
+#### Load configuration from a github repository
+Guided by the federated governance principle of the Data Mesh architecture, the tool allows to load the configuration from a github repository. This is useful to adhere to a common set of standards and practices and share the same configuration across multiple dbt projects. The configuration can be loaded from a public or private repository. The repository should have a `.dbt-opiner.yaml` file with the configuration.
+**Warning** Only use trusted repositories to load the configuration to prevent any security issues.
 
 ## Opinions
 The opinions are defined in the `opinions` directory. They apply to certain dbt nodes (models, macros, or tests) and/or type of files (yaml, sql, md). The opinions have a code, a description, a severity, and a configuration.
@@ -131,10 +152,10 @@ Applies to: dbt models when either sql or yaml files are changed.
 All columns in the model should have a description. Empty descriptions are not allowed.
 
 Descriptions are important for documentation and understanding the purpose
-of the columns. A good description desambiguates the content of a column
-and helps making data more obvious.
+of the columns. A good description disambiguates the content of a column
+and helps make data more obvious.
 
-This opinion has some caveats. The only way of really knowning the
+This opinion has some caveats. The only way of really knowing the
 columns of a model is by running the model and checking the columns in
 the database or catalog.json. However we don't want to depend on the execution of
 the model.
@@ -231,6 +252,8 @@ All the configurations for [ignoring opinions (noqa)](#ignoring-opinions-noqa) w
 
 We use `loguru` for logging. We encourage to use the same for the custom opinions. See how to use it, [here](https://github.com/Delgan/loguru).
 
+**Warning** Only use trusted repositories to load opinions to prevent any security issues.
+
 ### Ignoring opinions (noqa)
 > Strong opinions, weakly held. [_Paul Saffo_](https://bobsutton.typepad.com/my_weblog/2006/07/strong_opinions.html)
 
@@ -241,12 +264,13 @@ Note that if multiple nodes are defined in the same yaml file, the noqa comment 
 To ignore opinions for certaing regex matching file paths, add the opinion code as key and a regex as value to the `ignore_files` list in the `.dbt-opiner.yaml` file.
 
 ## Why?
-Inspired in Benn Stancil's [blog post](https://benn.substack.com/p/the-rise-of-the-analytics-pretendgineer) where he says:
+Inspired by Benn Stancil's [blog post](https://benn.substack.com/p/the-rise-of-the-analytics-pretendgineer) where he says:
 >My suspicion is that dbt [...] needs something that aggressively imposes [...] opinions on its users. It needs dbt on Rails: A framework that builds a project’s scaffolding, and tells us how to expand it—and not through education, but through functional requirements. Show where to put which bits of logic. Prevent me from doing circular things. Blare warnings at me when I use macros incorrectly. Force me to rigorously define “production.”
 
 Far from being a dbt framework, this less ambitious tool aims to help enforce standards and best practices in dbt projects at scale, as part of the data mesh architecture’s federated governance principle.
 
 Although other similar tools exist, they fall short in some aspects:
+  - [dbt-project-evaluator](https://dbt-labs.github.io/dbt-project-evaluator/latest/) doesn't work as a pre-commit hook and it requires a connection to the database to run. Also it's a nightmare of jinja macros and dbt_project configs.
   - [dbt-checkpoint](https://github.com/dbt-checkpoint/dbt-checkpoint) doesn't work well with multi projects repositories and doesn't provide a way to define custom opinions (with different levels of severity).
   - [dbt-score](https://dbt-score.picnic.tech/) doesn't work as a pre-commit hook and it's oriented to check mainly the metadata of the nodes. Other checks like one model per yml file or explicit column selection are not easy to integrate.
 
