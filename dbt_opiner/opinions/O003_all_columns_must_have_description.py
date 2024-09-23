@@ -9,10 +9,10 @@ class O003(BaseOpinion):
     """All columns in the model should have a description. Empty descriptions are not allowed.
 
     Descriptions are important for documentation and understanding the purpose
-    of the columns. A good description desambiguates the content of a column
-    and helps making data more obvious.
+    of the columns. A good description disambiguates the content of a column
+    and helps make data more obvious.
 
-    This opinion has some caveats. The only way of really knowning the
+    This opinion has some caveats. The only way of really knowing the
     columns of a model is by running the model and checking the columns in
     the database or catalog.json. However we don't want to depend on the execution of
     the model.
