@@ -25,8 +25,13 @@ Tool for keeping dbt standards aligned across dbt projects.
         3. [O003 all columns must have description](#O003-all-columns-must-have-description-source)
         4. [O004 All columns in model must be explicitly named at least once](#O004-all-columns-in-model-must-be-explicitly-named-at-least-once-source)
         5. [O005 model should have unique key](#O005-model-should-have-unique-key-source)
-    2. [Adding custom opinions](#adding-custom-opinions)
-    3. [Ignoring opinions (noqa)](#ignoring-opinions-noqa)
+    2. [BigQuery opinions](#bigquery-opinions)
+        1. [BQ001 Bigquery targets used for development and testing must have maximum_bytes_billed](#BQ001-Bigquery-targets-used-for-development-and-testing-must-have-maximum_bytes_billed-source)
+        2. [BQ002 Models materialized as tables in BigQuery should have clustering defined](#BQ002-Models-materialized-as-tables-in-BigQuery-should-have-clustering-defined-source)
+        3. [BQ003 Views must have documented the partition and cluster of underlying tables](#BQ003-Views-must-have-documented-the-partition-and-cluster-of-underlying-tables-source)
+        4. [BQ004 The persist_docs option for models must be enabled](#BQ004-The-persist_docs-option-for-models-must-be-enabled-source)
+    3. [Adding custom opinions](#adding-custom-opinions)
+    4. [Ignoring opinions (noqa)](#ignoring-opinions-noqa)
 3. [Why?](#why)
 4. [Contributing](#contributing)
 
@@ -231,9 +236,71 @@ select * from joined
 
 #### O005 model should have unique key [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O005_model_should_have_unique_key.py)]
 
-Applies to: dbt models when sql files are changed.   
+Applies to: dbt models when sql files are changed.  
 Models should have a unique key defined in the config block of the model.  
 This is useful to enforce the uniqueness of the model and to make the granularity of the model explicit.
+
+### BigQuery Opinions
+Opinions with the code starting in BQ are specific to BigQuery. They will only evaluate files if the sqlglot dialect is set to `bigquery` in `.dbt-opiner.yaml` file.
+
+#### BQ001 Bigquery targets used for development and testing must have maximum_bytes_billed [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/BQ001_bigquery_targets_must_have_maximum_bytes_billed.py)] 
+Applies to: profiles.yml file changes.
+
+Bigquery targets used for development and testing must have maximum_bytes_billed set to prevent unexpected costs.
+
+This opinion checks if the `maximum_bytes_billed` parameter is set in the target.
+An optional list of target names to ignore can be specified in the configuration. By default, it ignores the `prod` and `production` targets. To disable this and check all targets, set the `ignore_targets` configuration to an empty list.
+Also, an optional `maximum_bytes_billed` parameter can be set to specify the maximum number of bytes billed allowed. By default it is not checked.
+
+Extra configuration:
+You can specify these under the `opinions_config>extra_opinions_config>BQ001` key in your `.dbt-opiner.yaml` file.
+  - ignore_targets: list of target names to ignore (default: ['prod', 'production'])
+  - maximum_bytes_billed: maximum bytes billed allowed (optional)
+  
+#### BQ002 Models materialized as tables in BigQuery should have clustering defined [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/BQ002_bigquery_tables_should_have_clustering.py)]
+
+Applies to: dbt models when sql files are changed. 
+
+Models materialized as tables in BigQuery should have clustering defined.
+
+Clustering is a feature in BigQuery that allows you to group your data based
+on the contents of one or more columns in the table.
+This can help improve query performance, reduce costs, and optimize your data
+for analysis.
+A table with clustering also optimizes "limit 1" queries, as it can skip scanning.
+
+This opinion checks if models materialized as tables in BigQuery have clustering defined.
+
+#### BQ003 Views must have documented the partition and cluster of underlying tables [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/BQ003_bigquery_views_must_have_partition_and_cluster_description.py)]
+
+Applies to: dbt models when either sql or yaml files are changed.
+Views must have documented the partition and cluster of underlying tables.  
+
+Views that select underlying tables must have a description that explains
+the partition and clustering that will impact view usage performance.
+Since BigQuery does not show the partition and clustering information for views,
+it is important to document this information in the view description in dbt.  
+
+This opinion checks if the description of the view has the keywords 'partition' and 'cluster'.  
+The check is case insensitive.
+
+#### BQ004 The persist_docs option for models must be enabled [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/BQ004_bigquery_models_must_persist_docs.py)]
+
+Applies to: dbt_project.yml file changes  
+
+The persist_docs option for models must be enabled to ensure that the documentation
+is shown in the BigQuery console.  
+
+Add
+
+```yaml
+models:
+  +persist_docs:
+    relation: true
+    columns: true
+```
+To your dbt_project.yml file to enable this option.  
+
 
 ### Adding custom opinions
 > Opinions are like assholes, everyone has one. [_Popular wisdom_](https://en.wiktionary.org/wiki/opinions_are_like_assholes)
