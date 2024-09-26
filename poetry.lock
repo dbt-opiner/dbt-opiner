@@ -813,13 +813,13 @@ files = [
 
 [[package]]
 name = "sqlglot"
-version = "25.22.0"
+version = "25.23.2"
 description = "An easily customizable SQL parser and transpiler"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "sqlglot-25.22.0-py3-none-any.whl", hash = "sha256:3f03239456d6e19a922f2f59504e6363e8ed6ff8bbf6972c167ee5bf8d32a957"},
-    {file = "sqlglot-25.22.0.tar.gz", hash = "sha256:f7b9291556ac73301c1a72dffe1802c0c2bf56c9d223382b3cc4cdfc2b9c26b8"},
+    {file = "sqlglot-25.23.2-py3-none-any.whl", hash = "sha256:52b8c82da4b338fe5163395d6dbc4346fb39142d2735b0b662fc70a28b71472c"},
+    {file = "sqlglot-25.23.2.tar.gz", hash = "sha256:fbf384de30f83ba01c47f1b953509da2edc0b4c906e6c5491a90c8accbd6ed26"},
 ]
 
 [package.extras]
@@ -880,13 +880,13 @@ testing = ["build[virtualenv] (>=1.2.2)", "covdefaults (>=2.3)", "detect-test-po
 
 [[package]]
 name = "tzdata"
-version = "2024.1"
+version = "2024.2"
 description = "Provider of IANA time zone data"
 optional = false
 python-versions = ">=2"
 files = [
-    {file = "tzdata-2024.1-py2.py3-none-any.whl", hash = "sha256:9068bc196136463f5245e51efda838afa15aaeca9903f49050dfa2679db4d252"},
-    {file = "tzdata-2024.1.tar.gz", hash = "sha256:2674120f8d891909751c38abcdfd386ac0a5a1127954fbc332af6b5ceae07efd"},
+    {file = "tzdata-2024.2-py2.py3-none-any.whl", hash = "sha256:a48093786cdcde33cad18c2555e8532f34422074448fbc874186f0abd79565cd"},
+    {file = "tzdata-2024.2.tar.gz", hash = "sha256:7d85cc416e9382e69095b7bdf4afd9e3880418a2413feec7069d533d6b4e31cc"},
 ]
 
 [[package]]

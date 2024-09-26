@@ -262,6 +262,10 @@ class DbtNode:
         return self._node.get("description")
 
     @property
+    def config(self):
+        return self._node.get("config")
+
+    @property
     def columns(self):
         return self._node.get("columns")
 
