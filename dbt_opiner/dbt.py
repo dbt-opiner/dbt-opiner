@@ -27,6 +27,7 @@ class DbtProject:
         dbt_project_file_path: The path to the dbt_project.yml file.
         dbt_project_config: The configuration of the dbt project.
         dbt_profile_path: The path to the profiles.yml file.
+        dbt_profile: The configuration of the dbt profile.
         dbt_manifest: The dbt manifest object.
         files: A dictionary with the files in the dbt project.
 
@@ -66,6 +67,8 @@ class DbtProject:
         self.dbt_profile_path = None
         if (dbt_project_file_path.parent / "profiles.yml").exists():
             self.dbt_profile_path = dbt_project_file_path.parent / "profiles.yml"
+        self.dbt_profile = YamlFileHandler(self.dbt_profile_path)
+
         # Load manifest
         self._load_manifest(force_compile)
 
