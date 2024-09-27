@@ -63,11 +63,13 @@ class DbtProject:
         self.dbt_project_config = YamlFileHandler(dbt_project_file_path)
         self.name = self.dbt_project_config.get("name")
 
-        # Set profiles file
+        # Profiles can be none if it's specified in personal folder
+        # We won't take care of that because is not a very good practice
         self.dbt_profile_path = None
+        self.dbt_profile = None
         if (dbt_project_file_path.parent / "profiles.yml").exists():
             self.dbt_profile_path = dbt_project_file_path.parent / "profiles.yml"
-        self.dbt_profile = YamlFileHandler(self.dbt_profile_path)
+            self.dbt_profile = YamlFileHandler(self.dbt_profile_path)
 
         # Load manifest
         self._load_manifest(force_compile)
