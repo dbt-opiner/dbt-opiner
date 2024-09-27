@@ -11,9 +11,10 @@ class P002(BaseOpinion):
     Although is a good way to help the dbt team improve the product, for privacy
     reasons we recommend to disable this feature.
 
-    This opinion checks if the `send_anonymous_usage_stats` parameter is set to false
+    This opinion checks if the `send_anonymous_usage_stats` flag is set to false
     in the `dbt_project.yml` file.
-    Previous to dbt 1.8 this flag was set in profiles.yml. This opinion will also check if it's present there.
+    Previous to dbt 1.8 this flag was set in profiles.yml.
+    This opinion will also check if it's present there.
     """
 
     def __init__(self, config: dict = None, **kwargs) -> None:
