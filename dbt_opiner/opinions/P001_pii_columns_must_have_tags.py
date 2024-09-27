@@ -36,7 +36,7 @@ class P001(BaseOpinion):
     def __init__(self, config: dict = None, **kwargs) -> None:
         super().__init__(
             code="P001",
-            description="Columns that contain Personal Identifiable Information (PII) should be tagged in the yaml file.",
+            description="Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file.",
             severity=OpinionSeverity.MUST,
             config=config,
             tags=["privacy", "models"],

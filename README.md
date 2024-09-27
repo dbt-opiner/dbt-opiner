@@ -25,7 +25,7 @@ Tool for keeping dbt standards aligned across dbt projects.
         3. [O003 all columns must have description](#O003-all-columns-must-have-description-source)
         4. [O004 All columns in model must be explicitly named at least once](#O004-all-columns-in-model-must-be-explicitly-named-at-least-once-source)
         5. [O005 model should have unique key](#O005-model-should-have-unique-key-source)
-        6. [P001 Columns that contain Personal Identifiable Information (PII) should be tagged in the yaml file](#P001-Columns-that-contain-Personal-Identifiable-Information-PII-should-be-tagged-in-the-yaml-file-source)
+        6. [P001 Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file](#P001-Columns-that-contain-Personal-Identifiable-Information-PII-must-be-tagged-in-the-yaml-file-source)
         7. [P002 Dbt project must not send anonymous statistics](#P002-Dbt-project-must-not-send-anon-stats-source)
     2. [BigQuery opinions](#bigquery-opinions)
         1. [BQ001 Bigquery targets used for development and testing must have maximum_bytes_billed](#BQ001-Bigquery-targets-used-for-development-and-testing-must-have-maximum_bytes_billed-source)
@@ -242,10 +242,10 @@ Applies to: dbt models when sql files are changed.
 Models should have a unique key defined in the config block of the model.  
 This is useful to enforce the uniqueness of the model and to make the granularity of the model explicit.
 
-#### P001 Columns that contain Personal Identifiable Information (PII) should be tagged in the yaml file [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/P001_pii_columns_should_have_tags.py)]
+#### P001 Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/P001_pii_columns_must_have_tags.py)]
 
 Applies to: dbt models when either sql or yaml files are changed.  
-Columns that contain Personal Identifiable Information (PII) should be tagged in the yaml file.
+Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file.
 
 A common practise in data engineering is to tag columns that contain PII. This allows to easily identify which columns contain sensitive information and to apply the necessary security measures (e.g. masking, access control, etc.).
 
