@@ -57,12 +57,12 @@ from dbt_opiner.opinions import P001
                             "description": "Description",
                             "tags": ["some_tag"],
                         },
-                        "PII_column": {
-                            "name": "PII_column",
+                        "column_1": {
+                            "name": "column_1",
                             "description": "Description",
                         },
                     },
-                    "compiled_code": "select user_id, column_1, PII_column from dim_customers",
+                    "compiled_code": "select user_id, column_1, pii_column from dim_customers",
                 }
             ),
             False,
@@ -73,7 +73,7 @@ from dbt_opiner.opinions import P001
             DbtNode(
                 {
                     "resource_type": "model",
-                    "compiled_code": "select user_id, column_1, PII_column from dim_customers",
+                    "compiled_code": "select user_id, column_1, pii_column from dim_customers",
                 }
             ),
             False,
@@ -112,7 +112,7 @@ def test_sql_P001(node, is_policy_tag, mock_sqlfilehandler, expected_passed):
                     "policy_tag": is_policy_tag,
                     "pii_columns": {
                         "user_id": ["some_tag"],
-                        "PII_column": ["some_tag"],
+                        "pii_column": ["some_tag"],
                     },
                 }
             }
@@ -154,13 +154,9 @@ def test_sql_P001(node, is_policy_tag, mock_sqlfilehandler, expected_passed):
                                 "name": "user_id",
                                 "description": "Description",
                                 "tags": ["some_tag"],
-                            },
-                            "PII_column": {
-                                "name": "PII_column",
-                                "description": "Description",
-                            },
+                            }
                         },
-                        "compiled_code": "select user_id, column_1, PII_column from dim_customers",
+                        "compiled_code": "select user_id, column_1, pii_column from dim_customers",
                     }
                 ),
             ],
@@ -178,7 +174,7 @@ def test_yaml_P001(nodes, is_policy_tag, mock_yamlfilehandler, expected_passed):
                     "policy_tag": is_policy_tag,
                     "pii_columns": {
                         "user_id": ["some_tag"],
-                        "PII_column": ["some_tag"],
+                        "pii_column": ["some_tag"],
                     },
                 }
             }
