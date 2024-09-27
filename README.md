@@ -25,6 +25,8 @@ Tool for keeping dbt standards aligned across dbt projects.
         3. [O003 all columns must have description](#O003-all-columns-must-have-description-source)
         4. [O004 All columns in model must be explicitly named at least once](#O004-all-columns-in-model-must-be-explicitly-named-at-least-once-source)
         5. [O005 model should have unique key](#O005-model-should-have-unique-key-source)
+        6. [P001 Columns that contain Personal Identifiable Information (PII) should be tagged in the yaml file](#P001-Columns-that-contain-Personal-Identifiable-Information-PII-should-be-tagged-in-the-yaml-file-source)
+        7. [P002 Dbt project must not send anonymous statistics](#P002-Dbt-project-must-not-send-anon-stats-source)
     2. [BigQuery opinions](#bigquery-opinions)
         1. [BQ001 Bigquery targets used for development and testing must have maximum_bytes_billed](#BQ001-Bigquery-targets-used-for-development-and-testing-must-have-maximum_bytes_billed-source)
         2. [BQ002 Models materialized as tables in BigQuery should have clustering defined](#BQ002-Models-materialized-as-tables-in-BigQuery-should-have-clustering-defined-source)
