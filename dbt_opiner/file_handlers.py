@@ -73,13 +73,12 @@ class FileHandler(ABC):
             other_file_path: Str path to the file to get the no_qa_opinions from.
                              It's a string because dbt provides incomplete paths and we need to reconstruct them.
         """
-
         current_file_parts = list(self.path.resolve().parent.parts)
         other_file_parts = list(Path(other_file_path).parts)  # Comes from manifest
         index = current_file_parts.index(other_file_parts[0])
         final_path = current_file_parts[:index] + other_file_parts
-
         sql_file_path = Path(*final_path)
+
         with sql_file_path.open("r") as file:
             content = file.read()
         self.no_qa_opinions.extend(self._get_no_qa_opinions(content))
@@ -170,6 +169,8 @@ class SqlFileHandler(FileHandler):
         # Add no_qa_opinions from the docs yml file
         if self.dbt_node.docs_yml_file_path:
             self._add_no_qa_opinions_from_other_file(self.dbt_node.docs_yml_file_path)
+
+        # TODO: Add the raw yaml patch content as a property
         # TODO: Add catalog entry to the file handler
 
 

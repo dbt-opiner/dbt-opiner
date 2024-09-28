@@ -135,7 +135,10 @@ def temp_complete_git_repo(temp_empty_git_repo):
             {},
         ],
         [["dbt_project", "dbt_project.yml"], {"name": "project"}],
-        [["dbt_project", "profiles.yml"], {}],
+        [
+            ["dbt_project", "profiles.yml"],
+            {"config": {"send_anonymous_usage_stats": False}},
+        ],
         [
             ["dbt_project", "macros", "my_macro.sql"],
             "{% macro my_macro() %} select id, value from table {% endmacro %}",

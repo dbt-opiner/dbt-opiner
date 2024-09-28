@@ -25,6 +25,8 @@ Tool for keeping dbt standards aligned across dbt projects.
         3. [O003 all columns must have description](#O003-all-columns-must-have-description-source)
         4. [O004 All columns in model must be explicitly named at least once](#O004-all-columns-in-model-must-be-explicitly-named-at-least-once-source)
         5. [O005 model should have unique key](#O005-model-should-have-unique-key-source)
+        6. [P001 Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file](#P001-Columns-that-contain-Personal-Identifiable-Information-PII-must-be-tagged-in-the-yaml-file-source)
+        7. [P002 Dbt project must not send anonymous statistics](#P002-Dbt-project-must-not-send-anon-stats-source)
     2. [BigQuery opinions](#bigquery-opinions)
         1. [BQ001 Bigquery targets used for development and testing must have maximum_bytes_billed](#BQ001-Bigquery-targets-used-for-development-and-testing-must-have-maximum_bytes_billed-source)
         2. [BQ002 Models materialized as tables in BigQuery should have clustering defined](#BQ002-Models-materialized-as-tables-in-BigQuery-should-have-clustering-defined-source)
@@ -239,6 +241,37 @@ select * from joined
 Applies to: dbt models when sql files are changed.  
 Models should have a unique key defined in the config block of the model.  
 This is useful to enforce the uniqueness of the model and to make the granularity of the model explicit.
+
+#### P001 Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/P001_pii_columns_must_have_tags.py)]
+
+Applies to: dbt models when either sql or yaml files are changed.  
+Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file.
+
+A common practise in data engineering is to tag columns that contain PII. This allows to easily identify which columns contain sensitive information and to apply the necessary security measures (e.g. masking, access control, etc.).
+
+This opinion will check the existence in the model of any PII column name from a dictionary and verify if it is tagged in the yaml file.
+
+In BigQuery is a common practise to tag columns using policy tags instead of regular dbt tags. Make sure that `policy_tag = True` extra configuration is set if this applies to your case.
+
+Required extra configuration:
+You must specify these under the `extra_opinions_config>P001` key in your `.dbt-opiner.yaml` file.
+- pii_columns: dictionary of column names + list of pii tags. For example:
+``` yaml
+pii_columns:
+  email: ["pii_email", "pii_external"]
+```
+- policy_tag: bool (default: false) if true, the opinion will check for
+              the presence of a policy tag instead of tags.  
+
+If no pii_columns are specified, the opinion will be skipped.
+
+#### P002 Dbt project must not send anonymous statistics [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/P002_project_must_not_send_anon_stats.py)] 
+
+Applies to: dbt_project.yml and profiles.yml files. 
+Sending anonymous statistics is enabled by default (opt-out). Although is a good way to help the dbt team improve the product, for privacy reasons we recommend to disable this feature.
+
+This opinion checks if the `send_anonymous_usage_stats` flag is set to `False` in the `dbt_project.yml` file.
+Previous to dbt 1.8 this flag was set in profiles.yml. This opinion will also check if it's present there.
 
 ### BigQuery Opinions
 Opinions with the code starting in BQ are specific to BigQuery. They will only evaluate files if the sqlglot dialect is set to `bigquery` in `.dbt-opiner.yaml` file.

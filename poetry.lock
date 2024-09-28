@@ -813,13 +813,13 @@ files = [
 
 [[package]]
 name = "sqlglot"
-version = "25.23.2"
+version = "25.24.0"
 description = "An easily customizable SQL parser and transpiler"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "sqlglot-25.23.2-py3-none-any.whl", hash = "sha256:52b8c82da4b338fe5163395d6dbc4346fb39142d2735b0b662fc70a28b71472c"},
-    {file = "sqlglot-25.23.2.tar.gz", hash = "sha256:fbf384de30f83ba01c47f1b953509da2edc0b4c906e6c5491a90c8accbd6ed26"},
+    {file = "sqlglot-25.24.0-py3-none-any.whl", hash = "sha256:c53101d966e79248b667fa2e00d17db57a5188e595065b164b52c77767cbcb7b"},
+    {file = "sqlglot-25.24.0.tar.gz", hash = "sha256:6a270ef55da3cbf10cf49e886b2e9d37bdf7309700f5a294f20017227d378cea"},
 ]
 
 [package.extras]
@@ -908,13 +908,13 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "virtualenv"
-version = "20.26.5"
+version = "20.26.6"
 description = "Virtual Python Environment builder"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "virtualenv-20.26.5-py3-none-any.whl", hash = "sha256:4f3ac17b81fba3ce3bd6f4ead2749a72da5929c01774948e243db9ba41df4ff6"},
-    {file = "virtualenv-20.26.5.tar.gz", hash = "sha256:ce489cac131aa58f4b25e321d6d186171f78e6cb13fafbf32a840cee67733ff4"},
+    {file = "virtualenv-20.26.6-py3-none-any.whl", hash = "sha256:7345cc5b25405607a624d8418154577459c3e0277f5466dd79c49d5e492995f2"},
+    {file = "virtualenv-20.26.6.tar.gz", hash = "sha256:280aede09a2a5c317e409a00102e7077c6432c5a38f0ef938e643805a7ad2c48"},
 ]
 
 [package.dependencies]
