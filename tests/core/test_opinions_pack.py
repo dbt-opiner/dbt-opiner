@@ -15,7 +15,7 @@ from dbt_opiner.opinions.opinions_pack import OpinionsPack
     [
         pytest.param("local", None, "Loading custom opinions from local source:"),
         pytest.param("git", "some_rev", "Check out to revision:"),
-        pytest.param("git", None, "Repository revision not defined."),
+        pytest.param("git", None, "revision not defined."),
         pytest.param("invalid", None, "Custom opinions source invalid not supported"),
         pytest.param(
             None,
@@ -80,7 +80,7 @@ def test_opinions_pack(caplog, temp_complete_git_repo, source, revision, expecte
                 if revision:
                     assert "Check out to revision" in caplog.text
                 else:
-                    "Repository revision not defined" in caplog.text
+                    "Repository: https://github.com/some/repo.git revision not defined" in caplog.text
 
 
 # Test noqa no ignore flag

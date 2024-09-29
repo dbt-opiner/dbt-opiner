@@ -53,5 +53,5 @@ class BQ004(BaseOpinion):
             opinion_code=self.code,
             passed=False,
             severity=self.severity,
-            message=f"The persist_docs option for models {self.severity} be enabled",
+            message=f"The persist_docs option for models {self.severity.value} be enabled",
         )

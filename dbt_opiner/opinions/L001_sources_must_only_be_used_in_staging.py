@@ -53,7 +53,7 @@ class L001(BaseOpinion):
                     opinion_code=self.code,
                     passed=False,
                     severity=self.severity,
-                    message=f"The source macro {self.severity} only be used in staging layer.",
+                    message=f"The source macro {self.severity.value} only be used in staging layer.",
                 )
 
             return LintResult(

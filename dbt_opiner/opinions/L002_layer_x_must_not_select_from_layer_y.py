@@ -106,7 +106,7 @@ class L002(BaseOpinion):
                 passed=False,
                 severity=self.severity,
                 message=(
-                    f"Layer directionality {self.severity} be respected. "
+                    f"Layer directionality {self.severity.value} be respected. "
                     f"Model {file.dbt_node.alias} selects from {', '.join(forbidden_selects)}."
                 ),
             )
@@ -116,7 +116,7 @@ class L002(BaseOpinion):
             opinion_code=self.code,
             passed=True,
             severity=self.severity,
-            message=("Layer directionality is respected. "),
+            message=("Layer directionality is respected."),
         )
 
     def _get_select_restrictions(self) -> tuple[dict, dict]:

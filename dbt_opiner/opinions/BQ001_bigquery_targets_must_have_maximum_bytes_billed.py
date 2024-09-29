@@ -62,7 +62,7 @@ class BQ001(BaseOpinion):
                             error_targets["exceeded"].append(target_name)
 
         if error_targets.get("missing") or error_targets.get("exceeded"):
-            message = f"Bigquery targets used for development and testing {self.severity} have maximum_bytes_billed."
+            message = f"Bigquery targets used for development and testing {self.severity.value} have maximum_bytes_billed."
             if error_targets.get("exceeded"):
                 message += f"Exceeded for targets: {error_targets['exceeded']}.\n"
             if error_targets.get("missing"):
