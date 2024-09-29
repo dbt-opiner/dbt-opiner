@@ -36,7 +36,7 @@ class O003(BaseOpinion):
             tags=["metadata", "models"],
         )
 
-    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:
+    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult] | None:
         nodes = []
         if file.type == ".sql" and file.dbt_node.type == "model":
             nodes = [file.dbt_node]

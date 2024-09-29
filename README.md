@@ -19,21 +19,25 @@ Tool for keeping dbt standards aligned across dbt projects.
     4. [Important notes and additional configurations](#important-notes-and-additional-configurations)
         1. [Load configuration from a github repository](#load-configuration-from-a-github-repository)
 2. [Opinions](#opinions)
-    1. [Default opinions](#default-opinions)
-        1. [O001 model must have a description](#O001-model-must-have-a-description-source)
-        2. [O002 model description must have keywords](#O002-model-description-must-have-keywords-source)
-        3. [O003 all columns must have description](#O003-all-columns-must-have-description-source)
+    1. [Model metadata and configuration opinions](#model-metadata-and-configuration-opinions)
+        1. [O001 Model must have a description](#O001-model-must-have-a-description-source)
+        2. [O002 Model description must have keywords](#O002-model-description-must-have-keywords-source)
+        3. [O003 All columns must have description](#O003-all-columns-must-have-description-source)
         4. [O004 All columns in model must be explicitly named at least once](#O004-all-columns-in-model-must-be-explicitly-named-at-least-once-source)
-        5. [O005 model should have unique key](#O005-model-should-have-unique-key-source)
-        6. [P001 Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file](#P001-Columns-that-contain-Personal-Identifiable-Information-PII-must-be-tagged-in-the-yaml-file-source)
-        7. [P002 Dbt project must not send anonymous statistics](#P002-Dbt-project-must-not-send-anon-stats-source)
-    2. [BigQuery opinions](#bigquery-opinions)
+        5. [O005 Model should have unique key](#O005-model-should-have-unique-key-source)
+        6. [O006 Models names must start with a prefix](#O006-models-names-must-start-with-a-prefix)
+    2. [Lineage opinions](#lineage-opinions)
+        1. [L001 Sources must only be used in staging layer](#L001-sources-must-only-be-used-in-staging-layer-source)
+    3. [Privacy opinions](#privacy-opinions)
+        1. [P001 Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file](#P001-Columns-that-contain-Personal-Identifiable-Information-PII-must-be-tagged-in-the-yaml-file-source)
+        2. [P002 dbt project must not send anonymous statistics](#P002-Dbt-project-must-not-send-anon-stats-source)
+    4. [BigQuery opinions](#bigquery-opinions)
         1. [BQ001 Bigquery targets used for development and testing must have maximum_bytes_billed](#BQ001-Bigquery-targets-used-for-development-and-testing-must-have-maximum_bytes_billed-source)
         2. [BQ002 Models materialized as tables in BigQuery should have clustering defined](#BQ002-Models-materialized-as-tables-in-BigQuery-should-have-clustering-defined-source)
         3. [BQ003 Views must have documented the partition and cluster of underlying tables](#BQ003-Views-must-have-documented-the-partition-and-cluster-of-underlying-tables-source)
         4. [BQ004 The persist_docs option for models must be enabled](#BQ004-The-persist_docs-option-for-models-must-be-enabled-source)
-    3. [Adding custom opinions](#adding-custom-opinions)
-    4. [Ignoring opinions (noqa)](#ignoring-opinions-noqa)
+    5. [Adding custom opinions](#adding-custom-opinions)
+    6. [Ignoring opinions (noqa)](#ignoring-opinions-noqa)
 3. [Why?](#why)
 4. [Contributing](#contributing)
 
@@ -124,9 +128,9 @@ The opinions are defined in the `opinions` directory. They apply to certain dbt 
 The severity levels are: `Must` (it's mandatory) and `Should` (it's highly recommended).
 The configuration is optional and can be used to set extra parameters for the opinion.
 
-### Default opinions
+### Model metadata and configuration opinions
 
-#### O001 model must have a description [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O001_model_must_have_description.py)]
+#### O001 Model must have a description [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O001_model_must_have_description.py)]
 
 Applies to: dbt models when either sql or yaml files are changed.  
 Models must have descriptions. Empty descriptions are not allowed.
@@ -135,7 +139,9 @@ Descriptions are important for documentation and understanding the purpose of th
 A good description makes data more obvious.
 Include a description for the model in a yaml file or config block.
 
-#### O002 model description must have keywords [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)]
+---
+
+#### O002 Model description must have keywords [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O002_model_description_must_have_keywords.py)]
 
 Applies to: dbt models when either sql or yaml files are changed.  
 Models descriptions must have keywords.
@@ -153,7 +159,9 @@ opinions_config:
 ```
 Keywords are case insensitive.
 
-#### O003 all columns must have description [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O003_all_columns_must_have_description.py)]
+---
+
+#### O003 All columns must have description [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O003_all_columns_must_have_description.py)]
 
 Applies to: dbt models when either sql or yaml files are changed.  
 All columns in the model should have a description. Empty descriptions are not allowed.
@@ -176,6 +184,8 @@ If the model is constructed in a way that not all columns are extracted by
 the sqlglot parser, this opinion will omit those columns from the check.
 Rule O004 will check against this condition and will fail if
 unresolved `select *` are found.
+
+---
 
 #### O004 All columns in model must be explicitly named at least once [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O004_final_columns_in_model_must_be_explicitly_named_at_least_once.py)]
 
@@ -236,11 +246,91 @@ joined as (
 select * from joined
 ```
 
-#### O005 model should have unique key [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O005_model_should_have_unique_key.py)]
+---
+
+#### O005 Model should have unique key [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O005_model_should_have_unique_key.py)]
 
 Applies to: dbt models when sql files are changed.  
 Models should have a unique key defined in the config block of the model.  
 This is useful to enforce the uniqueness of the model and to make the granularity of the model explicit.
+
+---
+
+#### O006 Models names must start with a prefix [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/O006_models_names_must_start_with_a_prefix.py)]
+Applies to: dbt models when sql files are changed.  
+Models must start with a prefix that specifies the layer of the model.  
+
+Creating a consistent pattern of file naming is crucial in dbt.  
+File names must be unique and correspond to the name of the model when selected and created in the warehouse.
+
+We recommend putting as much clear information into the file name as possible, including a prefix for the layer the model exists in, important grouping information, and specific information about the entity or transformation in the model.
+
+See file names secion: https://docs.getdbt.com/best-practices/how-we-structure/2-staging#staging-files-and-folders
+
+Extra configuration:  
+You can specify these under `opinions_config>extra_opinions_config>O006` key in your `.dbt-opiner.yaml` file.
+  - accepted_prefixes: list of prefixes that are accepted. If not specified, the opinion will use:
+    ['base', 'stg', 'int', 'fct', 'dim', 'mrt', 'agg']
+
+Note:  
+Layers can be excluded using a regex pattern under the `ignore_files>O006` key in your `.dbt-opiner.yaml` file.
+
+---
+---
+
+### Lineage opinions
+#### L001 Sources must only be used in staging layer [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/L001_sources_must_only_be_used_in_staging.py)]
+Sources must only be used in staging layer.
+
+Staging models are the entrypoint for raw data in dbt projects, and it is the
+only place were we can use the source macro.
+See more [here](https://docs.getdbt.com/best-practices/how-we-structure/2-staging)
+
+This opinion checks if the __source macro__ is only used in staging models.
+
+Extra configuration:
+Sometimes when dbt is run in CI all models end up in the same schema.
+By specifying a node alias prefix we can still enforce this rule.
+You can specify these under the `opinions_config>extra_opinions_config>L001` key in your `.dbt-opiner.yaml` file.
+- staging_schema: schema name for staging tables (default: staging)
+- staging_prefix: prefix for staging tables (default: stg_)
+
+---
+
+#### L002 layer x must not select from layer y [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/L002_layer_x_must_not_select_from_layer_y.py)]
+Applies to: dbt models when sql files are changed.
+
+Layer directionality must be respected.
+
+Maintaining a good lineage crucial for any dbt project, and layer directionality is a key part of it.
+If the layer directionality is not respected, it can lead to circular dependencies between layers and make the data model harder to understand and to schedule.
+
+This opinion checks if the layer directionality is respected.
+
+For example:
+- layer `stg` should not select from a layer `fct` or `mrt`.
+- layer `fct` should not select from a layer `mrt`.
+- layer `mrt` should not select from a layer `stg`.
+
+Required extra configuration:
+You must specify these under the `opinions_config>extra_opinions_config>L002` key in your `.dbt-opiner.yaml` file.
+``` yaml
+  - layer_pairs: #list of forbidden layer pairs
+    - "staging,stg selects from facts,fct"
+    - "staging,stg selects from marts,mrt"
+    - "facts,fct selects from marts,mrt"
+
+```
+
+The first value is the schema layer name and the second the prefix.
+If by some case your models are all in the same schema (for example in CI) and that schema is not found, a check by prefixes will be used. **Prefixes can't be ommited**. If you don't use prefixes, use a generic one like `foo`.
+
+If no pairs are specified, the opinion will be skipped.
+
+---
+---
+
+### Privacy opinions
 
 #### P001 Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/P001_pii_columns_must_have_tags.py)]
 
@@ -265,13 +355,18 @@ pii_columns:
 
 If no pii_columns are specified, the opinion will be skipped.
 
-#### P002 Dbt project must not send anonymous statistics [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/P002_project_must_not_send_anon_stats.py)] 
+---
+
+#### P002 dbt project must not send anonymous statistics [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/P002_project_must_not_send_anon_stats.py)] 
 
 Applies to: dbt_project.yml and profiles.yml files. 
 Sending anonymous statistics is enabled by default (opt-out). Although is a good way to help the dbt team improve the product, for privacy reasons we recommend to disable this feature.
 
 This opinion checks if the `send_anonymous_usage_stats` flag is set to `False` in the `dbt_project.yml` file.
 Previous to dbt 1.8 this flag was set in profiles.yml. This opinion will also check if it's present there.
+
+---
+---
 
 ### BigQuery Opinions
 Opinions with the code starting in BQ are specific to BigQuery. They will only evaluate files if the sqlglot dialect is set to `bigquery` in `.dbt-opiner.yaml` file.
@@ -289,7 +384,9 @@ Extra configuration:
 You can specify these under the `opinions_config>extra_opinions_config>BQ001` key in your `.dbt-opiner.yaml` file.
   - ignore_targets: list of target names to ignore (default: ['prod', 'production'])
   - maximum_bytes_billed: maximum bytes billed allowed (optional)
-  
+
+---
+
 #### BQ002 Models materialized as tables in BigQuery should have clustering defined [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/BQ002_bigquery_tables_should_have_clustering.py)]
 
 Applies to: dbt models when sql files are changed. 
@@ -304,6 +401,8 @@ A table with clustering also optimizes "limit 1" queries, as it can skip scannin
 
 This opinion checks if models materialized as tables in BigQuery have clustering defined.
 
+---
+
 #### BQ003 Views must have documented the partition and cluster of underlying tables [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/BQ003_bigquery_views_must_have_partition_and_cluster_description.py)]
 
 Applies to: dbt models when either sql or yaml files are changed.
@@ -316,6 +415,8 @@ it is important to document this information in the view description in dbt.
 
 This opinion checks if the description of the view has the keywords 'partition' and 'cluster'.  
 The check is case insensitive.
+
+---
 
 #### BQ004 The persist_docs option for models must be enabled [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/BQ004_bigquery_models_must_persist_docs.py)]
 
@@ -334,6 +435,8 @@ models:
 ```
 To your dbt_project.yml file to enable this option.  
 
+---
+---
 
 ### Adding custom opinions
 > Opinions are like assholes, everyone has one. [_Popular wisdom_](https://en.wiktionary.org/wiki/opinions_are_like_assholes)
@@ -370,7 +473,7 @@ Inspired by Benn Stancil's [blog post](https://benn.substack.com/p/the-rise-of-t
 Far from being a dbt framework, this less ambitious tool aims to help enforce standards and best practices in dbt projects at scale, as part of the data mesh architecture’s federated governance principle.
 
 Although other similar tools exist, they fall short in some aspects:
-  - [dbt-project-evaluator](https://dbt-labs.github.io/dbt-project-evaluator/latest/) doesn't work as a pre-commit hook and it requires a connection to the database to run. Also it's a nightmare of jinja macros and dbt_project configs.
+  - [dbt-project-evaluator](https://dbt-labs.github.io/dbt-project-evaluator/latest/) doesn't work well as a pre-commit hook and in a multi project repo. Also it's a nightmare of jinja macros and dbt_project configs that need to be set up in every exisiting dbt project that you want to evaluate.
   - [dbt-checkpoint](https://github.com/dbt-checkpoint/dbt-checkpoint) doesn't work well with multi projects repositories and doesn't provide a way to define custom opinions (with different levels of severity).
   - [dbt-score](https://dbt-score.picnic.tech/) doesn't work as a pre-commit hook and it's oriented to check mainly the metadata of the nodes. Other checks like one model per yml file or explicit column selection are not easy to integrate.
 

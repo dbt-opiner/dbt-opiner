@@ -28,7 +28,7 @@ class BQ003(BaseOpinion):
             tags=["bigquery", "metadata", "models"],
         )
 
-    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:
+    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult] | None:
         if self._config.get("sqlglot_dialect") != "bigquery":
             return []
 

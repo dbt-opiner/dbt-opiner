@@ -8,5 +8,5 @@ def test_dbt_manifest(temp_complete_git_repo):
     manifest = DbtManifest(
         temp_complete_git_repo / "dbt_project" / "target" / "manifest.json"
     )
-    assert len(manifest.nodes) == 1
-    assert len(manifest.macros) == 1
+    assert len(manifest.nodes.values()) == 1
+    assert len(manifest.macros.values()) == 1

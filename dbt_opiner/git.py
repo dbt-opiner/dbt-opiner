@@ -38,7 +38,7 @@ def clone_git_repo_and_checkout_revision(repository, revision):
             )
         else:
             logger.warning(
-                "Repository revision not defined. "
+                f"Repository: {repository} revision not defined. "
                 "Main branch latest commit will be used. "
                 "We advise to pin a revision."
             )

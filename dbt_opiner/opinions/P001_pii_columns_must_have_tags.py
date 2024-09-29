@@ -21,7 +21,7 @@ class P001(BaseOpinion):
     Make sure that `policy_tag = True` extra configuration is set if this applies to your case.
 
     Required extra configuration:
-    You must specify these under the `extra_opinions_config>P001` key in your `.dbt-opiner.yaml` file.
+    You must specify these under the `opinions_config>extra_opinions_config>P001` key in your `.dbt-opiner.yaml` file.
     - pii_columns: dictionary of column names + list of pii tags.
                    for example:
                    ``` yaml
@@ -41,15 +41,18 @@ class P001(BaseOpinion):
             config=config,
             tags=["privacy", "models"],
         )
-        self._opinions_config = self._opinions_config = (
+        self._opinions_config = (
             config.get("opinions_config", {})
             .get("extra_opinions_config", {})
             .get("P001", {})
         )
 
+        self._skip = not self._opinions_config.get("pii_columns")
+        if self._skip:
+            logger.warning("No pii_columns configured for P001. Skipping.")
+
     def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:
-        if not self._opinions_config.get("pii_columns"):
-            logger.debug("P001 opinion is not configured. Skipping.")
+        if self._skip:
             return []
 
         if self._opinions_config.get("policy_tag"):

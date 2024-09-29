@@ -47,7 +47,7 @@ config_dict = {
         ),
     ],
 )
-def test__O002(node, mock_sqlfilehandler, config, expected_passed):
+def test_O002(node, mock_sqlfilehandler, config, expected_passed):
     mock_sqlfilehandler.dbt_node = node
     opinion = O002(config)
     results = opinion.check_opinion(mock_sqlfilehandler)
