@@ -25,7 +25,7 @@ class BQ002(BaseOpinion):
             tags=["models", "bigquery"],
         )
 
-    def _eval(self, file: SqlFileHandler) -> LintResult:
+    def _eval(self, file: SqlFileHandler) -> LintResult | None:
         if (
             file.type != ".sql"
             or file.dbt_node.type != "model"

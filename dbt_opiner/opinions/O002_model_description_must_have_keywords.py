@@ -35,7 +35,7 @@ class O002(BaseOpinion):
             tags=["metadata", "models"],
         )
 
-    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:
+    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult] | None:
         # Check type of file and model.
         keywords = (
             self._config.get("opinions_config", {})

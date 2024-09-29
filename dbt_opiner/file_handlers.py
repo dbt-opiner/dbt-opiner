@@ -139,7 +139,7 @@ class SqlFileHandler(FileHandler):
             self.dbt_node = next(
                 (
                     node
-                    for node in dbt_manifest.macros
+                    for node in dbt_manifest.macros.values()
                     if node.original_file_path in str(self.path)
                 ),
                 None,
@@ -150,7 +150,7 @@ class SqlFileHandler(FileHandler):
             self.dbt_node = next(
                 (
                     node
-                    for node in dbt_manifest.nodes
+                    for node in dbt_manifest.nodes.values()
                     if node.original_file_path in str(self.path)
                 ),
                 None,
@@ -218,7 +218,7 @@ class YamlFileHandler(FileHandler):
         if dbt_manifest:
             self.dbt_nodes = [
                 node
-                for node in dbt_manifest.nodes
+                for node in dbt_manifest.nodes.values()
                 if str(node.docs_yml_file_path) in str(file_path)
             ]
 

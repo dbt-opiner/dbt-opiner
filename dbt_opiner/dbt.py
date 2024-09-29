@@ -187,12 +187,15 @@ class DbtManifest:
         dialect = ConfigSingleton().get_config().get("sqlglot_dialect")
         # For now only a few elements of the manifest are defined as Attributes
         # If more are required they can be added or the manifest_dict can be used instead.
-        self.nodes = [
-            DbtNode(node, dialect) for node in self.manifest_dict.get("nodes").values()
-        ]
-        self.macros = [
-            DbtNode(node, dialect) for node in self.manifest_dict.get("macros").values()
-        ]
+
+        # Create a dictionary with the keys and values of the nodes
+        # and macros in the manifest file
+        self.nodes = {}
+        self.macros = {}
+        for key, value in self.manifest_dict.get("nodes", {}).items():
+            self.nodes[key] = DbtNode(value, dialect)
+        for key, value in self.manifest_dict.get("macros", {}).items():
+            self.macros[key] = DbtNode(value, dialect)
 
 
 class DbtCatalog:

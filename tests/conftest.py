@@ -176,7 +176,7 @@ def temp_complete_git_repo(temp_empty_git_repo):
                         "schema": "test",
                         "description": "model",
                         "name": "model",
-                        "alias": "model",
+                        "alias": "fct_model",
                         "compiled_code": "",
                         "original_file_path": "test/model/model.sql",
                         "patch_path": "dbt_project://models/test/model/_model__models.yaml",

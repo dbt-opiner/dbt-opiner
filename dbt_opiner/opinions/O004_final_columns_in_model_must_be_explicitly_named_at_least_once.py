@@ -66,7 +66,7 @@ class O004(BaseOpinion):
             tags=["sql style", "models"],
         )
 
-    def _eval(self, file: SqlFileHandler) -> LintResult:
+    def _eval(self, file: SqlFileHandler) -> LintResult | None:
         if file.type == ".sql" and file.dbt_node.type == "model":
             not_qualified_stars = [
                 star for star in file.dbt_node.ast_extracted_columns if "*" in star

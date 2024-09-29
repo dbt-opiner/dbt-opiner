@@ -30,7 +30,7 @@ class BQ004(BaseOpinion):
             tags=["bigquery", "dbt_config"],
         )
 
-    def _eval(self, file: YamlFileHandler) -> LintResult:
+    def _eval(self, file: YamlFileHandler) -> LintResult | None:
         if (
             self._config.get("sqlglot_dialect") != "bigquery"
             or file.path.name != "dbt_project.yml"

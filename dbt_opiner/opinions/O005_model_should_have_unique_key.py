@@ -18,7 +18,7 @@ class O005(BaseOpinion):
             tags=["dbt config", "models"],
         )
 
-    def _eval(self, file: SqlFileHandler) -> LintResult:
+    def _eval(self, file: SqlFileHandler) -> LintResult | None:
         # Check type of file and model.
         if file.type == ".sql" and file.dbt_node.type == "model":
             if file.dbt_node.unique_key:

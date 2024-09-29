@@ -186,8 +186,9 @@ def test_yaml_P001(nodes, is_policy_tag, mock_yamlfilehandler, expected_passed):
     assert [result.passed for result in results] == expected_passed
 
 
-def test_not_configured_P001(mock_sqlfilehandler):
+def test_not_configured_P001(caplog, mock_sqlfilehandler):
     mock_sqlfilehandler.dbt_node = {}
     opinion = P001({})
     results = opinion.check_opinion(mock_sqlfilehandler)
     assert results == []
+    assert "No pii_columns configured for P001. Skipping." in caplog.text

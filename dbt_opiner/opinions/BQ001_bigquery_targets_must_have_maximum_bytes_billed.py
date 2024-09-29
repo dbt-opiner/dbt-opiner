@@ -35,7 +35,7 @@ class BQ001(BaseOpinion):
             .get("BQ001", {})
         )
 
-    def _eval(self, file: YamlFileHandler) -> LintResult:
+    def _eval(self, file: YamlFileHandler) -> LintResult | None:
         if (
             file.path.name != "profiles.yml"
             or self._config.get("sqlglot_dialect") != "bigquery"
