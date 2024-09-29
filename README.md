@@ -28,6 +28,7 @@ Tool for keeping dbt standards aligned across dbt projects.
         6. [O006 Models names must start with a prefix](#O006-models-names-must-start-with-a-prefix)
     2. [Lineage opinions](#lineage-opinions)
         1. [L001 Sources must only be used in staging layer](#L001-sources-must-only-be-used-in-staging-layer-source)
+        2. [L002 layer x must not select from layer y](#L002-layer-x-must-not-select-from-layer-y-source)
     3. [Privacy opinions](#privacy-opinions)
         1. [P001 Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file](#P001-Columns-that-contain-Personal-Identifiable-Information-PII-must-be-tagged-in-the-yaml-file-source)
         2. [P002 dbt project must not send anonymous statistics](#P002-Dbt-project-must-not-send-anon-stats-source)
