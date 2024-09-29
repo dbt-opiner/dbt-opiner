@@ -170,6 +170,3 @@ class L002(BaseOpinion):
 class Layer:
     def __init__(self, pair_string: str) -> None:
         self.schema, self.prefix = [x.strip() for x in pair_string.split(",")]
-
-    def __str__(self) -> str:
-        return f"{self.schema} ({self.prefix})"
