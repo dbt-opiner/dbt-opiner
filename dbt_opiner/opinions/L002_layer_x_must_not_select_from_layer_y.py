@@ -23,16 +23,20 @@ class L002(BaseOpinion):
     - layer `fct` should not select from a layer `mrt`.
     - layer `mrt` should not select from a layer `stg`.
 
-    This rule requires extra configuration that state the forbidden layer pairs.
-    You can specify these under the `opinions_config>extra_opinions_config>L002` key in your `.dbt-opiner.yaml` file.
+    Required extra configuration:
+    You must specify these under the `opinions_config>extra_opinions_config>L002` key in your `.dbt-opiner.yaml` file.
+    ``` yaml
       - layer_pairs: #list of forbidden layer pairs
         - "staging,stg selects from facts,fct"
         - "staging,stg selects from marts,mrt"
         - "facts,fct selects from marts,mrt"
-        ... etc.
+
+    ```
+
     The first value is the schema layer name and the second the prefix.
-    If in CI run all models end up in the same schema a check by prefixes is used.
-    You can omit the prefix if it doesn't apply to your case.
+    If by some case your models are all in the same schema (for example in CI) and that schema is not found, a check by prefixes will be used. **Prefixes can't be ommited**. If you don't use prefixes, use a generic one like `foo`.
+
+    If no pairs are specified, the opinion will be skipped.
     """
 
     def __init__(self, config: dict, **kwargs) -> None:

@@ -295,6 +295,40 @@ You can specify these under the `opinions_config>extra_opinions_config>L001` key
 - staging_schema: schema name for staging tables (default: staging)
 - staging_prefix: prefix for staging tables (default: stg_)
 
+---
+
+#### L002 layer x must not select from layer y [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/L002_layer_x_must_not_select_from_layer_y.py)]
+Applies to: dbt models when sql files are changed.
+
+Layer directionality must be respected.
+
+Maintaining a good lineage crucial for any dbt project, and layer directionality is a key part of it.
+If the layer directionality is not respected, it can lead to circular dependencies between layers and make the data model harder to understand and to schedule.
+
+This opinion checks if the layer directionality is respected.
+
+For example:
+- layer `stg` should not select from a layer `fct` or `mrt`.
+- layer `fct` should not select from a layer `mrt`.
+- layer `mrt` should not select from a layer `stg`.
+
+Required extra configuration:
+You must specify these under the `opinions_config>extra_opinions_config>L002` key in your `.dbt-opiner.yaml` file.
+``` yaml
+  - layer_pairs: #list of forbidden layer pairs
+    - "staging,stg selects from facts,fct"
+    - "staging,stg selects from marts,mrt"
+    - "facts,fct selects from marts,mrt"
+
+```
+
+The first value is the schema layer name and the second the prefix.
+If by some case your models are all in the same schema (for example in CI) and that schema is not found, a check by prefixes will be used. **Prefixes can't be ommited**. If you don't use prefixes, use a generic one like `foo`.
+
+If no pairs are specified, the opinion will be skipped.
+
+---
+---
 
 ### Privacy opinions
 
