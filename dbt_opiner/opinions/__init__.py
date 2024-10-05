@@ -2,6 +2,7 @@ from .BQ001_bigquery_targets_must_have_maximum_bytes_billed import BQ001
 from .BQ002_bigquery_tables_should_have_clustering import BQ002
 from .BQ003_bigquery_views_must_have_partition_and_cluster_description import BQ003
 from .BQ004_bigquery_models_must_persist_docs import BQ004
+from .D001_yaml_docs_should_have_n_docs import D001
 from .L001_sources_must_only_be_used_in_staging import L001
 from .L002_layer_x_must_not_select_from_layer_y import L002
 from .O001_model_must_have_description import O001
@@ -19,6 +20,7 @@ opinion_classes = [
     BQ002,
     BQ003,
     BQ004,
+    D001,
     L001,
     L002,
     O001,

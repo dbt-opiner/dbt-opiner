@@ -170,8 +170,8 @@ class DbtManifest:
 
     Attributes:
         manifest_dict: The dictionary representation of the manifest file.
-        nodes: A list of dbt nodes in the manifest.
-        macros: A list of dbt macros in the manifest.
+        nodes: A dictionary of dbt nodes in the manifest.
+        macros: A dictionary of dbt macros in the manifest.
 
     """
 

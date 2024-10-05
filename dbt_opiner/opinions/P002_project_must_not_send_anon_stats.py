@@ -63,5 +63,5 @@ class P002(BaseOpinion):
             opinion_code=self.code,
             passed=False,
             severity=self.severity,
-            message=f"Dbt project {self.severity} not send anonymous statistics.",
+            message=f"Dbt project {self.severity.value} not send anonymous statistics.",
         )
