@@ -4,7 +4,7 @@ from dbt_opiner.dbt import DbtNode
 from dbt_opiner.opinions import O002
 
 config_dict = {
-    "opinions_config": {"extra_opinions_config": {"O002_keywords": ["keyword"]}}
+    "opinions_config": {"extra_opinions_config": {"O002": {"keywords": ["keyword"]}}}
 }
 
 

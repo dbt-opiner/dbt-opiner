@@ -29,16 +29,18 @@ Tool for keeping dbt standards aligned across dbt projects.
     2. [Lineage opinions](#lineage-opinions)
         1. [L001 Sources must only be used in staging layer](#L001-sources-must-only-be-used-in-staging-layer-source)
         2. [L002 layer x must not select from layer y](#L002-layer-x-must-not-select-from-layer-y-source)
-    3. [Privacy opinions](#privacy-opinions)
+    3. [Documentation files opinions](#documentation-files-opinions)
+        1. [D001 yaml files should have n docs](#D001-yaml-files-should-have-n-docs-source)
+    4. [Privacy opinions](#privacy-opinions)
         1. [P001 Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file](#P001-Columns-that-contain-Personal-Identifiable-Information-PII-must-be-tagged-in-the-yaml-file-source)
         2. [P002 dbt project must not send anonymous statistics](#P002-Dbt-project-must-not-send-anon-stats-source)
-    4. [BigQuery opinions](#bigquery-opinions)
+    5. [BigQuery opinions](#bigquery-opinions)
         1. [BQ001 Bigquery targets used for development and testing must have maximum_bytes_billed](#BQ001-Bigquery-targets-used-for-development-and-testing-must-have-maximum_bytes_billed-source)
         2. [BQ002 Models materialized as tables in BigQuery should have clustering defined](#BQ002-Models-materialized-as-tables-in-BigQuery-should-have-clustering-defined-source)
         3. [BQ003 Views must have documented the partition and cluster of underlying tables](#BQ003-Views-must-have-documented-the-partition-and-cluster-of-underlying-tables-source)
         4. [BQ004 The persist_docs option for models must be enabled](#BQ004-The-persist_docs-option-for-models-must-be-enabled-source)
-    5. [Adding custom opinions](#adding-custom-opinions)
-    6. [Ignoring opinions (noqa)](#ignoring-opinions-noqa)
+    6. [Adding custom opinions](#adding-custom-opinions)
+    7. [Ignoring opinions (noqa)](#ignoring-opinions-noqa)
 3. [Why?](#why)
 4. [Contributing](#contributing)
 
@@ -154,9 +156,10 @@ Make sure the description of the model has all the required keywords.
 The keywords can be set in the configuration like this:
 ```yaml
 opinions_config:
-  O002_keywords:
-    - summary
-    - granularity
+  O002:
+    keywords:
+      - summary
+      - granularity
 ```
 Keywords are case insensitive.
 
@@ -327,6 +330,22 @@ The first value is the schema layer name and the second the prefix.
 If by some case your models are all in the same schema (for example in CI) and that schema is not found, a check by prefixes will be used. **Prefixes can't be ommited**. If you don't use prefixes, use a generic one like `foo`.
 
 If no pairs are specified, the opinion will be skipped.
+
+---
+---
+### Documentation files opinions
+
+#### yaml files should have n docs [[source](https://github.com/dbt-opiner/dbt-opiner/blob/main/dbt_opiner/opinions/D001_yaml_docs_should_have_n_docs.py)]
+
+Applies to yaml files that contain dbt nodes documentation. 
+
+Yaml files used for documentation should have a limited number of models or sources.
+
+Although dbt allows to put multiple nodes inside the same yaml file, having a limited ammount of nodes per yaml file makes it easier to find the documentation for a specific element and keeps the files short.
+
+This opinion checks if each yaml file containing models or sources contains more than a specified number(default 1).  
+You can specify these under the `opinions_config>extra_opinions_config>D001` key in your `.dbt-opiner.yaml` file.
+    - max_n_allowed: number of docs allowed per yaml file
 
 ---
 ---

@@ -34,14 +34,15 @@ class O002(BaseOpinion):
             config=config,
             tags=["metadata", "models"],
         )
+        self._opinions_config = (
+            config.get("opinions_config", {})
+            .get("extra_opinions_config", {})
+            .get("O002", {})
+        )
 
     def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult] | None:
         # Check type of file and model.
-        keywords = (
-            self._config.get("opinions_config", {})
-            .get("extra_opinions_config", {})
-            .get("O002_keywords")
-        )
+        keywords = self._opinions_config.get("keywords", [])
 
         if keywords:
             logger.debug(f"Checking model descriptions for keywords: {keywords}")
