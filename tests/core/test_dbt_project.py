@@ -23,7 +23,7 @@ def test_dbt_project(temp_complete_git_repo):
 def test_dbt_project_filter_files(temp_complete_git_repo):
     os.chdir(temp_complete_git_repo)
     with patch(
-        "dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config"
+        "dbt_opiner.opinions.opinions_pack.config_singleton.ConfigSingleton.get_config"
     ) as mock_get_config:
         mock_get_config.return_value = {
             "files": {

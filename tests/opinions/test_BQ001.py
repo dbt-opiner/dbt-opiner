@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from dbt_opiner.file_handlers import YamlFileHandler
+from dbt_opiner import file_handlers
 from dbt_opiner.opinions import BQ001
 
 
@@ -62,7 +62,7 @@ def test_yaml_BQ001(
 ):
     profiles = Path(tmpdir) / "profiles.yml"
     profiles.touch()
-    file = YamlFileHandler(profiles)
+    file = file_handlers.YamlFileHandler(profiles)
     file._dict = profiles_content
     opinion = BQ001(config=config)
     result = opinion.check_opinion(file)

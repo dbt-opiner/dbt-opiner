@@ -7,14 +7,14 @@ from unittest.mock import patch
 
 import pytest
 
-from dbt_opiner.config_singleton import ConfigSingleton
+from dbt_opiner import config_singleton
 
 
-@patch.object(ConfigSingleton, "_initialize")
+@patch.object(config_singleton.ConfigSingleton, "_initialize")
 def test_singleton_instance(mock_initialize):
     # Ensure that the same instance is returned every time
-    instance1 = ConfigSingleton()
-    instance2 = ConfigSingleton()
+    instance1 = config_singleton.ConfigSingleton()
+    instance2 = config_singleton.ConfigSingleton()
     assert instance1 is instance2
     # Ensure that the _initialize method is called only once
     mock_initialize.assert_called_once()
@@ -32,8 +32,8 @@ def test_initialize_with_config(temp_complete_git_repo):
 
     env_var = "test"
     os.environ["ENV_VAR"] = env_var
-    config = ConfigSingleton().get_config()
-    config_file_path = ConfigSingleton().get_config_file_path()
+    config = config_singleton.ConfigSingleton().get_config()
+    config_file_path = config_singleton.ConfigSingleton().get_config_file_path()
     assert config == {
         "sqlglot_dialect": "test",
         "files": {
@@ -48,7 +48,7 @@ def test_initialize_with_config(temp_complete_git_repo):
 
 def test_initialize_without_config(temp_empty_git_repo):
     os.chdir(temp_empty_git_repo)
-    config = ConfigSingleton().get_config()
+    config = config_singleton.ConfigSingleton().get_config()
     assert config == {}
 
 
@@ -85,7 +85,7 @@ def test_initialize_with_invalid_config(
         file.write(config)
 
     with pytest.raises(SystemExit) as excinfo:
-        ConfigSingleton().get_config()
+        config_singleton.ConfigSingleton().get_config()
     assert excinfo.value.code == 1
     with caplog.at_level(logging.CRITICAL):
         assert expected in caplog.text
@@ -154,7 +154,7 @@ def test_initialize_with_shared_config(temp_complete_git_repo, overwrite, expect
             )
         mock_clone.return_value = Path(shared_config_repo)
 
-        config = ConfigSingleton().get_config()
+        config = config_singleton.ConfigSingleton().get_config()
         mock_clone.assert_called_once()
         assert config == expected
 
@@ -183,7 +183,7 @@ def test_initialize_with_invalid_shared_config(temp_complete_git_repo):
             )
         mock_clone.return_value = Path(shared_config_repo)
         with pytest.raises(SystemExit) as excinfo:
-            ConfigSingleton().get_config()
+            config_singleton.ConfigSingleton().get_config()
         assert excinfo.value.code == 1
 
 
@@ -199,7 +199,7 @@ def test_initialize_with_missing_shared_config(caplog, temp_complete_git_repo):
         (Path(shared_config_repo) / ".git").touch()
         mock_clone.return_value = Path(shared_config_repo)
         with pytest.raises(SystemExit) as excinfo:
-            ConfigSingleton().get_config()
+            config_singleton.ConfigSingleton().get_config()
         assert excinfo.value.code == 1
         with caplog.at_level(logging.CRITICAL):
             assert (

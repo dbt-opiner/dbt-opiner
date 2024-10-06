@@ -1,6 +1,5 @@
-from dbt_opiner.file_handlers import YamlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
 from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
@@ -25,7 +24,7 @@ class BQ001(BaseOpinion):
         super().__init__(
             code="BQ001",
             description="Bigquery targets used for development and testing must have maximum_bytes_billed.",
-            severity=OpinionSeverity.MUST,
+            severity=linter.OpinionSeverity.MUST,
             config=config,
             tags=["bigquery", "dbt_config"],
         )
@@ -35,7 +34,7 @@ class BQ001(BaseOpinion):
             .get("BQ001", {})
         )
 
-    def _eval(self, file: YamlFileHandler) -> LintResult | None:
+    def _eval(self, file: file_handlers.YamlFileHandler) -> linter.LintResult | None:
         if (
             file.path.name != "profiles.yml"
             or self._config.get("sqlglot_dialect") != "bigquery"
@@ -68,7 +67,7 @@ class BQ001(BaseOpinion):
             if error_targets.get("missing"):
                 message += f"Missing for targets: {error_targets['missing']}.\n"
 
-            return LintResult(
+            return linter.LintResult(
                 file=file,
                 opinion_code=self.code,
                 passed=False,
@@ -78,7 +77,7 @@ class BQ001(BaseOpinion):
 
         # Avoid returning true if there are no bq targets
         if error_targets.get("bq_targets"):
-            return LintResult(
+            return linter.LintResult(
                 file=file,
                 opinion_code=self.code,
                 passed=True,

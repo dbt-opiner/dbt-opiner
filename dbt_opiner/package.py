@@ -28,14 +28,16 @@ def recommend_version_upgrade():
     if not latest_version:
         # Failed to obtain the latest version, so skip the check
         return
+    current_version_package = version.parse(current_version)
+    latest_version_package = version.parse(latest_version)
 
-    if version.parse(current_version) < version.parse(latest_version):
+    if current_version_package < latest_version_package:
         click.secho(
             f"You are using dbt-opiner {current_version}, however version {latest_version} is available.\n"
             f"Consider upgrading to the latest version.\n",
             fg="yellow",
         )
-    elif version.parse(current_version) == version.parse(latest_version):
+    elif current_version_package == latest_version_package:
         click.secho(
             f"Using the latest version of dbt-opiner: {current_version}.", fg="green"
         )

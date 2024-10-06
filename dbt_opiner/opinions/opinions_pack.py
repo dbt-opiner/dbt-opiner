@@ -1,14 +1,13 @@
-import importlib.util
+import importlib
 import inspect
 import pathlib
 import shutil
 import subprocess
 import sys
-from importlib import metadata
 
 from loguru import logger
 
-from dbt_opiner.config_singleton import ConfigSingleton
+from dbt_opiner import config_singleton
 from dbt_opiner.git import clone_git_repo_and_checkout_revision
 from dbt_opiner.opinions.base_opinion import BaseOpinion
 
@@ -24,7 +23,7 @@ class OpinionsPack:
             no_ignore: Flag to supress the noqa ignored opinions. Defaults to False.
         """
         self._opinions = []
-        self._config = ConfigSingleton().get_config()
+        self._config = config_singleton.ConfigSingleton().get_config()
         self._ignored_opinions = self._config.get("opinions_config", {}).get(
             "ignore_opinions", []
         )
@@ -63,7 +62,9 @@ class OpinionsPack:
         custom_opinions = []
         if source == "local":
             path = (
-                pathlib.Path(ConfigSingleton().get_config_file_path()).parent
+                pathlib.Path(
+                    config_singleton.ConfigSingleton().get_config_file_path()
+                ).parent
                 / "custom_opinions"
             )
             logger.debug(f"Loading custom opinions from local source: {path}")
@@ -107,8 +108,8 @@ class OpinionsPack:
                                 f"Checking if package {package_name} is installed."
                             )
                             try:
-                                metadata.version(package_name)
-                            except metadata.PackageNotFoundError:
+                                importlib.metadata.version(package_name)
+                            except importlib.metadata.PackageNotFoundError:
                                 logger.debug(
                                     f"Package {package_name} not found. Installing."
                                 )

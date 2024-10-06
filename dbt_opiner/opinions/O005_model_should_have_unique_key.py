@@ -1,6 +1,5 @@
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
 from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
@@ -14,22 +13,22 @@ class O005(BaseOpinion):
         super().__init__(
             code="O005",
             description="Model should have unique key.",
-            severity=OpinionSeverity.SHOULD,
+            severity=linter.OpinionSeverity.SHOULD,
             tags=["dbt config", "models"],
         )
 
-    def _eval(self, file: SqlFileHandler) -> LintResult | None:
+    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
         # Check type of file and model.
         if file.type == ".sql" and file.dbt_node.type == "model":
             if file.dbt_node.unique_key:
-                return LintResult(
+                return linter.LintResult(
                     file=file,
                     opinion_code=self.code,
                     passed=True,
                     severity=self.severity,
                     message="Model has a unique key.",
                 )
-            return LintResult(
+            return linter.LintResult(
                 file=file,
                 opinion_code=self.code,
                 passed=False,

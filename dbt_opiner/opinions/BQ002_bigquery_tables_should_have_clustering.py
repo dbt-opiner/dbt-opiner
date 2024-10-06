@@ -1,6 +1,5 @@
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
 from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
@@ -20,12 +19,12 @@ class BQ002(BaseOpinion):
         super().__init__(
             code="BQ002",
             description="Models materialized as tables should have clustering defined.",
-            severity=OpinionSeverity.SHOULD,
+            severity=linter.OpinionSeverity.SHOULD,
             config=config,
             tags=["models", "bigquery"],
         )
 
-    def _eval(self, file: SqlFileHandler) -> LintResult | None:
+    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
         if (
             file.type != ".sql"
             or file.dbt_node.type != "model"
@@ -35,7 +34,7 @@ class BQ002(BaseOpinion):
             return None
 
         if file.dbt_node.config.get("cluster_by"):
-            return LintResult(
+            return linter.LintResult(
                 file=file,
                 opinion_code=self.code,
                 passed=True,
@@ -43,7 +42,7 @@ class BQ002(BaseOpinion):
                 message="Model has clustering defined.",
             )
 
-        return LintResult(
+        return linter.LintResult(
             file=file,
             opinion_code=self.code,
             passed=False,

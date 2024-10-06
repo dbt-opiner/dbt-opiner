@@ -1,6 +1,5 @@
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
 from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
@@ -31,7 +30,7 @@ class O006(BaseOpinion):
         super().__init__(
             code="O006",
             description="Models must start with a prefix.",
-            severity=OpinionSeverity.MUST,
+            severity=linter.OpinionSeverity.MUST,
             config=config,
             tags=["naming conventions", "models"],
         )
@@ -41,21 +40,21 @@ class O006(BaseOpinion):
             .get("O006", {})
         )
 
-    def _eval(self, file: SqlFileHandler) -> LintResult | None:
+    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
         if file.type == ".sql" and file.dbt_node.type == "model":
             accepted_prefixes = self._opinions_config.get(
                 "accepted_prefixes", ["base", "stg", "int", "fct", "dim", "mrt", "agg"]
             )
 
             if file.dbt_node.alias.split("_")[0] in accepted_prefixes:
-                return LintResult(
+                return linter.LintResult(
                     file=file,
                     opinion_code=self.code,
                     passed=True,
                     severity=self.severity,
                     message="Model starts with a valid prefix.",
                 )
-            return LintResult(
+            return linter.LintResult(
                 file=file,
                 opinion_code=self.code,
                 passed=False,

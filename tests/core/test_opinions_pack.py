@@ -27,7 +27,7 @@ from dbt_opiner.opinions.opinions_pack import OpinionsPack
 def test_opinions_pack(caplog, temp_complete_git_repo, source, revision, expected):
     os.chdir(temp_complete_git_repo)
     with patch(
-        "dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config"
+        "dbt_opiner.opinions.opinions_pack.config_singleton.ConfigSingleton.get_config"
     ) as mock_get_config, patch("subprocess.run") as mock_subprocess_run:
         mock_subprocess_run.return_value = None
         mock_get_config.return_value = {
@@ -87,7 +87,7 @@ def test_opinions_pack(caplog, temp_complete_git_repo, source, revision, expecte
 def test_opinions_pack_no_ignore(temp_complete_git_repo):
     os.chdir(temp_complete_git_repo)
     with patch(
-        "dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config"
+        "dbt_opiner.opinions.opinions_pack.config_singleton.ConfigSingleton.get_config"
     ) as mock_get_config:
         mock_get_config.return_value = {
             "opinions_config": {"ignore_opinions": ["O001"]}
@@ -120,7 +120,7 @@ def test_opinions_pack_no_ignore(temp_complete_git_repo):
 )
 def test_opinions_pack_exit_one(caplog, repository, revision, expected):
     with patch(
-        "dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config"
+        "dbt_opiner.opinions.opinions_pack.config_singleton.ConfigSingleton.get_config"
     ) as mock_get_config, patch(
         "subprocess.run",
         side_effect=subprocess.CalledProcessError(

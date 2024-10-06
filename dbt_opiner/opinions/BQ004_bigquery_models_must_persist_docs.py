@@ -1,6 +1,5 @@
-from dbt_opiner.file_handlers import YamlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
 from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
@@ -25,12 +24,12 @@ class BQ004(BaseOpinion):
         super().__init__(
             code="BQ004",
             description="The persist_docs option for models must be enabled",
-            severity=OpinionSeverity.MUST,
+            severity=linter.OpinionSeverity.MUST,
             config=config,
             tags=["bigquery", "dbt_config"],
         )
 
-    def _eval(self, file: YamlFileHandler) -> LintResult | None:
+    def _eval(self, file: file_handlers.YamlFileHandler) -> linter.LintResult | None:
         if (
             self._config.get("sqlglot_dialect") != "bigquery"
             or file.path.name != "dbt_project.yml"
@@ -40,7 +39,7 @@ class BQ004(BaseOpinion):
         if file.get("models", {}).get("persist_docs", {}).get("relation") and file.get(
             "models", {}
         ).get("persist_docs", {}).get("columns"):
-            return LintResult(
+            return linter.LintResult(
                 file=file,
                 opinion_code=self.code,
                 passed=True,
@@ -48,7 +47,7 @@ class BQ004(BaseOpinion):
                 message="The persist_docs option for models is enabled",
             )
 
-        return LintResult(
+        return linter.LintResult(
             file=file,
             opinion_code=self.code,
             passed=False,

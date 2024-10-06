@@ -1,5 +1,5 @@
+from dbt_opiner import linter
 from dbt_opiner.opinions.base_opinion import BaseOpinion
-from dbt_opiner.opinions.base_opinion import OpinionSeverity
 
 
 class BadOpinion(BaseOpinion):
@@ -7,7 +7,7 @@ class BadOpinion(BaseOpinion):
         super().__init__(
             code="bad",
             description="",
-            severity=OpinionSeverity.MUST,
+            severity=linter.OpinionSeverity.MUST,
             tags=[],
         )
 

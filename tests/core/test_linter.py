@@ -6,22 +6,20 @@ from unittest.mock import patch
 import pytest
 from loguru import logger
 
+from dbt_opiner import linter
 from dbt_opiner.dbt import DbtNode
 from dbt_opiner.dbt import DbtProject
-from dbt_opiner.linter import Linter
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
 from dbt_opiner.opinions import O001
 from dbt_opiner.opinions.opinions_pack import OpinionsPack
 
 
 @pytest.fixture
-@patch("dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config")
+@patch("dbt_opiner.opinions.opinions_pack.config_singleton.ConfigSingleton.get_config")
 def base_linter(get_config_mock, temp_empty_git_repo):
     os.chdir(temp_empty_git_repo)
     get_config_mock.return_value = {}
-    linter = Linter(OpinionsPack())
-    return linter
+    linter_inst = linter.Linter(OpinionsPack())
+    return linter_inst
 
 
 @pytest.fixture
@@ -33,13 +31,20 @@ def linter_with_results(base_linter, mock_yamlfilehandler):
     yaml_file.path = "test.yaml"
     yaml_file.parent_dbt_project = mock_dbt_project
 
-    lint_result_1 = LintResult(
-        yaml_file, "C001", False, OpinionSeverity.SHOULD, "message", ["tag1"]
+    lint_result_1 = linter.LintResult(
+        yaml_file, "C001", False, linter.OpinionSeverity.SHOULD, "message", ["tag1"]
     )
-    lint_result_2 = LintResult(
-        yaml_file, "C002", False, OpinionSeverity.MUST, "message", ["tag1", "tag2"]
+    lint_result_2 = linter.LintResult(
+        yaml_file,
+        "C002",
+        False,
+        linter.OpinionSeverity.MUST,
+        "message",
+        ["tag1", "tag2"],
     )
-    lint_result_3 = LintResult(yaml_file, "C003", True, OpinionSeverity.MUST, "message")
+    lint_result_3 = linter.LintResult(
+        yaml_file, "C003", True, linter.OpinionSeverity.MUST, "message"
+    )
 
     base_linter._lint_results = [lint_result_1, lint_result_2, lint_result_3]
 
@@ -80,11 +85,11 @@ def test_get_lint_results(base_linter, mock_sqlfilehandler, mock_yamlfilehandler
         }
     )
 
-    lint_result_1 = LintResult(
-        yaml_file, "C001", False, OpinionSeverity.SHOULD, "message"
+    lint_result_1 = linter.LintResult(
+        yaml_file, "C001", False, linter.OpinionSeverity.SHOULD, "message"
     )
-    lint_result_2 = LintResult(
-        sql_file, "C001", False, OpinionSeverity.SHOULD, "message"
+    lint_result_2 = linter.LintResult(
+        sql_file, "C001", False, linter.OpinionSeverity.SHOULD, "message"
     )
 
     base_linter._lint_results = [lint_result_1, lint_result_2]

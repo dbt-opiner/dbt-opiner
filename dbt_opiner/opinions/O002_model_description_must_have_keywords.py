@@ -1,9 +1,7 @@
 from loguru import logger
 
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.file_handlers import YamlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
 from dbt_opiner.opinions.base_opinion import BaseOpinion
 
 
@@ -30,7 +28,7 @@ class O002(BaseOpinion):
         super().__init__(
             code="O002",
             description="Model description must have keywords.",
-            severity=OpinionSeverity.MUST,
+            severity=linter.OpinionSeverity.MUST,
             config=config,
             tags=["metadata", "models"],
         )
@@ -40,7 +38,9 @@ class O002(BaseOpinion):
             .get("O002", {})
         )
 
-    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult] | None:
+    def _eval(
+        self, file: file_handlers.SqlFileHandler | file_handlers.YamlFileHandler
+    ) -> list[linter.LintResult] | None:
         # Check type of file and model.
         keywords = self._opinions_config.get("keywords", [])
 
@@ -62,7 +62,7 @@ class O002(BaseOpinion):
                             missing_keywords.append(keyword)
 
                     if len(missing_keywords) > 0:
-                        result = LintResult(
+                        result = linter.LintResult(
                             file=file,
                             opinion_code=self.code,
                             passed=False,
@@ -70,7 +70,7 @@ class O002(BaseOpinion):
                             message=f"Model {node.alias} description {self.severity.value} have keywords: {missing_keywords}",
                         )
                     else:
-                        result = LintResult(
+                        result = linter.LintResult(
                             file=file,
                             opinion_code=self.code,
                             passed=True,

@@ -1,15 +1,11 @@
-from abc import ABC
-from abc import abstractmethod
+import abc
 from typing import Any
 
-from dbt_opiner.file_handlers import MarkdownFileHandler
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.file_handlers import YamlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
 
 
-class BaseOpinion(ABC):
+class BaseOpinion(abc.ABC):
     """The base class for an opinion.
 
     Attributes:
@@ -32,7 +28,7 @@ class BaseOpinion(ABC):
         self,
         code: str,
         description: str,
-        severity: OpinionSeverity,
+        severity: linter.OpinionSeverity,
         config: dict[str, Any] = {},
         tags: list[str] = [],
     ) -> None:
@@ -54,8 +50,11 @@ class BaseOpinion(ABC):
         self._config = config
 
     def check_opinion(
-        self, file: SqlFileHandler | YamlFileHandler | MarkdownFileHandler
-    ) -> LintResult | list[LintResult]:
+        self,
+        file: file_handlers.SqlFileHandler
+        | file_handlers.YamlFileHandler
+        | file_handlers.MarkdownFileHandler,
+    ) -> linter.LintResult | list[linter.LintResult]:
         """The method that will be called to evaluate the opinion.
 
         Args:
@@ -69,22 +68,25 @@ class BaseOpinion(ABC):
         # consistency, extensibility, and ease of testing.
         result = self._eval(file)
 
-        # Add opinion tags to the result and check that the result is a LintResult
-        if isinstance(result, LintResult):
+        # Add opinion tags to the result and check that the result is a linter.LintResult
+        if isinstance(result, linter.LintResult):
             result.tags = self.tags
             return result
 
         if isinstance(result, list):
             for res in result:
-                if not isinstance(res, LintResult):
+                if not isinstance(res, linter.LintResult):
                     return None
                 res.tags = self.tags or "not tagged"
             return result
 
-    @abstractmethod
+    @abc.abstractmethod
     def _eval(
-        self, file: SqlFileHandler | YamlFileHandler | MarkdownFileHandler
-    ) -> LintResult | list[LintResult]:
+        self,
+        file: file_handlers.SqlFileHandler
+        | file_handlers.YamlFileHandler
+        | file_handlers.MarkdownFileHandler,
+    ) -> linter.LintResult | list[linter.LintResult]:
         """
         The method that will contain all the logic of the opinon evaluation.
         Should be implemented in the child class.
