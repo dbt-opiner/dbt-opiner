@@ -8,8 +8,8 @@ import sys
 from loguru import logger
 
 from dbt_opiner import config_singleton
-from dbt_opiner.git import clone_git_repo_and_checkout_revision
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner import git
+from dbt_opiner.opinions import base_opinion
 
 
 class OpinionsPack:
@@ -92,8 +92,8 @@ class OpinionsPack:
                 # Only load BaseOpinion children classes
                 if (
                     name not in self._ignored_opinions
-                    and issubclass(obj, BaseOpinion)
-                    and obj is not BaseOpinion
+                    and issubclass(obj, base_opinion.BaseOpinion)
+                    and obj is not base_opinion.BaseOpinion
                 ):
                     logger.debug(f"Found class {name} in {file}")
 
@@ -147,7 +147,7 @@ class OpinionsPack:
             sys.exit(1)
 
         logger.debug(f"Loading custom opinions from git repository: {git_repo}.")
-        temp_dir = clone_git_repo_and_checkout_revision(git_repo, revision)
+        temp_dir = git.clone_git_repo_and_checkout_revision(git_repo, revision)
         path = temp_dir / "custom_opinions"
         opinions = self._load_opinions_from_path(path)
         shutil.rmtree(temp_dir)  # Clean up the temporary directory

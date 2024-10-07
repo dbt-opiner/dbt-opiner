@@ -2,10 +2,10 @@ from loguru import logger
 
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class O002(BaseOpinion):
+class O002(base_opinion.BaseOpinion):
     """Models descriptions must have keywords.
 
     Keywords help standarizing the description of the models,

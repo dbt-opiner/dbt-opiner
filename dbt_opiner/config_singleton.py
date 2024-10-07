@@ -7,7 +7,7 @@ import sys
 import yaml
 from loguru import logger
 
-from dbt_opiner.git import clone_git_repo_and_checkout_revision
+from dbt_opiner import git
 
 
 class ConfigSingleton:
@@ -206,7 +206,7 @@ class ConfigSingleton:
 
         git_repo = original_config["shared_config"]["repository"]
         revision = original_config["shared_config"].get("rev")
-        temp_dir = clone_git_repo_and_checkout_revision(git_repo, revision)
+        temp_dir = git.clone_git_repo_and_checkout_revision(git_repo, revision)
         shared_config_path = self._search_config_file(temp_dir)
         if shared_config_path:
             shared_config = self._load_config_from_file(shared_config_path)

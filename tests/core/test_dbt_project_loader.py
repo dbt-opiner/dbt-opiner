@@ -1,9 +1,9 @@
 import os
-from pathlib import Path
+import pathlib
 
 import pytest
 
-from dbt_opiner.dbt import DbtProjectLoader
+from dbt_opiner import dbt
 
 
 # Test project loader
@@ -52,7 +52,7 @@ def test_dbt_project_loader(
             temp_complete_git_repo.joinpath(*file_parts)
             for file_parts in changed_files_parts
         ]
-    loader = DbtProjectLoader()
+    loader = dbt.DbtProjectLoader()
     projects = loader.initialize_dbt_projects(
         all_files=all_files, changed_files=changed_files
     )
@@ -73,7 +73,9 @@ def test_dbt_project_loader(
     "all_files, changed_files",
     [
         pytest.param(
-            True, [Path("some_file")], id="Both all_files and changed_files are passed"
+            True,
+            [pathlib.Path("some_file")],
+            id="Both all_files and changed_files are passed",
         ),
         pytest.param(False, None, id="Neither all_files and changed_files are passed"),
     ],
@@ -82,6 +84,6 @@ def test_dbt_project_loader_exceptions(
     temp_complete_git_repo, all_files, changed_files
 ):
     os.chdir(temp_complete_git_repo)
-    loader = DbtProjectLoader()
+    loader = dbt.DbtProjectLoader()
     with pytest.raises(ValueError):
         loader.initialize_dbt_projects(all_files=all_files, changed_files=changed_files)

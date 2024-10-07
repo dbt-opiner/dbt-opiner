@@ -2,10 +2,10 @@ from loguru import logger
 
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class P001(BaseOpinion):
+class P001(base_opinion.BaseOpinion):
     """Columns that contain Personal Identifiable Information (PII) should be tagged in the yaml file.
 
     A common practise in data engineering is to tag columns that contain PII.

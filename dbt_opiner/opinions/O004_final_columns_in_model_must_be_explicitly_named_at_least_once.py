@@ -1,9 +1,9 @@
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class O004(BaseOpinion):
+class O004(base_opinion.BaseOpinion):
     """
     The final columns of the model must be explicitly named at least once.
 

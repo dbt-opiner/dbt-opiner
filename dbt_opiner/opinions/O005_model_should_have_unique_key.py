@@ -1,9 +1,9 @@
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class O005(BaseOpinion):
+class O005(base_opinion.BaseOpinion):
     """Models should have a unique key defined in the config block of the model.
     This is useful to enforce the uniqueness of the model and
     to make the granularity of the model explicit.

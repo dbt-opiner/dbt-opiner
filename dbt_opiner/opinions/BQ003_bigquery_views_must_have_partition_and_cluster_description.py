@@ -2,10 +2,10 @@ from loguru import logger
 
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class BQ003(BaseOpinion):
+class BQ003(base_opinion.BaseOpinion):
     """Views must have documented the partition and cluster of underlying tables.
 
     Views that select underlying tables must have a description that explains

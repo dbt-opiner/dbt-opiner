@@ -1,4 +1,4 @@
-import importlib.metadata
+from importlib import metadata
 from typing import Optional
 
 import click
@@ -9,7 +9,7 @@ _PYPI_URL = "https://pypi.org/pypi/dbt-opiner/json"
 
 
 def get_package_version() -> str:
-    return importlib.metadata.version("dbt-opiner")
+    return metadata.version("dbt-opiner")
 
 
 def get_latest_package_version() -> Optional[str]:

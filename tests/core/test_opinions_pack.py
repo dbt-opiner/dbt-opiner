@@ -2,11 +2,11 @@ import logging
 import os
 import subprocess
 import sys
-from unittest.mock import patch
+from unittest import mock
 
 import pytest
 
-from dbt_opiner.opinions.opinions_pack import OpinionsPack
+from dbt_opiner.opinions import opinions_pack
 
 
 # Test general loading of opinions and custom opinions
@@ -26,9 +26,9 @@ from dbt_opiner.opinions.opinions_pack import OpinionsPack
 )
 def test_opinions_pack(caplog, temp_complete_git_repo, source, revision, expected):
     os.chdir(temp_complete_git_repo)
-    with patch(
+    with mock.patch(
         "dbt_opiner.opinions.opinions_pack.config_singleton.ConfigSingleton.get_config"
-    ) as mock_get_config, patch("subprocess.run") as mock_subprocess_run:
+    ) as mock_get_config, mock.patch("subprocess.run") as mock_subprocess_run:
         mock_subprocess_run.return_value = None
         mock_get_config.return_value = {
             "opinions_config": {
@@ -40,8 +40,8 @@ def test_opinions_pack(caplog, temp_complete_git_repo, source, revision, expecte
                 },
             }
         }
-        opinions_pack = OpinionsPack()
-        opinions = opinions_pack.get_opinions()
+        opinions_pack_inst = opinions_pack.OpinionsPack()
+        opinions = opinions_pack_inst.get_opinions()
         # There should be at least 1 opinion from opinion classes
         assert len(opinions) > 0
         # Ignored opinions
@@ -86,14 +86,14 @@ def test_opinions_pack(caplog, temp_complete_git_repo, source, revision, expecte
 # Test noqa no ignore flag
 def test_opinions_pack_no_ignore(temp_complete_git_repo):
     os.chdir(temp_complete_git_repo)
-    with patch(
+    with mock.patch(
         "dbt_opiner.opinions.opinions_pack.config_singleton.ConfigSingleton.get_config"
     ) as mock_get_config:
         mock_get_config.return_value = {
             "opinions_config": {"ignore_opinions": ["O001"]}
         }
-        opinions_pack = OpinionsPack(no_ignore=True)
-        opinions = opinions_pack.get_opinions()
+        opinions_pack_inst = opinions_pack.OpinionsPack(no_ignore=True)
+        opinions = opinions_pack_inst.get_opinions()
         # There should be at least 1 opinion from opinion classes
         assert len(opinions) > 0
         # Check that the opinion O001 was not ignored
@@ -119,9 +119,9 @@ def test_opinions_pack_no_ignore(temp_complete_git_repo):
     ],
 )
 def test_opinions_pack_exit_one(caplog, repository, revision, expected):
-    with patch(
+    with mock.patch(
         "dbt_opiner.opinions.opinions_pack.config_singleton.ConfigSingleton.get_config"
-    ) as mock_get_config, patch(
+    ) as mock_get_config, mock.patch(
         "subprocess.run",
         side_effect=subprocess.CalledProcessError(
             1, ["cmd", "command"], stderr=b"Some error occurred"
@@ -137,8 +137,8 @@ def test_opinions_pack_exit_one(caplog, repository, revision, expected):
             }
         }
         with pytest.raises(SystemExit) as excinfo:
-            opinions_pack = OpinionsPack()
-            opinions_pack.get_opinions()
+            opinions_pack_inst = opinions_pack.OpinionsPack()
+            opinions_pack_inst.get_opinions()
         assert excinfo.value.code == 1
         with caplog.at_level(logging.DEBUG):
             assert expected in caplog.text

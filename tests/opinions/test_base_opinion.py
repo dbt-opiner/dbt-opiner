@@ -1,8 +1,8 @@
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class BadOpinion(BaseOpinion):
+class BadOpinion(base_opinion.BaseOpinion):
     def __init__(self, **kwargs) -> None:
         super().__init__(
             code="bad",

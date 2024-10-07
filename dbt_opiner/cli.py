@@ -8,11 +8,11 @@ import pyfiglet
 from loguru import logger
 
 from dbt_opiner import entrypoint
-from dbt_opiner.package import recommend_version_upgrade
+from dbt_opiner import package
 
 fig = pyfiglet.Figlet(font="big")
 click.echo(fig.renderText("dbt  opiner"))
-recommend_version_upgrade()
+package.recommend_version_upgrade()
 
 
 def common_options(f):

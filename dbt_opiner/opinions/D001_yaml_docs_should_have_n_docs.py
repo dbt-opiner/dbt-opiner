@@ -1,9 +1,9 @@
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class D001(BaseOpinion):
+class D001(base_opinion.BaseOpinion):
     """Yaml files used for documentation should have a limited number of models or sources.
 
     Although dbt allows to put multiple nodes inside the same yaml file,

@@ -4,9 +4,9 @@ import time
 
 from loguru import logger
 
+from dbt_opiner import dbt
 from dbt_opiner import linter
-from dbt_opiner.dbt import DbtProjectLoader
-from dbt_opiner.opinions.opinions_pack import OpinionsPack
+from dbt_opiner.opinions import opinions_pack
 
 
 def lint(
@@ -27,14 +27,14 @@ def lint(
         output_file: Output file to save the linting results. Defaults to None.
     """
     logger.info("Linting dbt projects...")
-    loader = DbtProjectLoader(target, force_compile)
+    loader = dbt.DbtProjectLoader(target, force_compile)
 
     dbt_projects = loader.initialize_dbt_projects(
         changed_files=changed_files, all_files=all_files
     )
 
-    opinions_pack = OpinionsPack(no_ignore)
-    linter_inst = linter.Linter(opinions_pack, no_ignore)
+    opinions_pack_inst = opinions_pack.OpinionsPack(no_ignore)
+    linter_inst = linter.Linter(opinions_pack_inst, no_ignore)
 
     # TODO: make it parallel?
     start = time.process_time()
@@ -73,7 +73,7 @@ def audit(
         output_file: Output file to save the linting results. Defaults to None.
     """
     logger.info("Auditing dbt projects...")
-    loader = DbtProjectLoader(target, force_compile)
+    loader = dbt.DbtProjectLoader(target, force_compile)
 
     if dbt_project_dir:
         if (pathlib.Path(dbt_project_dir) / "dbt_project.yml").exists():
@@ -86,8 +86,8 @@ def audit(
     else:
         dbt_projects = loader.initialize_dbt_projects(all_files=True)
 
-    opinions_pack = OpinionsPack(no_ignore)
-    linter_inst = linter.Linter(opinions_pack, no_ignore)
+    opinions_pack_inst = opinions_pack.OpinionsPack(no_ignore)
+    linter_inst = linter.Linter(opinions_pack_inst, no_ignore)
     for dbt_project in dbt_projects:
         merged_files = [
             item for files_list in dbt_project.files.values() for item in files_list

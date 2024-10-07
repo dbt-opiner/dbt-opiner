@@ -1,9 +1,9 @@
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class O001(BaseOpinion):
+class O001(base_opinion.BaseOpinion):
     """Models must have descriptions. Empty descriptions are not allowed.
 
     Descriptions are important for documentation and understanding the purpose of the model.

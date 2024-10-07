@@ -1,9 +1,9 @@
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class BQ001(BaseOpinion):
+class BQ001(base_opinion.BaseOpinion):
     """Bigquery targets used for development and testing must have maximum_bytes_billed
     set to prevent unexpected costs.
 

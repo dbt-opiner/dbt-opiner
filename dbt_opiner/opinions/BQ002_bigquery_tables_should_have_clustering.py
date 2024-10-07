@@ -1,9 +1,9 @@
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class BQ002(BaseOpinion):
+class BQ002(base_opinion.BaseOpinion):
     """Models materialized as tables in BigQuery should have clustering defined.
 
     Clustering is a feature in BigQuery that allows you to group your data based

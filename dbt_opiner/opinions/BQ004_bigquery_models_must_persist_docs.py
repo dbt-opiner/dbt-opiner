@@ -1,9 +1,9 @@
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class BQ004(BaseOpinion):
+class BQ004(base_opinion.BaseOpinion):
     """The persist_docs option for models must be enabled.
 
     The persist_docs option for models must be enabled to ensure that the documentation

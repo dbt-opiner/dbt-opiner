@@ -7,9 +7,8 @@ from collections import defaultdict
 
 import sqlglot
 from loguru import logger
-from sqlglot.optimizer.qualify import qualify
-from sqlglot.optimizer.scope import build_scope
-from sqlglot.optimizer.scope import find_in_scope
+from sqlglot.optimizer import qualify
+from sqlglot.optimizer import scope
 
 from dbt_opiner import config_singleton
 from dbt_opiner import file_handlers
@@ -311,14 +310,14 @@ class DbtNode:
 
     def _extract_columns_from_ast(self):
         columns = []
-        for column in qualify(self.sql_code_ast).selects:
+        for column in qualify.qualify(self.sql_code_ast).selects:
             # If there's a select * in the final CTE
             if column.is_star:
-                root = build_scope(qualify(column.parent))
+                root = scope.build_scope(qualify.qualify(column.parent))
                 try:
                     # If the column is a `select *` from a directly referenced table
                     columns.append(
-                        f"* from {find_in_scope(root.expression, sqlglot.exp.Table).name}"
+                        f"* from {scope.find_in_scope(root.expression, sqlglot.exp.Table).name}"
                     )
                 except AttributeError:
                     # If the column is a `select * from (select * from table)`

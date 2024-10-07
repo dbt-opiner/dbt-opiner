@@ -1,9 +1,9 @@
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class P002(BaseOpinion):
+class P002(base_opinion.BaseOpinion):
     """Dbt project must not send anonymous statistics.
 
     Sending anonymous statistics is enabled by default (opt-out).

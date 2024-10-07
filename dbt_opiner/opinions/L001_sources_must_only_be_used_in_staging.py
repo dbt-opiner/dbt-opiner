@@ -1,9 +1,9 @@
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner.opinions import base_opinion
 
 
-class L001(BaseOpinion):
+class L001(base_opinion.BaseOpinion):
     """Sources must only be used in staging layer.
 
     Staging models are the entrypoint for raw data in dbt projects, and it is the

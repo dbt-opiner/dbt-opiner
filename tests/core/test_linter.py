@@ -1,30 +1,30 @@
 import logging
 import os
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest import mock
 
 import pytest
 from loguru import logger
 
+from dbt_opiner import dbt
 from dbt_opiner import linter
-from dbt_opiner.dbt import DbtNode
-from dbt_opiner.dbt import DbtProject
-from dbt_opiner.opinions import O001
-from dbt_opiner.opinions.opinions_pack import OpinionsPack
+from dbt_opiner import opinions
+from dbt_opiner.opinions import opinions_pack
 
 
 @pytest.fixture
-@patch("dbt_opiner.opinions.opinions_pack.config_singleton.ConfigSingleton.get_config")
+@mock.patch(
+    "dbt_opiner.opinions.opinions_pack.config_singleton.ConfigSingleton.get_config"
+)
 def base_linter(get_config_mock, temp_empty_git_repo):
     os.chdir(temp_empty_git_repo)
     get_config_mock.return_value = {}
-    linter_inst = linter.Linter(OpinionsPack())
+    linter_inst = linter.Linter(opinions_pack.OpinionsPack())
     return linter_inst
 
 
 @pytest.fixture
 def linter_with_results(base_linter, mock_yamlfilehandler):
-    mock_dbt_project = Mock(spec=DbtProject)
+    mock_dbt_project = mock.Mock(spec=dbt.DbtProject)
     mock_dbt_project.name = "test_project"
 
     yaml_file = mock_yamlfilehandler
@@ -53,7 +53,7 @@ def linter_with_results(base_linter, mock_yamlfilehandler):
 
 def test_noqa_opinion_in_file(base_linter, mock_yamlfilehandler, caplog):
     base_linter.opinions = [
-        O001(),
+        opinions.O001(),
     ]
     yaml_file = mock_yamlfilehandler
     yaml_file.path = "test.yaml"
@@ -65,7 +65,7 @@ def test_noqa_opinion_in_file(base_linter, mock_yamlfilehandler, caplog):
 
 def test_noqa_opinion_in_config(base_linter, mock_yamlfilehandler, caplog):
     base_linter._config = {"opinions_config": {"ignore_files": {"O001": ".*test.*"}}}
-    base_linter.opinions = [O001()]
+    base_linter.opinions = [opinions.O001()]
     yaml_file = mock_yamlfilehandler
     yaml_file.path = "test.yaml"
     base_linter.lint_file(yaml_file)
@@ -77,7 +77,7 @@ def test_get_lint_results(base_linter, mock_sqlfilehandler, mock_yamlfilehandler
     yaml_file = mock_yamlfilehandler
     yaml_file.path = "test.yaml"
     sql_file = mock_sqlfilehandler
-    sql_file.dbt_node = DbtNode(
+    sql_file.dbt_node = dbt.DbtNode(
         {
             "resource_type": "model",
             "description": "Some description",
@@ -130,7 +130,7 @@ def test_audit(
     expected,
 ):
     # Patch logger.remove to prevent weird loguru error
-    with patch("sys.exit") as mock_exit, patch.object(
+    with mock.patch("sys.exit") as mock_exit, mock.patch.object(
         logger, "remove", lambda *args, **kwargs: None
     ):
         linter_with_results.log_audit_and_exit(
@@ -149,13 +149,13 @@ def test_audit(
 
 def test_audit_unsupported_format(linter_with_results):
     # Patch logger.remove to prevent weird loguru error
-    with patch.object(logger, "remove", lambda *args, **kwargs: None):
+    with mock.patch.object(logger, "remove", lambda *args, **kwargs: None):
         with pytest.raises(ValueError):
             linter_with_results.log_audit_and_exit(type="all", format="json")
 
 
 def test_log_results_and_exit(linter_with_results, caplog):
-    with patch("sys.exit") as mock_exit, patch.object(
+    with mock.patch("sys.exit") as mock_exit, mock.patch.object(
         logger, "remove", lambda *args, **kwargs: None
     ):
         linter_with_results.log_results_and_exit(output_file="results.txt")

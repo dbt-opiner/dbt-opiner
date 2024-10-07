@@ -1,18 +1,18 @@
 import os
-from pathlib import Path
-from unittest.mock import patch
+import pathlib
+from unittest import mock
 
 import pytest
 import yaml
 
+from dbt_opiner import dbt
 from dbt_opiner import file_handlers
-from dbt_opiner.dbt import DbtManifest
 
 
 @pytest.fixture
 def manifest(temp_complete_git_repo):
     os.chdir(temp_complete_git_repo)
-    manifest = DbtManifest(
+    manifest = dbt.DbtManifest(
         temp_complete_git_repo / "dbt_project" / "target" / "manifest.json"
     )
     return manifest
@@ -109,7 +109,7 @@ def test_runtime_open(temp_complete_git_repo, manifest):
         / "model"
         / "model.sql"
     )
-    with patch("pathlib.Path.open") as mock_open:
+    with mock.patch("pathlib.Path.open") as mock_open:
         mock_open.side_effect = Exception("Mocked exception")
         with pytest.raises(RuntimeError, match="Error reading file: Mocked exception"):
             file_handlers.SqlFileHandler(file, manifest)
@@ -118,7 +118,13 @@ def test_runtime_open(temp_complete_git_repo, manifest):
 # Testfile_handlers.YamlFileHandler
 def test_yaml_file_handler(temp_complete_git_repo, manifest):
     os.chdir(temp_complete_git_repo)
-    file = Path("dbt_project") / "models" / "test" / "model" / "_model__models.yaml"
+    file = (
+        pathlib.Path("dbt_project")
+        / "models"
+        / "test"
+        / "model"
+        / "_model__models.yaml"
+    )
     handler = file_handlers.YamlFileHandler(file, manifest)
     assert handler.dbt_nodes[0].type == "model"
     assert handler.to_dict() == {
@@ -158,7 +164,7 @@ def test_runtime_safe_load(temp_complete_git_repo, manifest):
         / "model"
         / "_model__models.yaml"
     )
-    with patch("yaml.safe_load") as mock_safe_load:
+    with mock.patch("yaml.safe_load") as mock_safe_load:
         mock_safe_load.side_effect = yaml.YAMLError
         handler = file_handlers.YamlFileHandler(file, manifest)
         with pytest.raises(RuntimeError, match="Error parsing YAML file"):
