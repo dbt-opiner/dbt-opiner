@@ -1,14 +1,14 @@
 import os
-from unittest.mock import patch
+from unittest import mock
 
-from dbt_opiner.dbt import DbtProject
+from dbt_opiner import dbt
 
 
 def test_dbt_project(temp_complete_git_repo):
     os.chdir(temp_complete_git_repo)
     dbt_project_path = temp_complete_git_repo / "dbt_project" / "dbt_project.yml"
-    dbt_project_all_files = DbtProject(dbt_project_path, all_files=True)
-    dbt_project_one_file = DbtProject(
+    dbt_project_all_files = dbt.DbtProject(dbt_project_path, all_files=True)
+    dbt_project_one_file = dbt.DbtProject(
         dbt_project_path,
         files=[(dbt_project_path.parent / "models" / "test" / "model" / "model.sql")],
     )
@@ -22,8 +22,8 @@ def test_dbt_project(temp_complete_git_repo):
 # Test the filer files functionality
 def test_dbt_project_filter_files(temp_complete_git_repo):
     os.chdir(temp_complete_git_repo)
-    with patch(
-        "dbt_opiner.opinions.opinions_pack.ConfigSingleton.get_config"
+    with mock.patch(
+        "dbt_opiner.opinions.opinions_pack.config_singleton.ConfigSingleton.get_config"
     ) as mock_get_config:
         mock_get_config.return_value = {
             "files": {
@@ -31,6 +31,6 @@ def test_dbt_project_filter_files(temp_complete_git_repo):
             }
         }
         dbt_project_path = temp_complete_git_repo / "dbt_project" / "dbt_project.yml"
-        dbt_project_all_files = DbtProject(dbt_project_path, all_files=True)
+        dbt_project_all_files = dbt.DbtProject(dbt_project_path, all_files=True)
         # Check that the file was filtered
         assert dbt_project_all_files.files["sql"] == []

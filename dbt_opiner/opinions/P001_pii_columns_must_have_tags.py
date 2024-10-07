@@ -1,13 +1,11 @@
 from loguru import logger
 
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.file_handlers import YamlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
+from dbt_opiner.opinions import base_opinion
 
 
-class P001(BaseOpinion):
+class P001(base_opinion.BaseOpinion):
     """Columns that contain Personal Identifiable Information (PII) should be tagged in the yaml file.
 
     A common practise in data engineering is to tag columns that contain PII.
@@ -37,7 +35,7 @@ class P001(BaseOpinion):
         super().__init__(
             code="P001",
             description="Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file.",
-            severity=OpinionSeverity.MUST,
+            severity=linter.OpinionSeverity.MUST,
             config=config,
             tags=["privacy", "models"],
         )
@@ -51,7 +49,9 @@ class P001(BaseOpinion):
         if self._skip:
             logger.warning("No pii_columns configured for P001. Skipping.")
 
-    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult]:
+    def _eval(
+        self, file: file_handlers.SqlFileHandler | file_handlers.YamlFileHandler
+    ) -> list[linter.LintResult]:
         if self._skip:
             return []
 
@@ -95,7 +95,7 @@ class P001(BaseOpinion):
 
             if len(untagged_pii_columns) > 0:
                 results.append(
-                    LintResult(
+                    linter.LintResult(
                         file=file,
                         opinion_code=self.code,
                         passed=False,
@@ -105,7 +105,7 @@ class P001(BaseOpinion):
                 )
             else:
                 results.append(
-                    LintResult(
+                    linter.LintResult(
                         file=file,
                         opinion_code=self.code,
                         passed=True,

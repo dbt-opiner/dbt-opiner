@@ -1,13 +1,11 @@
 from loguru import logger
 
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.file_handlers import YamlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
+from dbt_opiner.opinions import base_opinion
 
 
-class BQ003(BaseOpinion):
+class BQ003(base_opinion.BaseOpinion):
     """Views must have documented the partition and cluster of underlying tables.
 
     Views that select underlying tables must have a description that explains
@@ -23,12 +21,14 @@ class BQ003(BaseOpinion):
         super().__init__(
             code="BQ003",
             description="Views must have documented the partition and cluster of underlying tables.",
-            severity=OpinionSeverity.MUST,
+            severity=linter.OpinionSeverity.MUST,
             config=config,
             tags=["bigquery", "metadata", "models"],
         )
 
-    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult] | None:
+    def _eval(
+        self, file: file_handlers.SqlFileHandler | file_handlers.YamlFileHandler
+    ) -> list[linter.LintResult] | None:
         if self._config.get("sqlglot_dialect") != "bigquery":
             return []
 
@@ -57,7 +57,7 @@ class BQ003(BaseOpinion):
                         missing_keywords.append(keyword)
 
                 if len(missing_keywords) > 0:
-                    result = LintResult(
+                    result = linter.LintResult(
                         file=file,
                         opinion_code=self.code,
                         passed=False,
@@ -65,7 +65,7 @@ class BQ003(BaseOpinion):
                         message=f"View {node.alias} description {self.severity.value} have keywords: {missing_keywords}",
                     )
                 else:
-                    result = LintResult(
+                    result = linter.LintResult(
                         file=file,
                         opinion_code=self.code,
                         passed=True,

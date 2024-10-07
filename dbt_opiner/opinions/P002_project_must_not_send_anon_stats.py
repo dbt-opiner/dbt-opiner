@@ -1,10 +1,9 @@
-from dbt_opiner.file_handlers import YamlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
+from dbt_opiner.opinions import base_opinion
 
 
-class P002(BaseOpinion):
+class P002(base_opinion.BaseOpinion):
     """Dbt project must not send anonymous statistics.
 
     Sending anonymous statistics is enabled by default (opt-out).
@@ -21,12 +20,12 @@ class P002(BaseOpinion):
         super().__init__(
             code="P002",
             description="Dbt project must not send anonymous statistics.",
-            severity=OpinionSeverity.MUST,
+            severity=linter.OpinionSeverity.MUST,
             config=config,
             tags=["privacy", "dbt_config"],
         )
 
-    def _eval(self, file: YamlFileHandler) -> LintResult:
+    def _eval(self, file: file_handlers.YamlFileHandler) -> linter.LintResult:
         if file.path.name not in ("profiles.yml", "dbt_project.yml"):
             return None
 
@@ -36,7 +35,7 @@ class P002(BaseOpinion):
             )
             is False
         ):
-            return LintResult(
+            return linter.LintResult(
                 file=file,
                 opinion_code=self.code,
                 passed=True,
@@ -50,7 +49,7 @@ class P002(BaseOpinion):
             )
             is False
         ):
-            return LintResult(
+            return linter.LintResult(
                 file=file,
                 opinion_code=self.code,
                 passed=True,
@@ -58,7 +57,7 @@ class P002(BaseOpinion):
                 message="Anonymous statistics are disabled in dbt_project.yml file.",
             )
 
-        return LintResult(
+        return linter.LintResult(
             file=file,
             opinion_code=self.code,
             passed=False,

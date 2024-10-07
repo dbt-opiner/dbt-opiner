@@ -49,5 +49,5 @@ For example, you can run: `dbt-opiner --log-level DEBUG lint --target dev  -f te
 We use pytest for unit testing. To run the tests, run `pytest`.
 Functional tests are TBD.
 
-### Some Style Rules
-Docstrings follow the [Google Python Style Guide](https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings).
+### Style Rules
+We follow the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html) except for the logging format. Since we use `loguru` we can actually use f-strings.

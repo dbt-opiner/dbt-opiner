@@ -2,13 +2,12 @@ from collections import defaultdict
 
 from loguru import logger
 
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
+from dbt_opiner.opinions import base_opinion
 
 
-class L002(BaseOpinion):
+class L002(base_opinion.BaseOpinion):
     """Layer directionality must be respected.
 
     Maintaining a good lineage crucial for any dbt project, and
@@ -43,7 +42,7 @@ class L002(BaseOpinion):
         super().__init__(
             code="L002",
             description="Layer directionality must be respected.",
-            severity=OpinionSeverity.MUST,
+            severity=linter.OpinionSeverity.MUST,
             config=config,
             tags=["lineage", "models"],
         )
@@ -62,7 +61,7 @@ class L002(BaseOpinion):
             self._get_select_restrictions()
         )
 
-    def _eval(self, file: SqlFileHandler) -> LintResult | None:
+    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
         if self._skip:
             return None
 
@@ -104,7 +103,7 @@ class L002(BaseOpinion):
             return None
 
         if forbidden_selects:
-            return LintResult(
+            return linter.LintResult(
                 file=file,
                 opinion_code=self.code,
                 passed=False,
@@ -115,7 +114,7 @@ class L002(BaseOpinion):
                 ),
             )
 
-        return LintResult(
+        return linter.LintResult(
             file=file,
             opinion_code=self.code,
             passed=True,

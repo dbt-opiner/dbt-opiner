@@ -1,20 +1,17 @@
 import json
 import os
+import pathlib
 import re
 import subprocess
 from collections import defaultdict
-from pathlib import Path
 
 import sqlglot
 from loguru import logger
-from sqlglot.optimizer.qualify import qualify
-from sqlglot.optimizer.scope import build_scope
-from sqlglot.optimizer.scope import find_in_scope
+from sqlglot.optimizer import qualify
+from sqlglot.optimizer import scope
 
-from dbt_opiner.config_singleton import ConfigSingleton
-from dbt_opiner.file_handlers import MarkdownFileHandler
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.file_handlers import YamlFileHandler
+from dbt_opiner import config_singleton
+from dbt_opiner import file_handlers
 
 MATCH_ALL = r".*"
 
@@ -35,7 +32,7 @@ class DbtProject:
 
     def __init__(
         self,
-        dbt_project_file_path: Path,
+        dbt_project_file_path: pathlib.Path,
         files: list = [],
         all_files: bool = False,
         target: str = None,
@@ -52,7 +49,7 @@ class DbtProject:
         self._target = target
 
         # Set config
-        self._config = ConfigSingleton().get_config()
+        self._config = config_singleton.ConfigSingleton().get_config()
         # Set dbt project file
         try:
             assert dbt_project_file_path.exists()
@@ -60,7 +57,7 @@ class DbtProject:
             raise FileNotFoundError(f"{dbt_project_file_path} does not exist")
 
         self.dbt_project_file_path = dbt_project_file_path
-        self.dbt_project_config = YamlFileHandler(dbt_project_file_path)
+        self.dbt_project_config = file_handlers.YamlFileHandler(dbt_project_file_path)
         self.name = self.dbt_project_config.get("name")
 
         # Profiles can be none if it's specified in personal folder
@@ -69,7 +66,7 @@ class DbtProject:
         self.dbt_profile = None
         if (dbt_project_file_path.parent / "profiles.yml").exists():
             self.dbt_profile_path = dbt_project_file_path.parent / "profiles.yml"
-            self.dbt_profile = YamlFileHandler(self.dbt_profile_path)
+            self.dbt_profile = file_handlers.YamlFileHandler(self.dbt_profile_path)
 
         # Load manifest
         self._load_manifest(force_compile)
@@ -90,7 +87,7 @@ class DbtProject:
         files = (self.dbt_project_file_path.parent).rglob("*")
         self._init_files(files)
 
-    def _init_files(self, files: list[Path]):
+    def _init_files(self, files: list[pathlib.Path]):
         """Initialize only the list of files pased. Useful for git diff files loading.
 
         Args:
@@ -122,7 +119,9 @@ class DbtProject:
                 if re.match(
                     self._config.get("files", {}).get("sql", MATCH_ALL), str(file)
                 ):
-                    sql_file = SqlFileHandler(file, self.dbt_manifest, self)
+                    sql_file = file_handlers.SqlFileHandler(
+                        file, self.dbt_manifest, self
+                    )
                     self.files["sql"].append(sql_file)
 
             elif file.suffix in [".yml", ".yaml"]:
@@ -131,13 +130,17 @@ class DbtProject:
                 except KeyError:
                     file_pattern = self._config.get("files", {}).get("yml", MATCH_ALL)
                 if re.match(file_pattern, str(file)):
-                    yaml_file = YamlFileHandler(file, self.dbt_manifest, self)
+                    yaml_file = file_handlers.YamlFileHandler(
+                        file, self.dbt_manifest, self
+                    )
                     self.files["yaml"].append(yaml_file)
 
             elif file.suffix == ".md":
                 file_pattern = self._config.get("files", {}).get("md", MATCH_ALL)
                 if re.match(file_pattern, str(file)):
-                    self.files["markdown"].append(MarkdownFileHandler(file, self))
+                    self.files["markdown"].append(
+                        file_handlers.MarkdownFileHandler(file, self)
+                    )
             else:
                 logger.debug(f"{file.suffix} is not supported. Skipping.")
 
@@ -184,7 +187,7 @@ class DbtManifest:
         with open(self._manifest_path, "r") as f:
             self.manifest_dict = json.load(f)
             f.close()
-        dialect = ConfigSingleton().get_config().get("sqlglot_dialect")
+        dialect = config_singleton.ConfigSingleton().get_config().get("sqlglot_dialect")
         # For now only a few elements of the manifest are defined as Attributes
         # If more are required they can be added or the manifest_dict can be used instead.
 
@@ -307,14 +310,14 @@ class DbtNode:
 
     def _extract_columns_from_ast(self):
         columns = []
-        for column in qualify(self.sql_code_ast).selects:
+        for column in qualify.qualify(self.sql_code_ast).selects:
             # If there's a select * in the final CTE
             if column.is_star:
-                root = build_scope(qualify(column.parent))
+                root = scope.build_scope(qualify.qualify(column.parent))
                 try:
                     # If the column is a `select *` from a directly referenced table
                     columns.append(
-                        f"* from {find_in_scope(root.expression, sqlglot.exp.Table).name}"
+                        f"* from {scope.find_in_scope(root.expression, sqlglot.exp.Table).name}"
                     )
                 except AttributeError:
                     # If the column is a `select * from (select * from table)`
@@ -380,7 +383,7 @@ class DbtProjectLoader:
         return dbt_projects
 
     def _get_dbt_projects_changed_files(
-        self, changed_files: list[Path]
+        self, changed_files: list[pathlib.Path]
     ) -> list[DbtProject]:
         """Initialize dbt projects with only the corresponding changed files.
 
@@ -439,7 +442,7 @@ class DbtProjectLoader:
             # get all files in the directory and its subdirectories
             files = []
             for file in changed_files:
-                path = Path(file)
+                path = pathlib.Path(file)
                 if path.is_dir():
                     files.extend(path.rglob("*"))
                 else:
@@ -448,7 +451,7 @@ class DbtProjectLoader:
 
         return dbt_projects
 
-    def _find_dbt_project_yml(self, file: Path) -> Path | None:
+    def _find_dbt_project_yml(self, file: pathlib.Path) -> pathlib.Path | None:
         """Given a file path, find the dbt_project.yml file in the directory tree.
         Only traverse up the directory tree until the git root directory.
 
@@ -478,14 +481,14 @@ class DbtProjectLoader:
 
         logger.debug("Not a git repository")
 
-    def _find_all_dbt_project_ymls(self) -> list[Path] | None:
+    def _find_all_dbt_project_ymls(self) -> list[pathlib.Path] | None:
         """Find all dbt_project.yml files in a git repository.
         Ignore nested dbt_project.yml that dbt_packages have, by keeping the files
         that are closest to the git root directory.
 
         Returns: If found, a list of dbt_project.yml file paths, otherwise None.
         """
-        git_root_path = self._find_git_root(Path(os.getcwd()))
+        git_root_path = self._find_git_root(pathlib.Path(os.getcwd()))
 
         if git_root_path:
             dbt_project_ymls = []
@@ -494,7 +497,7 @@ class DbtProjectLoader:
                 if ".venv" in root:
                     continue
                 if "dbt_project.yml" in files:
-                    dbt_project_ymls.append(Path(root) / "dbt_project.yml")
+                    dbt_project_ymls.append(pathlib.Path(root) / "dbt_project.yml")
                     # Clear dirs to stop os.walk from traversing down this directory
                     # to avoid finding nested dbt projects from dbt_packages
                     dirs[:] = []
@@ -504,7 +507,7 @@ class DbtProjectLoader:
         return None
 
     @staticmethod
-    def _find_git_root(path: Path) -> Path | None:
+    def _find_git_root(path: pathlib.Path) -> pathlib.Path | None:
         """Given a path to a file or directory, find the root of the git repository.
 
         Args:
@@ -524,8 +527,8 @@ class DbtProjectLoader:
 
 def run_dbt_command(
     command: str,
-    dbt_project_file_path: Path,
-    dbt_profile_path: Path = None,
+    dbt_project_file_path: pathlib.Path,
+    dbt_profile_path: pathlib.Path = None,
     target: str = None,
     silent: bool = False,
 ) -> subprocess.CompletedProcess:  # pragma: no cover
@@ -584,7 +587,9 @@ def run_dbt_command(
 
 
 def compile_dbt_manifest(
-    dbt_project_file_path: Path, dbt_profile_path: Path = None, target: str = None
+    dbt_project_file_path: pathlib.Path,
+    dbt_profile_path: pathlib.Path = None,
+    target: str = None,
 ):  # pragma: no cover
     """Compile the dbt manifest file for the given dbt project file path.
     It tries to run compile but runs deps, seed, if just compile fails.

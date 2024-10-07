@@ -1,12 +1,12 @@
+import pathlib
 import sys
 import time
-from pathlib import Path
 
 from loguru import logger
 
-from dbt_opiner.dbt import DbtProjectLoader
-from dbt_opiner.linter import Linter
-from dbt_opiner.opinions.opinions_pack import OpinionsPack
+from dbt_opiner import dbt
+from dbt_opiner import linter
+from dbt_opiner.opinions import opinions_pack
 
 
 def lint(
@@ -27,14 +27,14 @@ def lint(
         output_file: Output file to save the linting results. Defaults to None.
     """
     logger.info("Linting dbt projects...")
-    loader = DbtProjectLoader(target, force_compile)
+    loader = dbt.DbtProjectLoader(target, force_compile)
 
     dbt_projects = loader.initialize_dbt_projects(
         changed_files=changed_files, all_files=all_files
     )
 
-    opinions_pack = OpinionsPack(no_ignore)
-    linter = Linter(opinions_pack, no_ignore)
+    opinions_pack_inst = opinions_pack.OpinionsPack(no_ignore)
+    linter_inst = linter.Linter(opinions_pack_inst, no_ignore)
 
     # TODO: make it parallel?
     start = time.process_time()
@@ -43,11 +43,11 @@ def lint(
             item for files_list in dbt_project.files.values() for item in files_list
         ]
         for file in merged_files:
-            linter.lint_file(file)
+            linter_inst.lint_file(file)
     end = time.process_time()
 
     logger.info(f"Linting completed in {round(end - start, 3)} seconds")
-    linter.log_results_and_exit(output_file)
+    linter_inst.log_results_and_exit(output_file)
 
 
 def audit(
@@ -73,10 +73,10 @@ def audit(
         output_file: Output file to save the linting results. Defaults to None.
     """
     logger.info("Auditing dbt projects...")
-    loader = DbtProjectLoader(target, force_compile)
+    loader = dbt.DbtProjectLoader(target, force_compile)
 
     if dbt_project_dir:
-        if (Path(dbt_project_dir) / "dbt_project.yml").exists():
+        if (pathlib.Path(dbt_project_dir) / "dbt_project.yml").exists():
             dbt_projects = loader.initialize_dbt_projects(
                 changed_files=[dbt_project_dir]
             )
@@ -86,13 +86,13 @@ def audit(
     else:
         dbt_projects = loader.initialize_dbt_projects(all_files=True)
 
-    opinions_pack = OpinionsPack(no_ignore)
-    linter = Linter(opinions_pack, no_ignore)
+    opinions_pack_inst = opinions_pack.OpinionsPack(no_ignore)
+    linter_inst = linter.Linter(opinions_pack_inst, no_ignore)
     for dbt_project in dbt_projects:
         merged_files = [
             item for files_list in dbt_project.files.values() for item in files_list
         ]
         for file in merged_files:
-            linter.lint_file(file)
+            linter_inst.lint_file(file)
 
-    linter.log_audit_and_exit(type=type, format=format, output_file=output_file)
+    linter_inst.log_audit_and_exit(type=type, format=format, output_file=output_file)
