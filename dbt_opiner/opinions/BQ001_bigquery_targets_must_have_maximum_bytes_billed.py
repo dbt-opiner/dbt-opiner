@@ -39,7 +39,7 @@ class BQ001(base_opinion.BaseOpinion):
             file.path.name != "profiles.yml"
             or self._config.get("sqlglot_dialect") != "bigquery"
         ):
-            return None
+            return
 
         ignored_targets = self._opinions_config.get(
             "ignore_targets", ["prod", "production"]
@@ -84,3 +84,4 @@ class BQ001(base_opinion.BaseOpinion):
                 severity=self.severity,
                 message="Bigquery targets used for development and testing have maximum_bytes_billed.",
             )
+        return
