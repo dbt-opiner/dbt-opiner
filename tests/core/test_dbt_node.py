@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner import dbt
 
 
 # test ast_extracted_columns() method for DbtNode
@@ -186,5 +186,5 @@ from dbt_opiner.dbt import DbtNode
     ],
 )
 def test_ast_extracted_columns(node_dict, expected_columns):
-    node = DbtNode(node_dict, "duckdb")
+    node = dbt.DbtNode(node_dict, "duckdb")
     node.ast_extracted_columns == expected_columns

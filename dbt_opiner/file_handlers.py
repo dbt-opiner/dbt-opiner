@@ -1,7 +1,7 @@
+import abc
+import pathlib
 import re
 import sys
-from abc import ABC
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import yaml
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from dbt_opiner.dbt import DbtProject  # pragma: no cover
 
 
-class FileHandler(ABC):
+class FileHandler(abc.ABC):
     """Abstract class for handling files.
 
     Attributes:
@@ -25,7 +25,7 @@ class FileHandler(ABC):
     """
 
     def __init__(
-        self, file_path: Path, parent_dbt_project: "DbtProject" = None
+        self, file_path: pathlib.Path, parent_dbt_project: "DbtProject" = None
     ) -> None:
         """
         Args:
@@ -74,10 +74,12 @@ class FileHandler(ABC):
                              It's a string because dbt provides incomplete paths and we need to reconstruct them.
         """
         current_file_parts = list(self.path.resolve().parent.parts)
-        other_file_parts = list(Path(other_file_path).parts)  # Comes from manifest
+        other_file_parts = list(
+            pathlib.Path(other_file_path).parts
+        )  # Comes from manifest
         index = current_file_parts.index(other_file_parts[0])
         final_path = current_file_parts[:index] + other_file_parts
-        sql_file_path = Path(*final_path)
+        sql_file_path = pathlib.Path(*final_path)
 
         with sql_file_path.open("r") as file:
             content = file.read()
@@ -113,7 +115,7 @@ class SqlFileHandler(FileHandler):
 
     def __init__(
         self,
-        file_path: Path,
+        file_path: pathlib.Path,
         dbt_manifest: "DbtManifest",
         parent_dbt_project: "DbtProject" = None,
     ) -> None:
@@ -192,7 +194,7 @@ class YamlFileHandler(FileHandler):
 
     def __init__(
         self,
-        file_path: Path,
+        file_path: pathlib.Path,
         dbt_manifest: "DbtManifest" = None,
         parent_dbt_project: "DbtProject" = None,
     ) -> None:
@@ -261,7 +263,7 @@ class MarkdownFileHandler(FileHandler):
     """
 
     def __init__(
-        self, file_path: Path, parent_dbt_project: "DbtProject" = None
+        self, file_path: pathlib.Path, parent_dbt_project: "DbtProject" = None
     ) -> None:
         """
         Args:

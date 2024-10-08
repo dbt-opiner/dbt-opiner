@@ -1,15 +1,14 @@
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
+from dbt_opiner import linter
 
 
 def test_lint_result(mock_yamlfilehandler):
     file = mock_yamlfilehandler
     opinion_code = "O001"
     passed = True
-    severity = OpinionSeverity.MUST
+    severity = linter.OpinionSeverity.MUST
     message = "Model model_name has a description."
 
-    result = LintResult(
+    result = linter.LintResult(
         file=file,
         opinion_code=opinion_code,
         passed=passed,
@@ -25,18 +24,18 @@ def test_lint_result(mock_yamlfilehandler):
 
 
 def test_lint_result_sorting(mock_yamlfilehandler, mock_sqlfilehandler):
-    result1 = LintResult(
+    result1 = linter.LintResult(
         file=mock_yamlfilehandler,
         opinion_code="C001",
         passed=True,
-        severity=OpinionSeverity.MUST,
+        severity=linter.OpinionSeverity.MUST,
         message="message",
     )
-    result2 = LintResult(
+    result2 = linter.LintResult(
         file=mock_sqlfilehandler,
         opinion_code="C001",
         passed=True,
-        severity=OpinionSeverity.MUST,
+        severity=linter.OpinionSeverity.MUST,
         message="message",
     )
 
@@ -44,21 +43,21 @@ def test_lint_result_sorting(mock_yamlfilehandler, mock_sqlfilehandler):
         result1 > result2
     )  # They are not the same, but they are not greater than each other
 
-    result3 = LintResult(
+    result3 = linter.LintResult(
         file=mock_sqlfilehandler,
         opinion_code="C002",
         passed=True,
-        severity=OpinionSeverity.MUST,
+        severity=linter.OpinionSeverity.MUST,
         message="message",
     )
 
     assert result3 > result2  # result3 has a greater opinion code than result2
 
-    result4 = LintResult(
+    result4 = linter.LintResult(
         file=mock_sqlfilehandler,
         opinion_code="C004",
         passed=True,
-        severity=OpinionSeverity.SHOULD,
+        severity=linter.OpinionSeverity.SHOULD,
         message="message",
     )
 

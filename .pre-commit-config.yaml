@@ -30,3 +30,4 @@ repos:
       entry: tox
       language: system
       pass_filenames: false
+      types: ["python"]

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from dbt_opiner.file_handlers import YamlFileHandler
+from dbt_opiner import file_handlers
 from dbt_opiner.opinions import P002
 
 
@@ -50,7 +50,7 @@ def test_P002(
 ):
     dbt_file = Path(tmpdir) / file_type
     dbt_file.touch()
-    file = YamlFileHandler(dbt_file)
+    file = file_handlers.YamlFileHandler(dbt_file)
 
     DbtProject = MagicMock()
     mock_dbt_project = DbtProject()

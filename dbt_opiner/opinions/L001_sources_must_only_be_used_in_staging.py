@@ -1,10 +1,9 @@
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
+from dbt_opiner.opinions import base_opinion
 
 
-class L001(BaseOpinion):
+class L001(base_opinion.BaseOpinion):
     """Sources must only be used in staging layer.
 
     Staging models are the entrypoint for raw data in dbt projects, and it is the
@@ -25,7 +24,7 @@ class L001(BaseOpinion):
         super().__init__(
             code="L001",
             description="Sources must only be used in staging.",
-            severity=OpinionSeverity.MUST,
+            severity=linter.OpinionSeverity.MUST,
             tags=["lineage", "models"],
         )
         self._opinions_config = (
@@ -34,7 +33,7 @@ class L001(BaseOpinion):
             .get("L001", {})
         )
 
-    def _eval(self, file: SqlFileHandler) -> LintResult | None:
+    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
         staging_schema_name = self._opinions_config.get("staging_schema", "staging")
         staging_prefix = self._opinions_config.get("staging_prefix", "stg_")
 
@@ -48,7 +47,7 @@ class L001(BaseOpinion):
             content = file.content.replace(" ", "").replace("\n", "")
 
             if "{{source(" in content:
-                return LintResult(
+                return linter.LintResult(
                     file=file,
                     opinion_code=self.code,
                     passed=False,
@@ -56,7 +55,7 @@ class L001(BaseOpinion):
                     message=f"The source macro {self.severity.value} only be used in staging layer.",
                 )
 
-            return LintResult(
+            return linter.LintResult(
                 file=file,
                 opinion_code=self.code,
                 passed=True,

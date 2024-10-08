@@ -1,13 +1,13 @@
 import os
+import pathlib
 import re
 import shutil
 import sys
-from pathlib import Path
 
 import yaml
 from loguru import logger
 
-from dbt_opiner.git import clone_git_repo_and_checkout_revision
+from dbt_opiner import git
 
 
 class ConfigSingleton:
@@ -78,7 +78,7 @@ class ConfigSingleton:
         Load it into the _config attribute.
         """
         logger.debug("Initializing ConfigSingleton")
-        current_path = Path(os.getcwd()).resolve()
+        current_path = pathlib.Path(os.getcwd()).resolve()
 
         # Search for the config file in the git repository
         self._config_file_path = self._search_config_file(current_path)
@@ -126,7 +126,7 @@ class ConfigSingleton:
         logger.debug(f"Loaded config:\n{self._config}")
 
     @staticmethod
-    def _load_config_from_file(file_path: Path) -> dict:
+    def _load_config_from_file(file_path: pathlib.Path) -> dict:
         """Load the configuration from the dbt-opiner.yaml file and replace environment variables.
 
         Returns: The configuration dictionary with environment variables replaced.
@@ -144,7 +144,7 @@ class ConfigSingleton:
             )
         return yaml.safe_load(config_content)
 
-    def _search_config_file(self, root_dir: Path) -> Path:
+    def _search_config_file(self, root_dir: pathlib.Path) -> pathlib.Path:
         """Search for the dbt-opiner.yaml file in the root directory and subdirectories.
         Args:
             root_dir: The directory to start the search for the dbt-opiner.yaml file.
@@ -163,7 +163,7 @@ class ConfigSingleton:
                 d for d in dirs if d != ".venv"
             ]  # ignore .venv directory in the search
             if ".dbt-opiner.yaml" in files:
-                return Path(root) / ".dbt-opiner.yaml"
+                return pathlib.Path(root) / ".dbt-opiner.yaml"
 
     def _validate_config(self, config: dict, schema: dict) -> tuple[bool, str | None]:
         """Validates the dictionary structure based on the provided schema.
@@ -206,7 +206,7 @@ class ConfigSingleton:
 
         git_repo = original_config["shared_config"]["repository"]
         revision = original_config["shared_config"].get("rev")
-        temp_dir = clone_git_repo_and_checkout_revision(git_repo, revision)
+        temp_dir = git.clone_git_repo_and_checkout_revision(git_repo, revision)
         shared_config_path = self._search_config_file(temp_dir)
         if shared_config_path:
             shared_config = self._load_config_from_file(shared_config_path)

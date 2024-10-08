@@ -1,11 +1,9 @@
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.file_handlers import YamlFileHandler
-from dbt_opiner.linter import LintResult
-from dbt_opiner.linter import OpinionSeverity
-from dbt_opiner.opinions.base_opinion import BaseOpinion
+from dbt_opiner import file_handlers
+from dbt_opiner import linter
+from dbt_opiner.opinions import base_opinion
 
 
-class O003(BaseOpinion):
+class O003(base_opinion.BaseOpinion):
     """All columns in the model should have a description. Empty descriptions are not allowed.
 
     Descriptions are important for documentation and understanding the purpose
@@ -32,11 +30,13 @@ class O003(BaseOpinion):
         super().__init__(
             code="O003",
             description="All columns must have a description.",
-            severity=OpinionSeverity.MUST,
+            severity=linter.OpinionSeverity.MUST,
             tags=["metadata", "models"],
         )
 
-    def _eval(self, file: SqlFileHandler | YamlFileHandler) -> list[LintResult] | None:
+    def _eval(
+        self, file: file_handlers.SqlFileHandler | file_handlers.YamlFileHandler
+    ) -> list[linter.LintResult] | None:
         nodes = []
         if file.type == ".sql" and file.dbt_node.type == "model":
             nodes = [file.dbt_node]
@@ -49,7 +49,7 @@ class O003(BaseOpinion):
             # Check if model has columns.
             if not node.columns:
                 results.append(
-                    LintResult(
+                    linter.LintResult(
                         file=file,
                         opinion_code=self.code,
                         passed=False,
@@ -73,7 +73,7 @@ class O003(BaseOpinion):
 
             if len(descriptionless_columns) > 0:
                 results.append(
-                    LintResult(
+                    linter.LintResult(
                         file=file,
                         opinion_code=self.code,
                         passed=False,
@@ -83,7 +83,7 @@ class O003(BaseOpinion):
                 )
             else:
                 results.append(
-                    LintResult(
+                    linter.LintResult(
                         file=file,
                         opinion_code=self.code,
                         passed=True,

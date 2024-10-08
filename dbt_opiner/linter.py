@@ -1,20 +1,18 @@
+import io
+import pathlib
 import re
 import sys
 from collections import defaultdict
 from collections import OrderedDict
 from dataclasses import dataclass
 from enum import Enum
-from io import StringIO
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pandas as pd
 from loguru import logger
 
-from dbt_opiner.config_singleton import ConfigSingleton
-from dbt_opiner.file_handlers import MarkdownFileHandler
-from dbt_opiner.file_handlers import SqlFileHandler
-from dbt_opiner.file_handlers import YamlFileHandler
+from dbt_opiner import config_singleton
+from dbt_opiner import file_handlers
 
 if TYPE_CHECKING:
     from dbt_opiner.opinions.opinions_pack import OpinionsPack  # pragma: no cover
@@ -58,7 +56,11 @@ class LintResult:
         message: The message of the opinion check.
     """
 
-    file: SqlFileHandler | YamlFileHandler | MarkdownFileHandler
+    file: (
+        file_handlers.SqlFileHandler
+        | file_handlers.YamlFileHandler
+        | file_handlers.MarkdownFileHandler
+    )
     opinion_code: str
     passed: bool
     severity: OpinionSeverity
@@ -91,11 +93,16 @@ class Linter:
         """
         self._lint_results = []
         self._no_ignore = no_ignore
-        self._config = ConfigSingleton().get_config()
+        self._config = config_singleton.ConfigSingleton().get_config()
         self.opinions = opinions_pack.get_opinions()
 
     def lint_file(
-        self, file: (SqlFileHandler | YamlFileHandler | MarkdownFileHandler)
+        self,
+        file: (
+            file_handlers.SqlFileHandler
+            | file_handlers.YamlFileHandler
+            | file_handlers.MarkdownFileHandler
+        ),
     ) -> None:
         """Lint a file with the loaded opinions and add the result to the lint results.
 
@@ -151,7 +158,7 @@ class Linter:
         return sorted(self._lint_results)
         # TODO: add option to organize results by opinion tags.
 
-    def log_results_and_exit(self, output_file: Path = None) -> None:
+    def log_results_and_exit(self, output_file: pathlib.Path = None) -> None:
         """Log the results of the linting and exit with the appropriate code.
         Args:
           output_file: The file to write the lint results to.
@@ -196,7 +203,7 @@ class Linter:
         sys.exit(exit_code)
 
     def log_audit_and_exit(
-        self, type: str, format: str, output_file: Path = None
+        self, type: str, format: str, output_file: pathlib.Path = None
     ) -> None:
         """Log the audit results and exit.
         Args:
@@ -226,7 +233,7 @@ class Linter:
         audit_results = self._audit()
 
         def dataframe_to_string(df, format_type):
-            buffer = StringIO()
+            buffer = io.StringIO()
             if format_type == "md":
                 return df.to_markdown(index=False)
             elif format_type == "csv":

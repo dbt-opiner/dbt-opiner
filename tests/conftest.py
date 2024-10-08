@@ -6,7 +6,7 @@ import yaml
 from _pytest.logging import LogCaptureFixture
 from loguru import logger
 
-from dbt_opiner.config_singleton import ConfigSingleton
+from dbt_opiner import config_singleton
 
 
 # See https://loguru.readthedocs.io/en/stable/resources/migration.html#replacing-caplog-fixture-from-pytest-library
@@ -39,7 +39,7 @@ def mock_yamlfilehandler():
 
 @pytest.fixture(autouse=True)
 def reset_singletons():
-    ConfigSingleton._instance = None
+    config_singleton.ConfigSingleton._instance = None
 
 
 @pytest.fixture
