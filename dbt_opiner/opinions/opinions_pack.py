@@ -79,7 +79,7 @@ class OpinionsPack:
 
         return self._opinions.extend(custom_opinions)
 
-    def _load_opinions_from_path(self, path):
+    def _load_opinions_from_path(self, path: pathlib.Path) -> list:
         loaded_opinions = []
         for file in path.glob("*.py"):
             logger.debug(file)
@@ -128,7 +128,7 @@ class OpinionsPack:
                     loaded_opinions.append(obj(config=self._config))
         return loaded_opinions
 
-    def _load_opinions_from_git(self):
+    def _load_opinions_from_git(self) -> list[base_opinion.BaseOpinion]:
         git_repo = (
             self._config.get("opinions_config", {})
             .get("custom_opinions", {})

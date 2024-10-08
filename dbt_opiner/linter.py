@@ -1,5 +1,4 @@
 import io
-import pathlib
 import re
 import sys
 from collections import defaultdict
@@ -158,7 +157,7 @@ class Linter:
         return sorted(self._lint_results)
         # TODO: add option to organize results by opinion tags.
 
-    def log_results_and_exit(self, output_file: pathlib.Path = None) -> None:
+    def log_results_and_exit(self, output_file: str | None = None) -> None:
         """Log the results of the linting and exit with the appropriate code.
         Args:
           output_file: The file to write the lint results to.
@@ -171,7 +170,7 @@ class Linter:
         # Add file sink if specified
         if output_file:
             logger.add(
-                str(output_file),
+                output_file,
                 level=original_logger_config._levelno,
                 colorize=False,
                 format="{level} | {message}\n",
@@ -203,7 +202,7 @@ class Linter:
         sys.exit(exit_code)
 
     def log_audit_and_exit(
-        self, type: str, format: str, output_file: pathlib.Path = None
+        self, type: str, format: str, output_file: str | None = None
     ) -> None:
         """Log the audit results and exit.
         Args:
@@ -218,7 +217,7 @@ class Linter:
         # Add file sink if specified
         if output_file:
             logger.add(
-                str(output_file),
+                output_file,
                 level=original_logger_config._levelno,
                 colorize=False,
                 format="{message}\n",

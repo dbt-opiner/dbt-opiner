@@ -1,7 +1,8 @@
 import inspect
 import os
 import sys
-import typing as t
+from typing import Any
+from typing import Iterable
 
 import click
 import pyfiglet
@@ -102,8 +103,8 @@ class MultiOption(click.Option):  # pragma: no cover
                 break
         return retval
 
-    def type_cast_value(self, ctx: click.Context, value: t.Any) -> t.Any:
-        def flatten(data) -> t.Iterable:
+    def type_cast_value(self, ctx: click.Context, value: Any) -> Any:
+        def flatten(data) -> Iterable:
             if isinstance(data, tuple):
                 for x in data:
                     yield from flatten(x)

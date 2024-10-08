@@ -12,10 +12,10 @@ from dbt_opiner.opinions import opinions_pack
 def lint(
     changed_files: list[str] = [],
     all_files: bool = False,
-    target: str = None,
+    target: str | None = None,
     force_compile: bool = False,
     no_ignore: bool = False,
-    output_file: str = None,
+    output_file: str | None = None,
 ) -> None:
     """Lint the dbt project using the dbt-opiner package.
 
@@ -53,11 +53,11 @@ def lint(
 def audit(
     type: str,
     format: str = "md",
-    dbt_project_dir: str = None,
-    target: str = None,
+    dbt_project_dir: str | None = None,
+    target: str | None = None,
     force_compile: bool = False,
     no_ignore: bool = False,
-    output_file: str = None,
+    output_file: str | None = None,
 ) -> None:
     """Audit the dbt project using the dbt-opiner package.
 

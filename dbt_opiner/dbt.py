@@ -352,7 +352,7 @@ class DbtProjectLoader:
       initialize_dbt_projects: Initialize dbt projects with all files or only the changed ones.
     """
 
-    def __init__(self, target: str = None, force_compile: bool = False):
+    def __init__(self, target: str | None = None, force_compile: bool = False):
         """
         Args:
           target: The target to run dbt commands.
