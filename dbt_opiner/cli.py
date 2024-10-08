@@ -15,16 +15,16 @@ click.echo(fig.renderText("dbt  opiner"))
 recommend_version_upgrade()
 
 
-def common_options(f):
-    f = click.option(
+def common_options(opt: click.option) -> click.option:
+    opt = click.option(
         "--log-level",
         type=click.Choice(
             ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
         ),
         default="INFO",
         help="Set the logging level.",
-    )(f)
-    return f
+    )(opt)
+    return opt
 
 
 class ChoiceTuple(click.Choice):  # pragma: no cover
@@ -103,7 +103,7 @@ class MultiOption(click.Option):  # pragma: no cover
         return retval
 
     def type_cast_value(self, ctx: click.Context, value: t.Any) -> t.Any:
-        def flatten(data):
+        def flatten(data) -> t.Iterable:
             if isinstance(data, tuple):
                 for x in data:
                     yield from flatten(x)
@@ -124,7 +124,7 @@ class MultiOption(click.Option):  # pragma: no cover
 @click.version_option(
     message="dbt-opiner version: %(version)s",
 )
-def main():
+def main() -> None:
     pass
 
 
@@ -158,7 +158,15 @@ def main():
     type=str,
     help="If specified, a file to capture the lint results",
 )
-def lint(log_level, files, all_files, target, force_compile, no_ignore, output_file):
+def lint(
+    log_level: str,
+    files: list[str],
+    all_files: bool,
+    target: str,
+    force_compile: bool,
+    no_ignore: bool,
+    output_file: str,
+) -> None:
     if not files and not all_files:
         raise click.BadParameter(
             "Either --files or --all_files options must be provided"
@@ -222,15 +230,15 @@ def lint(log_level, files, all_files, target, force_compile, no_ignore, output_f
     help="If specified, a file to capture the audit results",
 )
 def audit(
-    log_level,
-    type,
-    format,
-    dbt_project_dir,
-    target,
-    force_compile,
-    no_ignore,
-    output_file,
-):
+    log_level: str,
+    type: str,
+    format: str,
+    dbt_project_dir: str,
+    target: str,
+    force_compile: bool,
+    no_ignore: bool,
+    output_file: str,
+) -> None:
     # Try to set a target from an environment variable
     # This is useful when things should run in CI
     if target is None:

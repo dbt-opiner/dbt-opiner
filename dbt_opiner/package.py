@@ -1,5 +1,4 @@
 import importlib.metadata
-from typing import Optional
 
 import click
 import requests
@@ -12,7 +11,7 @@ def get_package_version() -> str:
     return importlib.metadata.version("dbt-opiner")
 
 
-def get_latest_package_version() -> Optional[str]:
+def get_latest_package_version() -> str | None:
     try:
         resp = requests.get(_PYPI_URL, timeout=5)
         resp.raise_for_status()
@@ -21,7 +20,7 @@ def get_latest_package_version() -> Optional[str]:
         return None
 
 
-def recommend_version_upgrade():
+def recommend_version_upgrade() -> None:
     latest_version = get_latest_package_version()
     current_version = get_package_version()
 

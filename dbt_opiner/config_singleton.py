@@ -165,7 +165,7 @@ class ConfigSingleton:
             if ".dbt-opiner.yaml" in files:
                 return Path(root) / ".dbt-opiner.yaml"
 
-    def _validate_config(self, config: dict, schema: dict) -> tuple[bool, str]:
+    def _validate_config(self, config: dict, schema: dict) -> tuple[bool, str | None]:
         """Validates the dictionary structure based on the provided schema.
         Args:
           config: The config dictionary to validate.
@@ -201,7 +201,7 @@ class ConfigSingleton:
 
         return True, None
 
-    def _get_shared_config(self, original_config):
+    def _get_shared_config(self, original_config: dict) -> dict:
         """Load the shared configuration from a git repository."""
 
         git_repo = original_config["shared_config"]["repository"]
