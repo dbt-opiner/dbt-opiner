@@ -3,6 +3,7 @@ import pathlib
 import re
 import shutil
 import sys
+from typing import Optional
 
 import yaml
 from loguru import logger
@@ -165,7 +166,9 @@ class ConfigSingleton:
             if ".dbt-opiner.yaml" in files:
                 return pathlib.Path(root) / ".dbt-opiner.yaml"
 
-    def _validate_config(self, config: dict, schema: dict) -> tuple[bool, str | None]:
+    def _validate_config(
+        self, config: dict, schema: dict
+    ) -> tuple[bool, Optional[str]]:
         """Validates the dictionary structure based on the provided schema.
         Args:
           config: The config dictionary to validate.
@@ -226,10 +229,10 @@ class ConfigSingleton:
         else:
             return self._merge_configs(original_config, shared_config)
 
-    def get_config(self):
+    def get_config(self) -> dict:
         return self._config
 
-    def get_config_file_path(self):
+    def get_config_file_path(self) -> pathlib.Path:
         return self._config_file_path
 
     def _merge_configs(self, original, new):

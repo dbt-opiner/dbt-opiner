@@ -4,6 +4,7 @@ import pathlib
 import re
 import subprocess
 from collections import defaultdict
+from typing import Optional
 
 import sqlglot
 from loguru import logger
@@ -263,7 +264,7 @@ class DbtNode:
         return self._node.get("compiled_code")
 
     @property
-    def docs_yml_file_path(self) -> str | None:
+    def docs_yml_file_path(self) -> Optional[str]:
         if self._node.get("patch_path"):
             return self._node.get("patch_path").replace("://", "/")
         return None
@@ -352,7 +353,7 @@ class DbtProjectLoader:
       initialize_dbt_projects: Initialize dbt projects with all files or only the changed ones.
     """
 
-    def __init__(self, target: str | None = None, force_compile: bool = False):
+    def __init__(self, target: Optional[str] = None, force_compile: bool = False):
         """
         Args:
           target: The target to run dbt commands.
@@ -451,7 +452,7 @@ class DbtProjectLoader:
 
         return dbt_projects
 
-    def _find_dbt_project_yml(self, file: pathlib.Path) -> pathlib.Path | None:
+    def _find_dbt_project_yml(self, file: pathlib.Path) -> Optional[pathlib.Path]:
         """Given a file path, find the dbt_project.yml file in the directory tree.
         Only traverse up the directory tree until the git root directory.
 
@@ -481,7 +482,7 @@ class DbtProjectLoader:
 
         logger.debug("Not a git repository")
 
-    def _find_all_dbt_project_ymls(self) -> list[pathlib.Path] | None:
+    def _find_all_dbt_project_ymls(self) -> Optional[list[pathlib.Path]]:
         """Find all dbt_project.yml files in a git repository.
         Ignore nested dbt_project.yml that dbt_packages have, by keeping the files
         that are closest to the git root directory.
@@ -507,7 +508,7 @@ class DbtProjectLoader:
         return None
 
     @staticmethod
-    def _find_git_root(path: pathlib.Path) -> pathlib.Path | None:
+    def _find_git_root(path: pathlib.Path) -> Optional[pathlib.Path]:
         """Given a path to a file or directory, find the root of the git repository.
 
         Args:

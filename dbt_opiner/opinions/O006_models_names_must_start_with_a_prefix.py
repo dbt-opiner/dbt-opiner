@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -40,7 +42,7 @@ class O006(base_opinion.BaseOpinion):
             .get("O006", {})
         )
 
-    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         if file.type == ".sql" and file.dbt_node.type == "model":
             accepted_prefixes = self._opinions_config.get(
                 "accepted_prefixes", ["base", "stg", "int", "fct", "dim", "mrt", "agg"]
@@ -64,3 +66,4 @@ class O006(base_opinion.BaseOpinion):
                     f"Accepted prefixes are: {accepted_prefixes}."
                 ),
             )
+        return None

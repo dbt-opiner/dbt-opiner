@@ -1,3 +1,6 @@
+from typing import Any
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -20,7 +23,7 @@ class BQ001(base_opinion.BaseOpinion):
       - maximum_bytes_billed: maximum bytes billed allowed (optional)
     """
 
-    def __init__(self, config: dict = None, **kwargs) -> None:
+    def __init__(self, config: dict[str, Any] = {}, **kwargs) -> None:
         super().__init__(
             code="BQ001",
             description="Bigquery targets used for development and testing must have maximum_bytes_billed.",
@@ -34,12 +37,12 @@ class BQ001(base_opinion.BaseOpinion):
             .get("BQ001", {})
         )
 
-    def _eval(self, file: file_handlers.YamlFileHandler) -> linter.LintResult | None:
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         if (
             file.path.name != "profiles.yml"
             or self._config.get("sqlglot_dialect") != "bigquery"
         ):
-            return
+            return None
 
         ignored_targets = self._opinions_config.get(
             "ignore_targets", ["prod", "production"]
@@ -84,4 +87,4 @@ class BQ001(base_opinion.BaseOpinion):
                 severity=self.severity,
                 message="Bigquery targets used for development and testing have maximum_bytes_billed.",
             )
-        return
+        return None

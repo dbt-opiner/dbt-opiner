@@ -51,9 +51,7 @@ class BaseOpinion(abc.ABC):
 
     def check_opinion(
         self,
-        file: file_handlers.SqlFileHandler
-        | file_handlers.YamlFileHandler
-        | file_handlers.MarkdownFileHandler,
+        file: file_handlers.FileHandler,
     ) -> linter.LintResult | list[linter.LintResult]:
         """The method that will be called to evaluate the opinion.
 
@@ -83,10 +81,8 @@ class BaseOpinion(abc.ABC):
     @abc.abstractmethod
     def _eval(
         self,
-        file: file_handlers.SqlFileHandler
-        | file_handlers.YamlFileHandler
-        | file_handlers.MarkdownFileHandler,
-    ) -> linter.LintResult | list[linter.LintResult]:
+        file: file_handlers.FileHandler,
+    ) -> linter.LintResult | list[linter.LintResult] | None:
         """
         The method that will contain all the logic of the opinon evaluation.
         Should be implemented in the child class.

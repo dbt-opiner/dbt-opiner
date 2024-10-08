@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -15,7 +17,7 @@ class BQ002(base_opinion.BaseOpinion):
     This opinion checks if models materialized as tables in BigQuery have clustering defined.
     """
 
-    def __init__(self, config: dict = None, **kwargs):
+    def __init__(self, config: dict = {}, **kwargs) -> None:
         super().__init__(
             code="BQ002",
             description="Models materialized as tables should have clustering defined.",
@@ -24,7 +26,7 @@ class BQ002(base_opinion.BaseOpinion):
             tags=["models", "bigquery"],
         )
 
-    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         if (
             file.type != ".sql"
             or file.dbt_node.type != "model"

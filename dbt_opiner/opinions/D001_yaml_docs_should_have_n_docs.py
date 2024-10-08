@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -15,7 +17,7 @@ class D001(base_opinion.BaseOpinion):
         - max_n_allowed: number of docs allowed per yaml file
     """
 
-    def __init__(self, config: dict = None, **kwargs) -> None:
+    def __init__(self, config: dict = {}, **kwargs) -> None:
         super().__init__(
             code="D001",
             description="Yaml files used for documentation should have a limited number of models or sources.",
@@ -29,7 +31,7 @@ class D001(base_opinion.BaseOpinion):
             .get("D001", {})
         )
 
-    def _eval(self, file: file_handlers.YamlFileHandler) -> linter.LintResult | None:
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         max_n_allowed = self._opinions_config.get("max_n_allowed", 1)
         if file.type == ".yaml":
             if len(file.dbt_nodes) > max_n_allowed:
@@ -48,3 +50,4 @@ class D001(base_opinion.BaseOpinion):
                     severity=self.severity,
                     message=f"Yaml file {file.path} has {len(file.dbt_nodes)} nodes.",
                 )
+        return None

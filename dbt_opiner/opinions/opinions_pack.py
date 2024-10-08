@@ -1,4 +1,4 @@
-import importlib
+import importlib.util
 import inspect
 import pathlib
 import shutil
@@ -42,11 +42,11 @@ class OpinionsPack:
         opinions_str = "\n".join([opinion.code for opinion in self._opinions])
         logger.debug(f"Loaded opinions:\n{opinions_str}")
 
-    def get_opinions(self):
+    def get_opinions(self) -> list[base_opinion.BaseOpinion]:
         """Returns all the loaded opinions."""
         return [opinion for opinion in self._opinions]
 
-    def _load_custom_opinions(self):
+    def _load_custom_opinions(self) -> None:
         source = (
             self._config.get("opinions_config", {})
             .get("custom_opinions", {})
@@ -77,9 +77,12 @@ class OpinionsPack:
             )
             return
 
-        return self._opinions.extend(custom_opinions)
+        self._opinions.extend(custom_opinions)
+        return
 
-    def _load_opinions_from_path(self, path: pathlib.Path) -> list:
+    def _load_opinions_from_path(
+        self, path: pathlib.Path
+    ) -> list[base_opinion.BaseOpinion]:
         loaded_opinions = []
         for file in path.glob("*.py"):
             logger.debug(file)

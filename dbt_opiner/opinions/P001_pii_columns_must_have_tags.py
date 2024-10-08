@@ -49,9 +49,7 @@ class P001(base_opinion.BaseOpinion):
         if self._skip:
             logger.warning("No pii_columns configured for P001. Skipping.")
 
-    def _eval(
-        self, file: file_handlers.SqlFileHandler | file_handlers.YamlFileHandler
-    ) -> list[linter.LintResult]:
+    def _eval(self, file: file_handlers.FileHandler) -> list[linter.LintResult]:
         if self._skip:
             return []
 

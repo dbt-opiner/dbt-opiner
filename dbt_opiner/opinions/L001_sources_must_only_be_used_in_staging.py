@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -33,7 +35,7 @@ class L001(base_opinion.BaseOpinion):
             .get("L001", {})
         )
 
-    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         staging_schema_name = self._opinions_config.get("staging_schema", "staging")
         staging_prefix = self._opinions_config.get("staging_prefix", "stg_")
 
@@ -62,3 +64,5 @@ class L001(base_opinion.BaseOpinion):
                 severity=self.severity,
                 message=f"The source macro is not used in model {file.dbt_node.alias}.",
             )
+
+        return None

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -65,7 +67,7 @@ class O004(base_opinion.BaseOpinion):
             tags=["sql style", "models"],
         )
 
-    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         if file.type == ".sql" and file.dbt_node.type == "model":
             not_qualified_stars = [
                 star for star in file.dbt_node.ast_extracted_columns if "*" in star
@@ -85,3 +87,4 @@ class O004(base_opinion.BaseOpinion):
                 severity=self.severity,
                 message=f"The final columns in model {file.dbt_node.alias} are explicitly named at least once.",
             )
+        return None

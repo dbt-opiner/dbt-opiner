@@ -51,3 +51,5 @@ Functional tests are TBD.
 
 ### Style Rules
 We follow the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html) except for the logging format. Since we use `loguru` we can actually use f-strings.
+
+We follow the python 3.10+ guidelines for typing [provided by mypy](https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html).

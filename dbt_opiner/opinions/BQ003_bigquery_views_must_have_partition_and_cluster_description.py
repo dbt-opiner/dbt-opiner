@@ -27,8 +27,8 @@ class BQ003(base_opinion.BaseOpinion):
         )
 
     def _eval(
-        self, file: file_handlers.SqlFileHandler | file_handlers.YamlFileHandler
-    ) -> list[linter.LintResult] | None:
+        self, file: file_handlers.FileHandler | file_handlers.YamlFileHandler
+    ) -> list[linter.LintResult]:
         if self._config.get("sqlglot_dialect") != "bigquery":
             return []
 

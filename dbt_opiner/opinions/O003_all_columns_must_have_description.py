@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -35,8 +37,8 @@ class O003(base_opinion.BaseOpinion):
         )
 
     def _eval(
-        self, file: file_handlers.SqlFileHandler | file_handlers.YamlFileHandler
-    ) -> list[linter.LintResult] | None:
+        self, file: file_handlers.FileHandler
+    ) -> Optional[list[linter.LintResult]]:
         nodes = []
         if file.type == ".sql" and file.dbt_node.type == "model":
             nodes = [file.dbt_node]

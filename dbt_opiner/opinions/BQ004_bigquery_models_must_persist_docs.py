@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -29,7 +31,7 @@ class BQ004(base_opinion.BaseOpinion):
             tags=["bigquery", "dbt_config"],
         )
 
-    def _eval(self, file: file_handlers.YamlFileHandler) -> linter.LintResult | None:
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         if (
             self._config.get("sqlglot_dialect") != "bigquery"
             or file.path.name != "dbt_project.yml"

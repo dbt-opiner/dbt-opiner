@@ -1,3 +1,5 @@
+from typing import Optional
+
 from loguru import logger
 
 from dbt_opiner import file_handlers
@@ -39,8 +41,8 @@ class O002(base_opinion.BaseOpinion):
         )
 
     def _eval(
-        self, file: file_handlers.SqlFileHandler | file_handlers.YamlFileHandler
-    ) -> list[linter.LintResult] | None:
+        self, file: file_handlers.FileHandler
+    ) -> Optional[list[linter.LintResult]]:
         # Check type of file and model.
         keywords = self._opinions_config.get("keywords", [])
 

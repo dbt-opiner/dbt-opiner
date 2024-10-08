@@ -55,11 +55,7 @@ class LintResult:
         message: The message of the opinion check.
     """
 
-    file: (
-        file_handlers.SqlFileHandler
-        | file_handlers.YamlFileHandler
-        | file_handlers.MarkdownFileHandler
-    )
+    file: file_handlers.FileHandler
     opinion_code: str
     passed: bool
     severity: OpinionSeverity

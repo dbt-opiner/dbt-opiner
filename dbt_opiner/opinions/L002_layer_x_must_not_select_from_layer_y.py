@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Optional
 
 from loguru import logger
 
@@ -61,11 +62,12 @@ class L002(base_opinion.BaseOpinion):
             self._get_select_restrictions()
         )
 
-    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         if self._skip:
             return None
-
-        if file.dbt_node.type != "model" or file.type != ".sql":
+        if file.type != ".sql":
+            return None
+        if file.dbt_node.type != "model":
             return None
 
         selected_models = [

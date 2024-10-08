@@ -1,3 +1,5 @@
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -25,7 +27,7 @@ class P002(base_opinion.BaseOpinion):
             tags=["privacy", "dbt_config"],
         )
 
-    def _eval(self, file: file_handlers.YamlFileHandler) -> linter.LintResult:
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         if file.path.name not in ("profiles.yml", "dbt_project.yml"):
             return None
 
