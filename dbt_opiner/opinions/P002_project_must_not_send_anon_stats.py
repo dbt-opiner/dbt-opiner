@@ -1,3 +1,4 @@
+from typing import Any
 from typing import Optional
 
 from dbt_opiner import file_handlers
@@ -18,7 +19,7 @@ class P002(base_opinion.BaseOpinion):
     This opinion will also check if it's present there.
     """
 
-    def __init__(self, config: dict = None, **kwargs) -> None:
+    def __init__(self, config: dict[str, Any] = {}, **kwargs: dict[str, Any]) -> None:
         super().__init__(
             code="P002",
             description="Dbt project must not send anonymous statistics.",

@@ -88,8 +88,9 @@ class OpinionsPack:
             logger.debug(file)
             module_name = file.stem
             spec = importlib.util.spec_from_file_location(module_name, file)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
 
             for name, obj in inspect.getmembers(module, inspect.isclass):
                 # Only load BaseOpinion children classes

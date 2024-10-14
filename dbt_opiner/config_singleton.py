@@ -3,6 +3,7 @@ import pathlib
 import re
 import shutil
 import sys
+from typing import Any
 from typing import Optional
 
 import yaml
@@ -127,7 +128,7 @@ class ConfigSingleton:
         logger.debug(f"Loaded config:\n{self._config}")
 
     @staticmethod
-    def _load_config_from_file(file_path: pathlib.Path) -> dict:
+    def _load_config_from_file(file_path: pathlib.Path) -> dict[str, Any]:
         """Load the configuration from the dbt-opiner.yaml file and replace environment variables.
 
         Returns: The configuration dictionary with environment variables replaced.
@@ -143,9 +144,10 @@ class ConfigSingleton:
                 env_var_value,
                 config_content,
             )
-        return yaml.safe_load(config_content)
+        config_dict: dict[str, Any] = yaml.safe_load(config_content)
+        return config_dict
 
-    def _search_config_file(self, root_dir: pathlib.Path) -> pathlib.Path:
+    def _search_config_file(self, root_dir: pathlib.Path) -> Optional[pathlib.Path]:
         """Search for the dbt-opiner.yaml file in the root directory and subdirectories.
         Args:
             root_dir: The directory to start the search for the dbt-opiner.yaml file.
@@ -165,9 +167,10 @@ class ConfigSingleton:
             ]  # ignore .venv directory in the search
             if ".dbt-opiner.yaml" in files:
                 return pathlib.Path(root) / ".dbt-opiner.yaml"
+        return None
 
     def _validate_config(
-        self, config: dict, schema: dict
+        self, config: dict[str, Any], schema: dict[str, tuple[object, bool]]
     ) -> tuple[bool, Optional[str]]:
         """Validates the dictionary structure based on the provided schema.
         Args:
@@ -192,11 +195,12 @@ class ConfigSingleton:
                 if not is_valid:
                     return False, error
             else:
-                if not isinstance(value, expected_type):
-                    return (
-                        False,
-                        f"Expected {key} to be of type {expected_type.__name__}, but got {type(value).__name__}",
-                    )
+                if isinstance(expected_type, type):
+                    if not isinstance(value, expected_type):
+                        return (
+                            False,
+                            f"Expected {key} to be of type {expected_type.__name__}, but got {type(value).__name__}",
+                        )
 
         for key in config:
             if key not in schema:
@@ -204,7 +208,7 @@ class ConfigSingleton:
 
         return True, None
 
-    def _get_shared_config(self, original_config: dict) -> dict:
+    def _get_shared_config(self, original_config: dict[str, Any]) -> dict[str, Any]:
         """Load the shared configuration from a git repository."""
 
         git_repo = original_config["shared_config"]["repository"]
@@ -229,13 +233,19 @@ class ConfigSingleton:
         else:
             return self._merge_configs(original_config, shared_config)
 
-    def get_config(self) -> dict:
+    def get_config(self) -> dict[str, Any]:
+        if self._config is None:
+            raise ValueError("ConfigSingleton not initialized.")
         return self._config
 
     def get_config_file_path(self) -> pathlib.Path:
+        if self._config_file_path is None:
+            raise ValueError("ConfigSingleton not initialized.")
         return self._config_file_path
 
-    def _merge_configs(self, original, new):
+    def _merge_configs(
+        self, original: dict[str, Any], new: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Recursively merges 'new' dictionary into 'original' dictionary, but preserves
         existing values in 'original'.

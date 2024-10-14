@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Any
 from typing import Optional
 
 from loguru import logger
@@ -39,7 +40,7 @@ class L002(base_opinion.BaseOpinion):
     If no pairs are specified, the opinion will be skipped.
     """
 
-    def __init__(self, config: dict, **kwargs) -> None:
+    def __init__(self, config: dict[str, Any], **kwargs: dict[str, Any]) -> None:
         super().__init__(
             code="L002",
             description="Layer directionality must be respected.",
@@ -65,66 +66,72 @@ class L002(base_opinion.BaseOpinion):
     def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         if self._skip:
             return None
-        if file.type != ".sql":
-            return None
-        if file.dbt_node.type != "model":
-            return None
 
-        selected_models = [
-            file.parent_dbt_project.dbt_manifest.nodes.get(model)
-            for model in file.dbt_node.get("depends_on", {}).get("nodes", [])
-        ]
+        if isinstance(file, file_handlers.SqlFileHandler):
+            if file.dbt_node.type != "model":
+                return None
 
-        # If there are no selected models, there's nothing to check
-        if not selected_models:
-            return None
-
-        node_prefix = file.dbt_node.alias.split("_")[0]
-        forbidden_selects = []
-
-        # Check for schema restrictions
-        if self._schema_lineage_restrictions.get(file.dbt_node.schema):
-            restricted_schemas = [
-                layer.schema
-                for layer in self._schema_lineage_restrictions.get(file.dbt_node.schema)
+            selected_models = [
+                file.parent_dbt_project.dbt_manifest.nodes.get(model)
+                for model in file.dbt_node.get("depends_on", {}).get("nodes", [])
             ]
-            for selected_model in selected_models:
-                if selected_model.schema in restricted_schemas:
-                    forbidden_selects.append(selected_model.alias)
-        # If schema is not found, check for prefix restrictions
-        elif self._prefix_lineage_restrictions.get(node_prefix):
-            restricted_prefixes = [
-                layer.prefix
-                for layer in self._prefix_lineage_restrictions.get(node_prefix)
-            ]
-            for selected_model in selected_models:
-                if selected_model.alias.split("_")[0] in restricted_prefixes:
-                    forbidden_selects.append(selected_model.alias)
-        # If no restrictions are found for this layer, return None
-        else:
-            return None
 
-        if forbidden_selects:
+            # If there are no selected models, there's nothing to check
+            if not selected_models:
+                return None
+
+            node_prefix = file.dbt_node.alias.split("_")[0]
+            forbidden_selects = []
+
+            # Check for schema restrictions
+            if self._schema_lineage_restrictions.get(file.dbt_node.schema):
+                restricted_schemas = [
+                    layer.schema
+                    for layer in self._schema_lineage_restrictions.get(
+                        file.dbt_node.schema
+                    )
+                ]
+                for selected_model in selected_models:
+                    if selected_model.schema in restricted_schemas:
+                        forbidden_selects.append(selected_model.alias)
+            # If schema is not found, check for prefix restrictions
+            elif self._prefix_lineage_restrictions.get(node_prefix):
+                restricted_prefixes = [
+                    layer.prefix
+                    for layer in self._prefix_lineage_restrictions.get(node_prefix)
+                ]
+                for selected_model in selected_models:
+                    if selected_model.alias.split("_")[0] in restricted_prefixes:
+                        forbidden_selects.append(selected_model.alias)
+            # If no restrictions are found for this layer, return None
+            else:
+                return None
+
+            if forbidden_selects:
+                return linter.LintResult(
+                    file=file,
+                    opinion_code=self.code,
+                    passed=False,
+                    severity=self.severity,
+                    message=(
+                        f"Layer directionality {self.severity.value} be respected. "
+                        f"Model {file.dbt_node.alias} selects from {', '.join(forbidden_selects)}."
+                    ),
+                )
+
             return linter.LintResult(
                 file=file,
                 opinion_code=self.code,
-                passed=False,
+                passed=True,
                 severity=self.severity,
-                message=(
-                    f"Layer directionality {self.severity.value} be respected. "
-                    f"Model {file.dbt_node.alias} selects from {', '.join(forbidden_selects)}."
-                ),
+                message=("Layer directionality is respected."),
             )
 
-        return linter.LintResult(
-            file=file,
-            opinion_code=self.code,
-            passed=True,
-            severity=self.severity,
-            message=("Layer directionality is respected."),
-        )
+        return None
 
-    def _get_select_restrictions(self) -> tuple[dict, dict]:
+    def _get_select_restrictions(
+        self,
+    ) -> tuple[defaultdict[Any, list["Layer"]], defaultdict[Any, list["Layer"]]]:
         def _verify_comma_split(pair_string: str) -> bool:
             return len(pair_string.split(",")) == 2
 

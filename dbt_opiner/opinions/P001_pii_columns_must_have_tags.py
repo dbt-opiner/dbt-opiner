@@ -1,3 +1,5 @@
+from typing import Any
+
 from loguru import logger
 
 from dbt_opiner import file_handlers
@@ -31,7 +33,7 @@ class P001(base_opinion.BaseOpinion):
     If no pii_columns are specified, the opinion will be skipped.
     """
 
-    def __init__(self, config: dict = None, **kwargs) -> None:
+    def __init__(self, config: dict[str, Any] = {}, **kwargs: dict[str, Any]) -> None:
         super().__init__(
             code="P001",
             description="Columns that contain Personal Identifiable Information (PII) must be tagged in the yaml file.",
@@ -59,9 +61,10 @@ class P001(base_opinion.BaseOpinion):
             tag_type = "tags"
 
         nodes = []
-        if file.type == ".sql" and file.dbt_node.type == "model":
-            nodes = [file.dbt_node]
-        if file.type == ".yaml":
+        if isinstance(file, file_handlers.SqlFileHandler):
+            if file.dbt_node.type == "model":
+                nodes = [file.dbt_node]
+        if isinstance(file, file_handlers.YamlFileHandler):
             nodes = [node for node in file.dbt_nodes if node.type == "model"]
 
         results = []

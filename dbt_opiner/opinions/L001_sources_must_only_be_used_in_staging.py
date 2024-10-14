@@ -1,3 +1,4 @@
+from typing import Any
 from typing import Optional
 
 from dbt_opiner import file_handlers
@@ -22,7 +23,7 @@ class L001(base_opinion.BaseOpinion):
     - staging_prefix: prefix for staging tables (default: stg_)
     """
 
-    def __init__(self, config: dict, **kwargs) -> None:
+    def __init__(self, config: dict[str, Any], **kwargs: dict[str, Any]) -> None:
         super().__init__(
             code="L001",
             description="Sources must only be used in staging.",
@@ -38,31 +39,30 @@ class L001(base_opinion.BaseOpinion):
     def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         staging_schema_name = self._opinions_config.get("staging_schema", "staging")
         staging_prefix = self._opinions_config.get("staging_prefix", "stg_")
+        if isinstance(file, file_handlers.SqlFileHandler):
+            if (
+                file.dbt_node.type == "model"
+                and not file.dbt_node.alias.startswith(staging_prefix)
+                and not file.dbt_node.schema == staging_schema_name
+            ):
+                # We check the raw sql content for the source macro.
+                content = file.content.replace(" ", "").replace("\n", "")
 
-        if (
-            file.type == ".sql"
-            and file.dbt_node.type == "model"
-            and not file.dbt_node.alias.startswith(staging_prefix)
-            and not file.dbt_node.schema == staging_schema_name
-        ):
-            # We check the raw sql content for the source macro.
-            content = file.content.replace(" ", "").replace("\n", "")
+                if "{{source(" in content:
+                    return linter.LintResult(
+                        file=file,
+                        opinion_code=self.code,
+                        passed=False,
+                        severity=self.severity,
+                        message=f"The source macro {self.severity.value} only be used in staging layer.",
+                    )
 
-            if "{{source(" in content:
                 return linter.LintResult(
                     file=file,
                     opinion_code=self.code,
-                    passed=False,
+                    passed=True,
                     severity=self.severity,
-                    message=f"The source macro {self.severity.value} only be used in staging layer.",
+                    message=f"The source macro is not used in model {file.dbt_node.alias}.",
                 )
-
-            return linter.LintResult(
-                file=file,
-                opinion_code=self.code,
-                passed=True,
-                severity=self.severity,
-                message=f"The source macro is not used in model {file.dbt_node.alias}.",
-            )
 
         return None

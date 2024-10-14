@@ -2,14 +2,15 @@ import abc
 import pathlib
 import re
 import sys
+from typing import Any
+from typing import Optional
 from typing import TYPE_CHECKING
 
 import yaml
 from loguru import logger
 
-
 if TYPE_CHECKING:
-    from dbt_opiner.dbt import DbtManifest  # pragma: no cover
+    from dbt_opiner.dbt import DbtNode  # pragma: no cover
     from dbt_opiner.dbt import DbtProject  # pragma: no cover
 
 
@@ -25,7 +26,7 @@ class FileHandler(abc.ABC):
     """
 
     def __init__(
-        self, file_path: pathlib.Path, parent_dbt_project: "DbtProject" = None
+        self, file_path: pathlib.Path, parent_dbt_project: "DbtProject"
     ) -> None:
         """
         Args:
@@ -38,12 +39,12 @@ class FileHandler(abc.ABC):
             raise FileNotFoundError(f"{file_path} does not exist")
         self.path = file_path
         self.type = self.path.suffix
-        self._content = None
+        self._content: Optional[str] = None
         self.no_qa_opinions = self._get_no_qa_opinions(self.content)
         self.parent_dbt_project = parent_dbt_project
 
     @property
-    def content(self):
+    def content(self) -> str:
         """Reads the file content and returns it as a string."""
         if self._content is None:
             self._content = self._read_content()
@@ -59,7 +60,7 @@ class FileHandler(abc.ABC):
         """
         if re.search(r"noqa: dbt-opiner all", content):
             return ["all"]
-        matches = re.findall(r"noqa: dbt-opiner ([\w\d, ]+)", content)
+        matches: list[str] = re.findall(r"noqa: dbt-opiner ([\w\d, ]+)", content)
         if matches:
             return matches[0].split(", ")
         return []
@@ -85,17 +86,17 @@ class FileHandler(abc.ABC):
             content = file.read()
         self.no_qa_opinions.extend(self._get_no_qa_opinions(content))
 
-    def _read_content(self):
+    def _read_content(self) -> str:
         try:
             with self.path.open("r") as file:
                 return file.read()
         except Exception as e:
             raise RuntimeError(f"Error reading file: {e}")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"FileHander({self.path})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.path}"
 
 
@@ -114,10 +115,7 @@ class SqlFileHandler(FileHandler):
     """
 
     def __init__(
-        self,
-        file_path: pathlib.Path,
-        dbt_manifest: "DbtManifest",
-        parent_dbt_project: "DbtProject" = None,
+        self, file_path: pathlib.Path, parent_dbt_project: "DbtProject"
     ) -> None:
         """
         Args:
@@ -133,12 +131,14 @@ class SqlFileHandler(FileHandler):
                 f"SqlFileHandler requires a .sql file, got {file_path.suffix}"
             )
         super().__init__(file_path, parent_dbt_project)
-        self.dbt_node = None
+        self.dbt_node: DbtNode
 
+        dbt_manifest = self.parent_dbt_project.dbt_manifest
         # Add dbt node to the file handler
         # Check if it's a model or a macro .sql file
+        node = None
         if "{%macro" in self.content.replace(" ", ""):
-            self.dbt_node = next(
+            node = next(
                 (
                     node
                     for node in dbt_manifest.macros.values()
@@ -149,7 +149,7 @@ class SqlFileHandler(FileHandler):
 
         else:
             # It's a model or a test
-            self.dbt_node = next(
+            node = next(
                 (
                     node
                     for node in dbt_manifest.nodes.values()
@@ -158,7 +158,7 @@ class SqlFileHandler(FileHandler):
                 None,
             )
 
-        if not self.dbt_node:
+        if not node:
             logger.critical(
                 (
                     f"Node not found for {self.path}. Try running dbt compile to "
@@ -167,6 +167,8 @@ class SqlFileHandler(FileHandler):
                 )
             )
             sys.exit(1)
+        else:
+            self.dbt_node = node
 
         # Add no_qa_opinions from the docs yml file
         if self.dbt_node.docs_yml_file_path:
@@ -195,8 +197,7 @@ class YamlFileHandler(FileHandler):
     def __init__(
         self,
         file_path: pathlib.Path,
-        dbt_manifest: "DbtManifest" = None,
-        parent_dbt_project: "DbtProject" = None,
+        parent_dbt_project: "DbtProject",
     ) -> None:
         """
         Args:
@@ -211,12 +212,13 @@ class YamlFileHandler(FileHandler):
                 f"YamlFileHandler requires a .yml or .yaml file, got {file_path.suffix}"
             )
         super().__init__(file_path, parent_dbt_project)
-        self._dict = None
+        self._dict: Optional[dict[str, Any]] = None
         self.type = ".yaml"
 
         # Search for the node in the manifest by the file name in patch
         # A yml file can have more than one dbt node
         self.dbt_nodes = []
+        dbt_manifest = parent_dbt_project.dbt_manifest
         if dbt_manifest:
             self.dbt_nodes = [
                 node
@@ -230,7 +232,7 @@ class YamlFileHandler(FileHandler):
                 for node in self.dbt_nodes:
                     self._add_no_qa_opinions_from_other_file(node.original_file_path)
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Returns the YAML file content as a dictionary."""
         if self._dict is None:
             try:
@@ -241,7 +243,7 @@ class YamlFileHandler(FileHandler):
                 raise RuntimeError(f"Error reading YAML file: {e}")
         return self._dict
 
-    def get(self, key, default=None):
+    def get(self, key: str, default: Optional[str] = None) -> Any:
         """Returns the value of a key in the YAML file content.
         Args:
             key: Key to get the value of.
@@ -263,7 +265,7 @@ class MarkdownFileHandler(FileHandler):
     """
 
     def __init__(
-        self, file_path: pathlib.Path, parent_dbt_project: "DbtProject" = None
+        self, file_path: pathlib.Path, parent_dbt_project: "DbtProject"
     ) -> None:
         """
         Args:

@@ -1,3 +1,5 @@
+from typing import Any
+
 from loguru import logger
 
 from dbt_opiner import file_handlers
@@ -17,7 +19,7 @@ class BQ003(base_opinion.BaseOpinion):
     The check is case insensitive.
     """
 
-    def __init__(self, config: dict, **kwargs) -> None:
+    def __init__(self, config: dict[str, Any], **kwargs: dict[str, Any]) -> None:
         super().__init__(
             code="BQ003",
             description="Views must have documented the partition and cluster of underlying tables.",
@@ -34,14 +36,14 @@ class BQ003(base_opinion.BaseOpinion):
 
         keywords = ["partition", "cluster"]
         nodes = []
-        if (
-            file.type == ".sql"
-            and file.dbt_node.type == "model"
-            and file.dbt_node.config.get("materialized") == "view"
-        ):
-            nodes = [file.dbt_node]
+        if isinstance(file, file_handlers.SqlFileHandler):
+            if (
+                file.dbt_node.type == "model"
+                and file.dbt_node.config.get("materialized") == "view"
+            ):
+                nodes = [file.dbt_node]
 
-        if file.type == ".yaml":
+        if isinstance(file, file_handlers.YamlFileHandler):
             nodes = [
                 node
                 for node in file.dbt_nodes

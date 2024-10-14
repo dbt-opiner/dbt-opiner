@@ -5,6 +5,7 @@ from collections import defaultdict
 from collections import OrderedDict
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -60,9 +61,9 @@ class LintResult:
     passed: bool
     severity: OpinionSeverity
     message: str
-    tags: list[str] = None
+    tags: Optional[list[str]] = None
 
-    def __gt__(self, other):
+    def __gt__(self, other: "LintResult") -> bool:
         """Compare two LintResult objects by severity and opinion code."""
         if self.severity.num != other.severity.num:
             return self.severity.num > other.severity.num
@@ -86,18 +87,14 @@ class Linter:
             opinions_pack: OpinionsPack object containing the opinions to be checked.
             no_ignore: If True, ignore all the no qa configs.
         """
-        self._lint_results = []
+        self._lint_results: list[LintResult] = []
         self._no_ignore = no_ignore
         self._config = config_singleton.ConfigSingleton().get_config()
         self.opinions = opinions_pack.get_opinions()
 
     def lint_file(
         self,
-        file: (
-            file_handlers.SqlFileHandler
-            | file_handlers.YamlFileHandler
-            | file_handlers.MarkdownFileHandler
-        ),
+        file: (file_handlers.FileHandler),
     ) -> None:
         """Lint a file with the loaded opinions and add the result to the lint results.
 
@@ -137,7 +134,7 @@ class Linter:
                 else:
                     self._lint_results.append(lint_result)
 
-    def get_lint_results(self, deduplicate=False) -> list[LintResult]:
+    def get_lint_results(self, deduplicate: bool = False) -> list[LintResult]:
         """Returns list of lint results sorted by severity and
         opinion code (alphabetically).
         Files can be in different order and not necessarily together if
@@ -153,14 +150,14 @@ class Linter:
         return sorted(self._lint_results)
         # TODO: add option to organize results by opinion tags.
 
-    def log_results_and_exit(self, output_file: str | None = None) -> None:
+    def log_results_and_exit(self, output_file: Optional[str] = None) -> None:
         """Log the results of the linting and exit with the appropriate code.
         Args:
           output_file: The file to write the lint results to.
         """
         # Change logger setup to make messages more clear
         # Get exiting logger config
-        original_logger_config = next(iter(logger._core.handlers.copy().values()))
+        original_logger_config = next(iter(logger._core.handlers.copy().values()))  # type: ignore
         logger.remove()
 
         # Add file sink if specified
@@ -198,7 +195,7 @@ class Linter:
         sys.exit(exit_code)
 
     def log_audit_and_exit(
-        self, type: str, format: str, output_file: str | None = None
+        self, type: str, format: str, output_file: Optional[str] = None
     ) -> None:
         """Log the audit results and exit.
         Args:
@@ -207,7 +204,7 @@ class Linter:
         """
         # Change logger setup to make messages more clear
         # Get exiting logger config
-        original_logger_config = next(iter(logger._core.handlers.copy().values()))
+        original_logger_config = next(iter(logger._core.handlers.copy().values()))  # type: ignore
         logger.remove()
 
         # Add file sink if specified
@@ -227,13 +224,15 @@ class Linter:
 
         audit_results = self._audit()
 
-        def dataframe_to_string(df, format_type):
+        def dataframe_to_string(df: pd.DataFrame, format_type: str) -> str:
             buffer = io.StringIO()
             if format_type == "md":
-                return df.to_markdown(index=False)
+                markdown_str: str = df.to_markdown(index=False)
+                return markdown_str
             elif format_type == "csv":
                 df.to_csv(buffer, index=False)
-                return buffer.getvalue().strip()
+                csv_str: str = buffer.getvalue().strip()
+                return csv_str
             else:
                 raise ValueError(f"Unsupported format: {format_type}")
 
@@ -267,7 +266,7 @@ class Linter:
         """
         deduplicated_results = []
         for result in self._lint_results:
-            if result.file.type == ".sql":
+            if isinstance(result.file, file_handlers.SqlFileHandler):
                 node_yaml_file = result.file.dbt_node.docs_yml_file_path
                 opinion = result.opinion_code
                 if any(
@@ -281,7 +280,7 @@ class Linter:
 
         return deduplicated_results
 
-    def _audit(self) -> dict:
+    def _audit(self) -> dict[str, pd.DataFrame]:
         """Create a series of dataframes with data about the linting results."""
         audit_dict = defaultdict(list)
 

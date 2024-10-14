@@ -4,9 +4,11 @@ import pathlib
 import re
 import subprocess
 from collections import defaultdict
+from typing import Any
 from typing import Optional
 
 import sqlglot
+import yaml
 from loguru import logger
 from sqlglot.optimizer import qualify
 from sqlglot.optimizer import scope
@@ -22,6 +24,7 @@ class DbtProject:
 
     Attributes:
         name: The name of the dbt project.
+        dbt_project_dir_path: The path to the dbt project directory (where dbt_project.yml file is).
         dbt_project_file_path: The path to the dbt_project.yml file.
         dbt_project_config: The configuration of the dbt project.
         dbt_profile_path: The path to the profiles.yml file.
@@ -34,9 +37,9 @@ class DbtProject:
     def __init__(
         self,
         dbt_project_file_path: pathlib.Path,
-        files: list = [],
+        files: list[pathlib.Path] = [],
         all_files: bool = False,
-        target: str = None,
+        target: Optional[str] = None,
         force_compile: bool = False,
     ) -> None:
         """
@@ -47,6 +50,7 @@ class DbtProject:
             target: The target to run the dbt command.
             force_compile: A flag to force compile the dbt manifest file
         """
+
         self._target = target
 
         # Set config
@@ -58,16 +62,17 @@ class DbtProject:
             raise FileNotFoundError(f"{dbt_project_file_path} does not exist")
 
         self.dbt_project_file_path = dbt_project_file_path
-        self.dbt_project_config = file_handlers.YamlFileHandler(dbt_project_file_path)
+        self.dbt_project_dir_path = dbt_project_file_path.parent
+        self.dbt_project_config = self._load_yaml_file(dbt_project_file_path)
         self.name = self.dbt_project_config.get("name")
 
         # Profiles can be none if it's specified in personal folder
         # We won't take care of that because is not a very good practice
         self.dbt_profile_path = None
-        self.dbt_profile = None
+        self.dbt_profile: dict[str, Any] = {}
         if (dbt_project_file_path.parent / "profiles.yml").exists():
             self.dbt_profile_path = dbt_project_file_path.parent / "profiles.yml"
-            self.dbt_profile = file_handlers.YamlFileHandler(self.dbt_profile_path)
+            self.dbt_profile = self._load_yaml_file(self.dbt_profile_path)
 
         # Load manifest
         self._load_manifest(force_compile)
@@ -75,20 +80,22 @@ class DbtProject:
         # TODO: Load catalog
 
         # Load files
-        self.files = dict(sql=[], yaml=[], markdown=[])
+        self.files: dict[str, list[file_handlers.FileHandler]] = dict(
+            sql=[], yaml=[], markdown=[]
+        )
         if all_files:
             self._init_all_files()
         else:
             self._init_files(files)
 
-    def _init_all_files(self):
+    def _init_all_files(self) -> None:
         """Create an object for every sql, yaml, and markdown file in the dbt project
         and add it to self.files dictionary.
         """
-        files = (self.dbt_project_file_path.parent).rglob("*")
+        files = list((self.dbt_project_file_path.parent).rglob("*"))
         self._init_files(files)
 
-    def _init_files(self, files: list[pathlib.Path]):
+    def _init_files(self, files: list[pathlib.Path]) -> None:
         """Initialize only the list of files pased. Useful for git diff files loading.
 
         Args:
@@ -121,7 +128,7 @@ class DbtProject:
                     self._config.get("files", {}).get("sql", MATCH_ALL), str(file)
                 ):
                     sql_file = file_handlers.SqlFileHandler(
-                        file, self.dbt_manifest, self
+                        file_path=file, parent_dbt_project=self
                     )
                     self.files["sql"].append(sql_file)
 
@@ -132,7 +139,7 @@ class DbtProject:
                     file_pattern = self._config.get("files", {}).get("yml", MATCH_ALL)
                 if re.match(file_pattern, str(file)):
                     yaml_file = file_handlers.YamlFileHandler(
-                        file, self.dbt_manifest, self
+                        file_path=file, parent_dbt_project=self
                     )
                     self.files["yaml"].append(yaml_file)
 
@@ -140,12 +147,14 @@ class DbtProject:
                 file_pattern = self._config.get("files", {}).get("md", MATCH_ALL)
                 if re.match(file_pattern, str(file)):
                     self.files["markdown"].append(
-                        file_handlers.MarkdownFileHandler(file, self)
+                        file_handlers.MarkdownFileHandler(
+                            file_path=file, parent_dbt_project=self
+                        )
                     )
             else:
                 logger.debug(f"{file.suffix} is not supported. Skipping.")
 
-    def _load_manifest(self, force_compile=False):
+    def _load_manifest(self, force_compile: bool = False) -> None:
         """Load the dbt manifest file.
 
         Args:
@@ -166,7 +175,22 @@ class DbtProject:
                 self.dbt_project_file_path, self.dbt_profile_path, self._target
             )
 
-        self.dbt_manifest = DbtManifest(manifest_path)
+        self.dbt_manifest = DbtManifest(str(manifest_path))
+
+    @staticmethod
+    def _load_yaml_file(file_path: pathlib.Path) -> dict[str, Any]:
+        """Load a yaml file.
+
+        Args:
+            file_path: The path to the yaml file.
+
+        Returns:
+            A dictionary with the yaml file content.
+        """
+        with open(file_path, "r") as f:
+            yaml_file: dict[str, Any] = yaml.safe_load(f)
+            f.close()
+        return yaml_file
 
 
 class DbtManifest:
@@ -234,7 +258,7 @@ class DbtNode:
         get: Get the value of a key in the node.
     """
 
-    def __init__(self, node: dict, sql_dialect: str = None) -> None:
+    def __init__(self, node: dict[str, Any], sql_dialect: Optional[str] = None) -> None:
         """
         Args:
             node: The dictionary representation of the dbt node.
@@ -244,45 +268,45 @@ class DbtNode:
         self._sql_dialect = sql_dialect
 
     @property
-    def schema(self):
+    def schema(self) -> Any:
         return self._node.get("schema")
 
     @property
-    def alias(self):
+    def alias(self) -> Any:
         return self._node.get("alias")
 
     @property
-    def type(self):
+    def type(self) -> Any:
         return self._node.get("resource_type")
 
     @property
-    def original_file_path(self):
+    def original_file_path(self) -> str:
         return self._node.get("original_file_path")
 
     @property
-    def compiled_code(self):
+    def compiled_code(self) -> str:
         return self._node.get("compiled_code")
 
     @property
-    def docs_yml_file_path(self) -> Optional[str]:
+    def docs_yml_file_path(self) -> Any:
         if self._node.get("patch_path"):
             return self._node.get("patch_path").replace("://", "/")
         return None
 
     @property
-    def description(self):
+    def description(self) -> Any:
         return self._node.get("description")
 
     @property
-    def config(self):
+    def config(self) -> dict[str, Any]:
         return self._node.get("config")
 
     @property
-    def columns(self):
+    def columns(self) -> dict[str, Any]:
         return self._node.get("columns")
 
     @property
-    def unique_key(self):
+    def unique_key(self) -> str:
         return self._node.get("config", {}).get("unique_key")
 
     @property
@@ -303,23 +327,24 @@ class DbtNode:
         return self._sql_code_ast
 
     @property
-    def ast_extracted_columns(self):
+    def ast_extracted_columns(self) -> list[str]:
         """Returns the columns extracted from the sql code ast."""
         if self.sql_code_ast:
             return self._extract_columns_from_ast()
         return []
 
-    def _extract_columns_from_ast(self):
+    def _extract_columns_from_ast(self) -> list[str]:
         columns = []
-        for column in qualify.qualify(self.sql_code_ast).selects:
+        for column in qualify.qualify(self.sql_code_ast).selects:  # type: ignore
             # If there's a select * in the final CTE
             if column.is_star:
                 root = scope.build_scope(qualify.qualify(column.parent))
                 try:
                     # If the column is a `select *` from a directly referenced table
-                    columns.append(
-                        f"* from {scope.find_in_scope(root.expression, sqlglot.exp.Table).name}"
-                    )
+                    if root:
+                        columns.append(
+                            f"* from {scope.find_in_scope(root.expression, sqlglot.exp.Table).name}"  # type: ignore
+                        )
                 except AttributeError:
                     # If the column is a `select * from (select * from table)`
                     columns.append("* from nested query")
@@ -327,22 +352,22 @@ class DbtNode:
                 columns.append(column.alias)
         return columns
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"DbtNode({self.alias})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self._node}"
 
-    def keys(self):
+    def keys(self) -> list[str]:
         return self._node.keys()
 
-    def values(self):
+    def values(self) -> list[Any]:
         return self._node.values()
 
-    def items(self):
+    def items(self) -> list[tuple[str, Any]]:
         return self._node.items()
 
-    def get(self, key, default=None):
+    def get(self, key: str, default: Optional[str] = None) -> Any:
         return self._node.get(key, default)
 
 
@@ -415,7 +440,7 @@ class DbtProjectLoader:
         return dbt_projects
 
     def initialize_dbt_projects(
-        self, changed_files: list[str] = None, all_files: bool = False
+        self, changed_files: list[str] = [], all_files: bool = False
     ) -> list[DbtProject]:
         """Initialize dbt projects with all files or only the changed ones.
 
@@ -441,7 +466,7 @@ class DbtProjectLoader:
             logger.debug("Processing changed files")
             # If the parameter is a path to a directory
             # get all files in the directory and its subdirectories
-            files = []
+            files: list[pathlib.Path] = []
             for file in changed_files:
                 path = pathlib.Path(file)
                 if path.is_dir():
@@ -481,6 +506,7 @@ class DbtProjectLoader:
             logger.debug("dbt_project.yml not found")
 
         logger.debug("Not a git repository")
+        return None
 
     def _find_all_dbt_project_ymls(self) -> Optional[list[pathlib.Path]]:
         """Find all dbt_project.yml files in a git repository.
@@ -529,10 +555,10 @@ class DbtProjectLoader:
 def run_dbt_command(
     command: str,
     dbt_project_file_path: pathlib.Path,
-    dbt_profile_path: pathlib.Path = None,
-    target: str = None,
+    dbt_profile_path: Optional[pathlib.Path] = None,
+    target: Optional[str] = None,
     silent: bool = False,
-) -> subprocess.CompletedProcess:  # pragma: no cover
+) -> subprocess.CompletedProcess[bytes]:  # pragma: no cover
     """Run dbt command for the given dbt project file path.
 
     Args:
@@ -589,9 +615,9 @@ def run_dbt_command(
 
 def compile_dbt_manifest(
     dbt_project_file_path: pathlib.Path,
-    dbt_profile_path: pathlib.Path = None,
-    target: str = None,
-):  # pragma: no cover
+    dbt_profile_path: Optional[pathlib.Path] = None,
+    target: Optional[str] = None,
+) -> None:  # pragma: no cover
     """Compile the dbt manifest file for the given dbt project file path.
     It tries to run compile but runs deps, seed, if just compile fails.
     Sometimes those are required to run compile.
@@ -602,7 +628,7 @@ def compile_dbt_manifest(
         target: The target to run the dbt command
     """
     # Shouldn't access private attribute, but passing all the logger context is too much
-    if logger._core.handlers.get(1).levelno == 10:
+    if logger._core.handlers.get(1).levelno == 10:  # type: ignore
         r = run_dbt_command(
             command="debug",
             dbt_project_file_path=dbt_project_file_path,

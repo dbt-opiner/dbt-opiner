@@ -1,3 +1,4 @@
+from typing import Any
 from typing import Optional
 
 from dbt_opiner import file_handlers
@@ -28,7 +29,7 @@ class O003(base_opinion.BaseOpinion):
     unresolved `select *` are found.
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: dict[str, Any]) -> None:
         super().__init__(
             code="O003",
             description="All columns must have a description.",
@@ -40,9 +41,10 @@ class O003(base_opinion.BaseOpinion):
         self, file: file_handlers.FileHandler
     ) -> Optional[list[linter.LintResult]]:
         nodes = []
-        if file.type == ".sql" and file.dbt_node.type == "model":
-            nodes = [file.dbt_node]
-        if file.type == ".yaml":
+        if isinstance(file, file_handlers.SqlFileHandler):
+            if file.dbt_node.type == "model":
+                nodes = [file.dbt_node]
+        if isinstance(file, file_handlers.YamlFileHandler):
             nodes = [node for node in file.dbt_nodes if node.type == "model"]
 
         results = []

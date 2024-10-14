@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 
 from dbt_opiner import file_handlers
@@ -25,14 +23,13 @@ from dbt_opiner.opinions import BQ004
     ],
 )
 def test_yaml_BQ004(
-    tmpdir,
+    dbt_project,
     dbt_project_content,
     config,
     expected_passed,
 ):
-    dbt_project = Path(tmpdir) / "dbt_project.yml"
-    dbt_project.touch()
-    file = file_handlers.YamlFileHandler(dbt_project)
+    dbt_project_file = dbt_project.dbt_project_dir_path / "dbt_project.yml"
+    file = file_handlers.YamlFileHandler(dbt_project_file, dbt_project)
     file._dict = dbt_project_content
     opinion = BQ004(config)
     result = opinion.check_opinion(file)

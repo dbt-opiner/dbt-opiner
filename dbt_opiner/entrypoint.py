@@ -1,6 +1,7 @@
 import pathlib
 import sys
 import time
+from typing import Optional
 
 from loguru import logger
 
@@ -12,10 +13,10 @@ from dbt_opiner.opinions import opinions_pack
 def lint(
     changed_files: list[str] = [],
     all_files: bool = False,
-    target: str | None = None,
+    target: Optional[str] = None,
     force_compile: bool = False,
     no_ignore: bool = False,
-    output_file: str | None = None,
+    output_file: Optional[str] = None,
 ) -> None:
     """Lint the dbt project using the dbt-opiner package.
 
@@ -53,11 +54,11 @@ def lint(
 def audit(
     type: str,
     format: str = "md",
-    dbt_project_dir: str | None = None,
-    target: str | None = None,
+    dbt_project_dir: Optional[str] = None,
+    target: Optional[str] = None,
     force_compile: bool = False,
     no_ignore: bool = False,
-    output_file: str | None = None,
+    output_file: Optional[str] = None,
 ) -> None:
     """Audit the dbt project using the dbt-opiner package.
 

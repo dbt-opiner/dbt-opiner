@@ -1,5 +1,6 @@
 import json
-from unittest.mock import patch
+import os
+from unittest import mock
 
 import pytest
 import yaml
@@ -7,6 +8,8 @@ from _pytest.logging import LogCaptureFixture
 from loguru import logger
 
 from dbt_opiner import config_singleton
+from dbt_opiner import dbt
+from dbt_opiner import file_handlers
 
 
 # See https://loguru.readthedocs.io/en/stable/resources/migration.html#replacing-caplog-fixture-from-pytest-library
@@ -25,16 +28,18 @@ def caplog(caplog: LogCaptureFixture):
 
 @pytest.fixture
 def mock_sqlfilehandler():
-    with patch("dbt_opiner.file_handlers.SqlFileHandler") as MockClass:
-        MockClass.type = ".sql"
-        yield MockClass
+    mock_instance = mock.MagicMock()
+    mock_instance.type = ".sql"
+    mock_instance.__class__ = file_handlers.SqlFileHandler
+    yield mock_instance
 
 
 @pytest.fixture
 def mock_yamlfilehandler():
-    with patch("dbt_opiner.file_handlers.YamlFileHandler") as MockClass:
-        MockClass.type = ".yaml"
-        yield MockClass
+    mock_instance = mock.MagicMock()
+    mock_instance.type = ".yaml"
+    mock_instance.__class__ = file_handlers.YamlFileHandler
+    yield mock_instance
 
 
 @pytest.fixture(autouse=True)
@@ -250,3 +255,11 @@ def temp_complete_git_repo(temp_empty_git_repo):
                 f.write(content)
 
     return temp_empty_git_repo
+
+
+@pytest.fixture
+def dbt_project(temp_complete_git_repo):
+    os.chdir(temp_complete_git_repo)
+    dbt_project_path = temp_complete_git_repo / "dbt_project" / "dbt_project.yml"
+    dbt_project = dbt.DbtProject(dbt_project_path, all_files=True)
+    return dbt_project

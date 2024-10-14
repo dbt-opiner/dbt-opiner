@@ -1,5 +1,6 @@
 import abc
 from typing import Any
+from typing import Optional
 
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
@@ -52,7 +53,7 @@ class BaseOpinion(abc.ABC):
     def check_opinion(
         self,
         file: file_handlers.FileHandler,
-    ) -> linter.LintResult | list[linter.LintResult]:
+    ) -> Optional[linter.LintResult | list[linter.LintResult]]:
         """The method that will be called to evaluate the opinion.
 
         Args:
@@ -75,14 +76,15 @@ class BaseOpinion(abc.ABC):
             for res in result:
                 if not isinstance(res, linter.LintResult):
                     return None
-                res.tags = self.tags or "not tagged"
+                res.tags = self.tags or ["not tagged"]
             return result
+        return None
 
     @abc.abstractmethod
     def _eval(
         self,
         file: file_handlers.FileHandler,
-    ) -> linter.LintResult | list[linter.LintResult] | None:
+    ) -> Optional[linter.LintResult | list[linter.LintResult]]:
         """
         The method that will contain all the logic of the opinon evaluation.
         Should be implemented in the child class.

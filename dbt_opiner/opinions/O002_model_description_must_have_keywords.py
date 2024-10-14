@@ -1,3 +1,4 @@
+from typing import Any
 from typing import Optional
 
 from loguru import logger
@@ -26,7 +27,7 @@ class O002(base_opinion.BaseOpinion):
     Keywords are case insensitive.
     """
 
-    def __init__(self, config: dict = None, **kwargs) -> None:
+    def __init__(self, config: dict[str, Any] = {}, **kwargs: dict[str, Any]) -> None:
         super().__init__(
             code="O002",
             description="Model description must have keywords.",
@@ -49,10 +50,10 @@ class O002(base_opinion.BaseOpinion):
         if keywords:
             logger.debug(f"Checking model descriptions for keywords: {keywords}")
             nodes = []
-            if file.type == ".sql" and file.dbt_node.type == "model":
-                nodes = [file.dbt_node]
-
-            if file.type == ".yaml":
+            if isinstance(file, file_handlers.SqlFileHandler):
+                if file.dbt_node.type == "model":
+                    nodes = [file.dbt_node]
+            if isinstance(file, file_handlers.YamlFileHandler):
                 nodes = [node for node in file.dbt_nodes if node.type == "model"]
 
             results = []

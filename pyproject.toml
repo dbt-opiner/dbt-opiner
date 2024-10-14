@@ -73,5 +73,6 @@ module = [
 "requests.*",
 "yaml.*",
 "pyfiglet.*",
+"pandas.*",
 ]
 ignore_missing_imports = true
