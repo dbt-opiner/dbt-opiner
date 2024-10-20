@@ -4,18 +4,23 @@ repos:
 
   hooks:
   - id: check-yaml
+    name: Validate YAML files
     args: [--allow-multiple-documents]
   - id: end-of-file-fixer
+    name: Ensure files end with a newline
   - id: trailing-whitespace
+    name: Remove trailing whitespace
     exclude_types: [markdown]
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.4.3
   hooks:
     - id: ruff
+      name: Ruff fixer
       types: ["python"]
       args: ["--fix"]
     - id: ruff-format
+      name: Ruff formatter
       types: ["python"]
 
 - repo: https://github.com/asottile/reorder-python-imports
@@ -26,7 +31,7 @@ repos:
 - repo: local
   hooks:
     - id: mypy
-      name: mypy
+      name: Run mypy checks
       entry: poetry run mypy --follow-imports=silent
       language: system
       pass_filenames: false
