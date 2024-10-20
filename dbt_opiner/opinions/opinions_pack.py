@@ -130,7 +130,7 @@ class OpinionsPack:
                     else:
                         logger.debug(f"No required packages for opinion {name}")
                     # Inject the config to the opinion
-                    loaded_opinions.append(obj(config=self._config)) # type: ignore
+                    loaded_opinions.append(obj(config=self._config))  # type: ignore
         return loaded_opinions
 
     def _load_opinions_from_git(self) -> list[base_opinion.BaseOpinion]:
