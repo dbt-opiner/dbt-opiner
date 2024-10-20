@@ -522,7 +522,6 @@ class DbtProjectLoader:
                 return dbt_project_yml_path
             logger.debug("dbt_project.yml not found")
 
-        logger.debug("Not a git repository")
         return None
 
     def _find_all_dbt_project_ymls(self) -> Optional[list[pathlib.Path]]:
@@ -547,7 +546,6 @@ class DbtProjectLoader:
                     dirs[:] = []
                     continue
             return dbt_project_ymls
-        logger.debug("Not a git repository")
         return None
 
     @staticmethod
@@ -565,8 +563,9 @@ class DbtProjectLoader:
                 logger.debug(f"git root is: {current_path}")
                 return current_path
             current_path = current_path.parent
-        logger.debug("Not a git repository")
-        return None
+
+        logger.error("Not a git repository")
+        raise FileNotFoundError("Not a git repository")
 
 
 def run_dbt_command(
