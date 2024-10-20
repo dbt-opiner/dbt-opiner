@@ -5,7 +5,11 @@ import re
 import subprocess
 from collections import defaultdict
 from typing import Any
+from typing import ItemsView
+from typing import KeysView
 from typing import Optional
+from typing import TypedDict
+from typing import ValuesView
 
 import sqlglot
 import yaml
@@ -232,6 +236,18 @@ class DbtCatalog:
     # TODO
 
 
+class DbtNodeType(TypedDict, total=False):
+    schema: str
+    alias: str
+    resource_type: str
+    original_file_path: str
+    compiled_code: str
+    patch_path: str
+    description: str
+    config: dict[str, Any]
+    columns: dict[str, Any]
+
+
 class DbtNode:
     """Class to represent a dbt node or a macro in the manifest file.
 
@@ -258,7 +274,7 @@ class DbtNode:
         get: Get the value of a key in the node.
     """
 
-    def __init__(self, node: dict[str, Any], sql_dialect: Optional[str] = None) -> None:
+    def __init__(self, node: DbtNodeType, sql_dialect: Optional[str] = None) -> None:
         """
         Args:
             node: The dictionary representation of the dbt node.
@@ -268,49 +284,47 @@ class DbtNode:
         self._sql_dialect = sql_dialect
 
     @property
-    def schema(self) -> Any:
-        return self._node.get("schema")
+    def schema(self) -> str:
+        return self._node.get("schema", "")
 
     @property
-    def alias(self) -> Any:
-        return self._node.get("alias")
+    def alias(self) -> str:
+        return self._node.get("alias", "")
 
     @property
-    def type(self) -> Any:
-        return self._node.get("resource_type")
+    def type(self) -> str:
+        return self._node.get("resource_type", "")
 
     @property
     def original_file_path(self) -> str:
-        return self._node.get("original_file_path")
+        return self._node.get("original_file_path", "")
 
     @property
     def compiled_code(self) -> str:
-        return self._node.get("compiled_code")
+        return self._node.get("compiled_code", "")
 
     @property
-    def docs_yml_file_path(self) -> Any:
-        if self._node.get("patch_path"):
-            return self._node.get("patch_path").replace("://", "/")
-        return None
+    def docs_yml_file_path(self) -> str:
+        return self._node.get("patch_path", "").replace("://", "/")
 
     @property
-    def description(self) -> Any:
-        return self._node.get("description")
+    def description(self) -> str:
+        return self._node.get("description", "")
 
     @property
     def config(self) -> dict[str, Any]:
-        return self._node.get("config")
+        return self._node.get("config", {})
 
     @property
     def columns(self) -> dict[str, Any]:
-        return self._node.get("columns")
+        return self._node.get("columns", {})
 
     @property
     def unique_key(self) -> str:
-        return self._node.get("config", {}).get("unique_key")
+        return str(self._node.get("config", {}).get("unique_key", ""))
 
     @property
-    def sql_code_ast(self) -> sqlglot.expressions.Select:
+    def sql_code_ast(self) -> Optional[sqlglot.expressions.Select]:
         """Returns the sqlglot Abstract Syntax Tree for the compiled sql code.
         See more about AST at: https://github.com/tobymao/sqlglot/blob/main/posts/ast_primer.md
         """
@@ -320,7 +334,7 @@ class DbtNode:
             except sqlglot.errors.ParseError as e:
                 logger.error(f"Malformed SQL code:\n{e}")
             else:
-                self._sql_code_ast = sqlglot.parse_one(
+                self._sql_code_ast = sqlglot.parse_one(  # type: ignore
                     self.compiled_code, dialect=self._sql_dialect
                 )
 
@@ -358,16 +372,18 @@ class DbtNode:
     def __str__(self) -> str:
         return f"{self._node}"
 
-    def keys(self) -> list[str]:
+    def keys(self) -> KeysView[str]:
         return self._node.keys()
 
-    def values(self) -> list[Any]:
+    def values(self) -> ValuesView[Any]:
         return self._node.values()
 
-    def items(self) -> list[tuple[str, Any]]:
+    def items(self) -> ItemsView[str, Any]:
         return self._node.items()
 
-    def get(self, key: str, default: Optional[str] = None) -> Any:
+    def get(
+        self, key: str, default: Optional[str | dict[str, Any] | list[Any]] = None
+    ) -> Any:
         return self._node.get(key, default)
 
 
@@ -396,15 +412,16 @@ class DbtProjectLoader:
         """
         dbt_projects_file_paths = self._find_all_dbt_project_ymls()
         dbt_projects = []
-
-        for dbt_project_file_path in dbt_projects_file_paths:
-            dbt_project = DbtProject(
-                dbt_project_file_path=dbt_project_file_path,
-                target=self._target,
-                force_compile=self._force_compile,
-                all_files=True,
-            )
-            dbt_projects.append(dbt_project)
+        if dbt_projects_file_paths:
+            dbt_projects = [
+                DbtProject(
+                    dbt_project_file_path=dbt_project_file_path,
+                    target=self._target,
+                    force_compile=self._force_compile,
+                    all_files=True,
+                )
+                for dbt_project_file_path in dbt_projects_file_paths
+            ]
 
         return dbt_projects
 

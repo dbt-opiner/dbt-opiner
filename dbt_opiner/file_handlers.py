@@ -243,7 +243,9 @@ class YamlFileHandler(FileHandler):
                 raise RuntimeError(f"Error reading YAML file: {e}")
         return self._dict
 
-    def get(self, key: str, default: Optional[str] = None) -> Any:
+    def get(
+        self, key: str, default: Optional[str | dict[str, Any] | list[Any]] = None
+    ) -> Any:
         """Returns the value of a key in the YAML file content.
         Args:
             key: Key to get the value of.

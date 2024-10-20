@@ -88,21 +88,23 @@ class L002(base_opinion.BaseOpinion):
                 restricted_schemas = [
                     layer.schema
                     for layer in self._schema_lineage_restrictions.get(
-                        file.dbt_node.schema
+                        file.dbt_node.schema, []
                     )
                 ]
                 for selected_model in selected_models:
-                    if selected_model.schema in restricted_schemas:
-                        forbidden_selects.append(selected_model.alias)
+                    if selected_model:
+                        if selected_model.schema in restricted_schemas:
+                            forbidden_selects.append(selected_model.alias)
             # If schema is not found, check for prefix restrictions
             elif self._prefix_lineage_restrictions.get(node_prefix):
                 restricted_prefixes = [
                     layer.prefix
-                    for layer in self._prefix_lineage_restrictions.get(node_prefix)
+                    for layer in self._prefix_lineage_restrictions.get(node_prefix, [])
                 ]
                 for selected_model in selected_models:
-                    if selected_model.alias.split("_")[0] in restricted_prefixes:
-                        forbidden_selects.append(selected_model.alias)
+                    if selected_model:
+                        if selected_model.alias.split("_")[0] in restricted_prefixes:
+                            forbidden_selects.append(selected_model.alias)
             # If no restrictions are found for this layer, return None
             else:
                 return None
