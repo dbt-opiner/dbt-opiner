@@ -20,7 +20,7 @@ class ConfigSingleton:
     """
 
     _instance = None
-    _config = None
+    _config: dict[str, Any] = {}
     _config_file_path = None
     # Define the schema for the configuration file
     # The schema is a dictionary where the key is the name of the configuration key
@@ -234,13 +234,9 @@ class ConfigSingleton:
             return self._merge_configs(original_config, shared_config)
 
     def get_config(self) -> dict[str, Any]:
-        if self._config is None:
-            raise ValueError("ConfigSingleton not initialized.")
         return self._config
 
-    def get_config_file_path(self) -> pathlib.Path:
-        if self._config_file_path is None:
-            raise ValueError("ConfigSingleton not initialized.")
+    def get_config_file_path(self) -> Optional[pathlib.Path]:
         return self._config_file_path
 
     def _merge_configs(

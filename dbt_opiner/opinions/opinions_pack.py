@@ -61,14 +61,13 @@ class OpinionsPack:
 
         custom_opinions = []
         if source == "local":
-            path = (
-                pathlib.Path(
-                    config_singleton.ConfigSingleton().get_config_file_path()
-                ).parent
-                / "custom_opinions"
-            )
-            logger.debug(f"Loading custom opinions from local source: {path}")
-            custom_opinions.extend(self._load_opinions_from_path(path))
+            if config_singleton.ConfigSingleton().get_config_file_path():
+                path = (
+                    config_singleton.ConfigSingleton().get_config_file_path().parent  # type: ignore
+                    / "custom_opinions"
+                )
+                logger.debug(f"Loading custom opinions from local source: {path}")
+                custom_opinions.extend(self._load_opinions_from_path(path))
         elif source == "git":
             custom_opinions.extend(self._load_opinions_from_git())
         else:
