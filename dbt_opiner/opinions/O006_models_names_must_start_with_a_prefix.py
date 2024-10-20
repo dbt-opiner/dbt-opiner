@@ -1,3 +1,6 @@
+from typing import Any
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -26,7 +29,7 @@ class O006(base_opinion.BaseOpinion):
     Layers can be excluded using a regex pattern under the `ignore_files>O006` key in your `.dbt-opiner.yaml` file.
     """
 
-    def __init__(self, config: dict, **kwargs) -> None:
+    def __init__(self, config: dict[str, Any], **kwargs: dict[str, Any]) -> None:
         super().__init__(
             code="O006",
             description="Models must start with a prefix.",
@@ -40,27 +43,30 @@ class O006(base_opinion.BaseOpinion):
             .get("O006", {})
         )
 
-    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
-        if file.type == ".sql" and file.dbt_node.type == "model":
-            accepted_prefixes = self._opinions_config.get(
-                "accepted_prefixes", ["base", "stg", "int", "fct", "dim", "mrt", "agg"]
-            )
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
+        if isinstance(file, file_handlers.SqlFileHandler):
+            if file.dbt_node.type == "model":
+                accepted_prefixes = self._opinions_config.get(
+                    "accepted_prefixes",
+                    ["base", "stg", "int", "fct", "dim", "mrt", "agg"],
+                )
 
-            if file.dbt_node.alias.split("_")[0] in accepted_prefixes:
+                if file.dbt_node.alias.split("_")[0] in accepted_prefixes:
+                    return linter.LintResult(
+                        file=file,
+                        opinion_code=self.code,
+                        passed=True,
+                        severity=self.severity,
+                        message="Model starts with a valid prefix.",
+                    )
                 return linter.LintResult(
                     file=file,
                     opinion_code=self.code,
-                    passed=True,
+                    passed=False,
                     severity=self.severity,
-                    message="Model starts with a valid prefix.",
+                    message=(
+                        f"Model {file.dbt_node.alias} {self.severity.value} start with a prefix that specifies the layer of the model. "
+                        f"Accepted prefixes are: {accepted_prefixes}."
+                    ),
                 )
-            return linter.LintResult(
-                file=file,
-                opinion_code=self.code,
-                passed=False,
-                severity=self.severity,
-                message=(
-                    f"Model {file.dbt_node.alias} {self.severity.value} start with a prefix that specifies the layer of the model. "
-                    f"Accepted prefixes are: {accepted_prefixes}."
-                ),
-            )
+        return None

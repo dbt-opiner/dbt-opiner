@@ -87,3 +87,10 @@ def test_dbt_project_loader_exceptions(
     loader = dbt.DbtProjectLoader()
     with pytest.raises(ValueError):
         loader.initialize_dbt_projects(all_files=all_files, changed_files=changed_files)
+
+
+def test_not_git_repo(tmpdir):
+    os.chdir(tmpdir)
+    loader = dbt.DbtProjectLoader()
+    with pytest.raises(FileNotFoundError):
+        loader.initialize_dbt_projects(all_files=True)

@@ -7,7 +7,9 @@ import tempfile
 from loguru import logger
 
 
-def clone_git_repo_and_checkout_revision(repository, revision):
+def clone_git_repo_and_checkout_revision(
+    repository: str, revision: str
+) -> pathlib.Path:
     """Clones a git repository to a temporary directory and checks out to the revision if provided.
     Args:
         repository: Git repository URL.

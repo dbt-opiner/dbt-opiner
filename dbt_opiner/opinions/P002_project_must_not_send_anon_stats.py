@@ -1,3 +1,6 @@
+from typing import Any
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -16,7 +19,7 @@ class P002(base_opinion.BaseOpinion):
     This opinion will also check if it's present there.
     """
 
-    def __init__(self, config: dict = None, **kwargs) -> None:
+    def __init__(self, config: dict[str, Any] = {}, **kwargs: dict[str, Any]) -> None:
         super().__init__(
             code="P002",
             description="Dbt project must not send anonymous statistics.",
@@ -25,7 +28,7 @@ class P002(base_opinion.BaseOpinion):
             tags=["privacy", "dbt_config"],
         )
 
-    def _eval(self, file: file_handlers.YamlFileHandler) -> linter.LintResult:
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         if file.path.name not in ("profiles.yml", "dbt_project.yml"):
             return None
 

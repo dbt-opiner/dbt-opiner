@@ -1,7 +1,10 @@
 import inspect
 import os
 import sys
-import typing as t
+from typing import Any
+from typing import Callable
+from typing import Iterable
+from typing import Optional
 
 import click
 import pyfiglet
@@ -15,16 +18,16 @@ click.echo(fig.renderText("dbt  opiner"))
 package.recommend_version_upgrade()
 
 
-def common_options(f):
-    f = click.option(
+def common_options(opt: Callable[..., Any]) -> Callable[..., Any]:
+    opt = click.option(
         "--log-level",
         type=click.Choice(
             ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False
         ),
         default="INFO",
         help="Set the logging level.",
-    )(f)
-    return f
+    )(opt)
+    return opt
 
 
 class ChoiceTuple(click.Choice):  # pragma: no cover
@@ -34,7 +37,12 @@ class ChoiceTuple(click.Choice):  # pragma: no cover
 
     name = "CHOICE_TUPLE"
 
-    def convert(self, value, param, ctx):
+    def convert(
+        self,
+        value: str | tuple[str],
+        param: Optional[click.Parameter],
+        ctx: Optional[click.Context],
+    ) -> str | tuple[str]:
         if not isinstance(value, str):
             for value_item in value:
                 super().convert(value_item, param, ctx)
@@ -49,7 +57,7 @@ class MultiOption(click.Option):  # pragma: no cover
     Taken from https://github.com/dbt-labs/dbt-core/blob/main/core/dbt/cli/options.py
     """
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.save_other_options = kwargs.pop("save_other_options", True)
         nargs = kwargs.pop("nargs", -1)
         assert nargs == -1, "nargs, if set, must be -1 not {}".format(nargs)
@@ -71,15 +79,17 @@ class MultiOption(click.Option):  # pragma: no cover
         else:
             assert isinstance(option_type, ChoiceTuple), msg
 
-    def add_to_parser(self, parser: click.parser.OptionParser, ctx: click.Context):
-        def parser_process(value: str, state: click.parser.ParsingState):
+    def add_to_parser(
+        self, parser: click.parser.OptionParser, ctx: click.Context
+    ) -> Any:
+        def parser_process(value: str, state: click.parser.ParsingState) -> None:
             # method to hook to the parser.process
             done = False
             value_list = str.split(value, " ")
             if self.save_other_options:
                 # grab everything up to the next option
                 while state.rargs and not done:
-                    for prefix in self._eat_all_parser.prefixes:
+                    for prefix in self._eat_all_parser.prefixes:  # type: ignore
                         if state.rargs[0].startswith(prefix):
                             done = True
                     if not done:
@@ -90,20 +100,20 @@ class MultiOption(click.Option):  # pragma: no cover
                 state.rargs[:] = []
             value_tuple = tuple(value_list)
             # call the actual process
-            self._previous_parser_process(value_tuple, state)
+            self._previous_parser_process(value_tuple, state)  # type: ignore
 
         retval = super(MultiOption, self).add_to_parser(parser, ctx)
         for name in self.opts:
             our_parser = parser._long_opt.get(name) or parser._short_opt.get(name)
             if our_parser:
-                self._eat_all_parser = our_parser
+                self._eat_all_parser = our_parser  # type: ignore
                 self._previous_parser_process = our_parser.process
-                our_parser.process = parser_process
+                our_parser.process = parser_process  # type: ignore
                 break
         return retval
 
-    def type_cast_value(self, ctx: click.Context, value: t.Any) -> t.Any:
-        def flatten(data):
+    def type_cast_value(self, ctx: click.Context, value: Any) -> Any:
+        def flatten(data: Any) -> Iterable[Any]:
             if isinstance(data, tuple):
                 for x in data:
                     yield from flatten(x)
@@ -124,7 +134,7 @@ class MultiOption(click.Option):  # pragma: no cover
 @click.version_option(
     message="dbt-opiner version: %(version)s",
 )
-def main():
+def main() -> None:
     pass
 
 
@@ -158,7 +168,15 @@ def main():
     type=str,
     help="If specified, a file to capture the lint results",
 )
-def lint(log_level, files, all_files, target, force_compile, no_ignore, output_file):
+def lint(
+    log_level: str,
+    files: list[str],
+    all_files: bool,
+    target: str,
+    force_compile: bool,
+    no_ignore: bool,
+    output_file: str,
+) -> None:
     if not files and not all_files:
         raise click.BadParameter(
             "Either --files or --all_files options must be provided"
@@ -222,15 +240,15 @@ def lint(log_level, files, all_files, target, force_compile, no_ignore, output_f
     help="If specified, a file to capture the audit results",
 )
 def audit(
-    log_level,
-    type,
-    format,
-    dbt_project_dir,
-    target,
-    force_compile,
-    no_ignore,
-    output_file,
-):
+    log_level: str,
+    type: str,
+    format: str,
+    dbt_project_dir: str,
+    target: str,
+    force_compile: bool,
+    no_ignore: bool,
+    output_file: str,
+) -> None:
     # Try to set a target from an environment variable
     # This is useful when things should run in CI
     if target is None:

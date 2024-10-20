@@ -16,12 +16,13 @@ def get_latest_package_version() -> Optional[str]:
     try:
         resp = requests.get(_PYPI_URL, timeout=5)
         resp.raise_for_status()
-        return resp.json().get("info", {}).get("version")
+        ver: Optional[str] = resp.json().get("info", {}).get("version")
+        return ver
     except Exception:
         return None
 
 
-def recommend_version_upgrade():
+def recommend_version_upgrade() -> None:
     latest_version = get_latest_package_version()
     current_version = get_package_version()
 

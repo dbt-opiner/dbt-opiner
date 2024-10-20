@@ -1,4 +1,4 @@
-import importlib
+import importlib.util
 import inspect
 import pathlib
 import shutil
@@ -42,11 +42,11 @@ class OpinionsPack:
         opinions_str = "\n".join([opinion.code for opinion in self._opinions])
         logger.debug(f"Loaded opinions:\n{opinions_str}")
 
-    def get_opinions(self):
+    def get_opinions(self) -> list[base_opinion.BaseOpinion]:
         """Returns all the loaded opinions."""
         return [opinion for opinion in self._opinions]
 
-    def _load_custom_opinions(self):
+    def _load_custom_opinions(self) -> None:
         source = (
             self._config.get("opinions_config", {})
             .get("custom_opinions", {})
@@ -61,14 +61,13 @@ class OpinionsPack:
 
         custom_opinions = []
         if source == "local":
-            path = (
-                pathlib.Path(
-                    config_singleton.ConfigSingleton().get_config_file_path()
-                ).parent
-                / "custom_opinions"
-            )
-            logger.debug(f"Loading custom opinions from local source: {path}")
-            custom_opinions.extend(self._load_opinions_from_path(path))
+            if config_singleton.ConfigSingleton().get_config_file_path():
+                path = (
+                    config_singleton.ConfigSingleton().get_config_file_path().parent  # type: ignore
+                    / "custom_opinions"
+                )
+                logger.debug(f"Loading custom opinions from local source: {path}")
+                custom_opinions.extend(self._load_opinions_from_path(path))
         elif source == "git":
             custom_opinions.extend(self._load_opinions_from_git())
         else:
@@ -77,16 +76,20 @@ class OpinionsPack:
             )
             return
 
-        return self._opinions.extend(custom_opinions)
+        self._opinions.extend(custom_opinions)
+        return
 
-    def _load_opinions_from_path(self, path):
+    def _load_opinions_from_path(
+        self, path: pathlib.Path
+    ) -> list[base_opinion.BaseOpinion]:
         loaded_opinions = []
         for file in path.glob("*.py"):
             logger.debug(file)
             module_name = file.stem
             spec = importlib.util.spec_from_file_location(module_name, file)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
 
             for name, obj in inspect.getmembers(module, inspect.isclass):
                 # Only load BaseOpinion children classes
@@ -101,9 +104,10 @@ class OpinionsPack:
                     # We do it like this because:
                     #  - there are different ways of defining packages in python projects
                     #  - if an opinion is ignored and not loaded, we don't want to install the packages
-                    try:
-                        logger.debug(f"Checking required packages for opinion {name}")
-                        for package_name in obj.required_packages:
+
+                    logger.debug(f"Checking required packages for opinion {name}")
+                    if obj.required_dependencies:
+                        for package_name in obj.required_dependencies:
                             logger.debug(
                                 f"Checking if package {package_name} is installed."
                             )
@@ -122,13 +126,13 @@ class OpinionsPack:
                                         package_name,
                                     ]
                                 )
-                    except AttributeError:
+                    else:
                         logger.debug(f"No required packages for opinion {name}")
                     # Inject the config to the opinion
-                    loaded_opinions.append(obj(config=self._config))
+                    loaded_opinions.append(obj(config=self._config))  # type: ignore
         return loaded_opinions
 
-    def _load_opinions_from_git(self):
+    def _load_opinions_from_git(self) -> list[base_opinion.BaseOpinion]:
         git_repo = (
             self._config.get("opinions_config", {})
             .get("custom_opinions", {})

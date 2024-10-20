@@ -48,12 +48,12 @@ def test_P002(
     file_type,
     expected_passed,
 ):
-    dbt_file = Path(tmpdir) / file_type
-    dbt_file.touch()
-    file = file_handlers.YamlFileHandler(dbt_file)
-
     DbtProject = MagicMock()
     mock_dbt_project = DbtProject()
+
+    dbt_file = Path(tmpdir) / file_type
+    dbt_file.touch()
+    file = file_handlers.YamlFileHandler(dbt_file, mock_dbt_project)
 
     if file_type == "dbt_project.yml":
         mock_dbt_project.dbt_project_config = dbt_file_content

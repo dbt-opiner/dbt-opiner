@@ -1,3 +1,6 @@
+from typing import Any
+from typing import Optional
+
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
 from dbt_opiner.opinions import base_opinion
@@ -57,7 +60,7 @@ class O004(base_opinion.BaseOpinion):
     select * from joined
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, **kwargs: dict[str, Any]) -> None:
         super().__init__(
             code="O004",
             description="The final columns of the model must be explicitly named at least once.",
@@ -65,23 +68,25 @@ class O004(base_opinion.BaseOpinion):
             tags=["sql style", "models"],
         )
 
-    def _eval(self, file: file_handlers.SqlFileHandler) -> linter.LintResult | None:
-        if file.type == ".sql" and file.dbt_node.type == "model":
-            not_qualified_stars = [
-                star for star in file.dbt_node.ast_extracted_columns if "*" in star
-            ]
-            if not_qualified_stars:
+    def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
+        if isinstance(file, file_handlers.SqlFileHandler):
+            if file.dbt_node.type == "model":
+                not_qualified_stars = [
+                    star for star in file.dbt_node.ast_extracted_columns if "*" in star
+                ]
+                if not_qualified_stars:
+                    return linter.LintResult(
+                        file=file,
+                        opinion_code=self.code,
+                        passed=False,
+                        severity=self.severity,
+                        message=f"The final columns in model {file.dbt_node.alias} {self.severity.value} be explicitly named at least once. Unresolved select * statement(s): {not_qualified_stars}",
+                    )
                 return linter.LintResult(
                     file=file,
                     opinion_code=self.code,
-                    passed=False,
+                    passed=True,
                     severity=self.severity,
-                    message=f"The final columns in model {file.dbt_node.alias} {self.severity.value} be explicitly named at least once. Unresolved select * statement(s): {not_qualified_stars}",
+                    message=f"The final columns in model {file.dbt_node.alias} are explicitly named at least once.",
                 )
-            return linter.LintResult(
-                file=file,
-                opinion_code=self.code,
-                passed=True,
-                severity=self.severity,
-                message=f"The final columns in model {file.dbt_node.alias} are explicitly named at least once.",
-            )
+        return None
