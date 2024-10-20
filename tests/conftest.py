@@ -116,7 +116,7 @@ def temp_complete_git_repo(temp_empty_git_repo):
                 "from dbt_opiner.opinions.base_opinion import BaseOpinion\n"
                 "from dbt_opiner.linter import OpinionSeverity\n"
                 "class C001(BaseOpinion):\n"
-                "    required_packages=['some_pypi_package']\n"
+                "    required_dependencies=['some_pypi_package']\n"
                 "    def __init__(self, **kwargs):\n"
                 "        super().__init__(code='C001', description='', severity=OpinionSeverity.SHOULD)\n"
                 "    def _eval(self, file):\n"

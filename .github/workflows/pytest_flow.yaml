@@ -1,4 +1,4 @@
-name: Pre-Commit and Pytest
+name: Pytest
 
 on:
     pull_request:
@@ -13,7 +13,7 @@ permissions:
 jobs:
     pytest_flow:
         name: |
-            Pre-commit and Pytest workflow - Python: ${{ matrix.python-version }}
+            Pytest workflow - Python: ${{ matrix.python-version }}
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
@@ -39,10 +39,6 @@ jobs:
 
             - name: Install dependencies
               run: poetry install --no-interaction --no-ansi
-
-            - name: pre-commit
-              run: |
-                  SKIP=run-tox poetry run pre-commit run -a
 
             - name: pytest
               run: |

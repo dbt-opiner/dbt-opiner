@@ -105,9 +105,10 @@ class OpinionsPack:
                     # We do it like this because:
                     #  - there are different ways of defining packages in python projects
                     #  - if an opinion is ignored and not loaded, we don't want to install the packages
-                    try:
-                        logger.debug(f"Checking required packages for opinion {name}")
-                        for package_name in obj.required_packages:
+
+                    logger.debug(f"Checking required packages for opinion {name}")
+                    if obj.required_dependencies:
+                        for package_name in obj.required_dependencies:
                             logger.debug(
                                 f"Checking if package {package_name} is installed."
                             )
@@ -126,7 +127,7 @@ class OpinionsPack:
                                         package_name,
                                     ]
                                 )
-                    except AttributeError:
+                    else:
                         logger.debug(f"No required packages for opinion {name}")
                     # Inject the config to the opinion
                     loaded_opinions.append(obj(config=self._config))
