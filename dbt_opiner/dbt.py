@@ -246,6 +246,7 @@ class DbtNodeType(TypedDict, total=False):
     description: str
     config: dict[str, Any]
     columns: dict[str, Any]
+    depends_on: dict[str, list[str]]
 
 
 class DbtNode:
@@ -264,6 +265,7 @@ class DbtNode:
         description: The description of the node.
         columns: The columns of the node available in the manifest.json
         unique_key: The unique key of the node.
+        depends_on: The list of dependencies of the node (macros and nodes).
         sql_code_ast: The sqlglot Abstract Syntax Tree (AST) of the compiled code.
         ast_extracted_columns: The columns extracted from the sql code AST.
 
@@ -322,6 +324,10 @@ class DbtNode:
     @property
     def unique_key(self) -> str:
         return str(self._node.get("config", {}).get("unique_key", ""))
+
+    @property
+    def depends_on(self) -> dict[str, list[str]]:
+        return self._node.get("depends_on", {})
 
     @property
     def sql_code_ast(self) -> Optional[sqlglot.expressions.Select]:
