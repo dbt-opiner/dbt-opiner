@@ -188,3 +188,25 @@ from dbt_opiner import dbt
 def test_ast_extracted_columns(node_dict, expected_columns):
     node = dbt.DbtNode(node_dict, "duckdb")
     node.ast_extracted_columns == expected_columns
+
+
+# test logic in docs_yml_file_path property
+@pytest.mark.parametrize(
+    "node_dict, expected_path",
+    [
+        pytest.param(
+            {"patch_path": "billing_bigquery://models/some_path/_folder__models.yml"},
+            "billing_bigquery/models/some_path/_folder__models.yml",
+            id="Valid patch_path with expected format",
+        ),
+        pytest.param(
+            {"patch_path": None},
+            "",
+            id="None patch_path (e.g. for tests) returns empty string",
+        ),
+        pytest.param({}, "", id="Missing patch_path returns empty string"),
+    ],
+)
+def test_docs_yml_file_path(node_dict, expected_path):
+    node = dbt.DbtNode(node_dict)
+    assert node.docs_yml_file_path == expected_path
