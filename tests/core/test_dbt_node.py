@@ -204,7 +204,7 @@ def test_ast_extracted_columns(node_dict, expected_columns):
             None,
             id="None patch_path (e.g. for tests) returns empty string",
         ),
-        pytest.param({}, None, id="Missing patch_path returns empty string"),
+        pytest.param({}, None, id="Missing patch_path returns none"),
     ],
 )
 def test_docs_yml_file_path(node_dict, expected_path):
