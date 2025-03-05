@@ -306,9 +306,9 @@ class DbtNode:
         return self._node.get("compiled_code", "")
 
     @property
-    def docs_yml_file_path(self) -> str:
-        patch_path = self._node.get("patch_path", "")
-        return patch_path.replace("://", "/") if patch_path is not None else ""
+    def docs_yml_file_path(self) -> Optional[str]:
+        patch_path = self._node.get("patch_path")
+        return patch_path.replace("://", "/") if patch_path is not None else None
 
     @property
     def description(self) -> str:
