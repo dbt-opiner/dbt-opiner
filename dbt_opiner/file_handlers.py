@@ -223,8 +223,7 @@ class YamlFileHandler(FileHandler):
             self.dbt_nodes = [
                 node
                 for node in dbt_manifest.nodes.values()
-                if node.docs_yml_file_path
-                and str(node.docs_yml_file_path) in str(file_path)
+                if str(node.docs_yml_file_path) in str(file_path)
             ]
 
             # If we have a dbt node, get the no_qa_opinions from the sql file
