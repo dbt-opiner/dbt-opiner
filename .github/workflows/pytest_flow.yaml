@@ -10,14 +10,15 @@ permissions:
   checks: write
   pull-requests: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
     pytest_flow:
         name: |
             Pytest workflow - Python: ${{ matrix.python-version }}
         runs-on: ubuntu-latest
-        concurrency:
-          group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-          cancel-in-progress: true
         strategy:
             fail-fast: false
             matrix:
@@ -43,30 +44,14 @@ jobs:
             - name: Install dependencies
               run: poetry install --no-interaction --no-ansi
 
-            - name: Run pytest
-              id: pytest
+            - name: pytest
               run: |
                   set -o pipefail
-                  poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=dbt_opiner --numprocesses 10 tests/ | tee pytest-coverage.txt
-                  if grep -q 'FAILED' pytest-coverage.txt; then
-                    failed_tests_output="$(grep -o 'FAILED .*' pytest-coverage.txt)"
-                    echo "failed_tests=$failed_tests_output" >> $GITHUB_OUTPUT
-                    exit 1
-                  fi
-
-            - name: Post PR comment for failed tests
-              if: failure()
-              uses: mshick/add-pr-comment@v2
-              with:
-                  message: |
-                    :x: Some tests have failed in the `Pytest` workflow:
-                    ```
-                    ${{ steps.pytest.outputs.failed_tests }}
-                    ```
+                  poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=dbt_opiner tests/ --numprocesses 10 | tee pytest-coverage.txt
 
             - name: Pytest coverage comment
-              if: always()
               uses: MishaKav/pytest-coverage-comment@main
+              if: always()
               with:
                   pytest-coverage-path: ./pytest-coverage.txt
                   title: Coverage Report
