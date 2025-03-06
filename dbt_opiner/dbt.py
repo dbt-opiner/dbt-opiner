@@ -323,8 +323,8 @@ class DbtNode:
         return self._node.get("columns", {})
 
     @property
-    def unique_key(self) -> str:
-        return str(self._node.get("config", {}).get("unique_key", ""))
+    def unique_key(self) -> Optional[str]:
+        return self._node.get("config", {}).get("unique_key")
 
     @property
     def depends_on(self) -> dict[str, list[str]]:
