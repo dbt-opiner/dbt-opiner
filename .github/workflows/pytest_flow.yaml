@@ -1,3 +1,5 @@
+name: Pytest
+
 on:
     pull_request:
         branches:
