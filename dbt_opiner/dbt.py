@@ -332,7 +332,7 @@ class DbtNode:
 
     @property
     def sql_code_ast(self) -> Optional[sqlglot.expressions.Select]:
-        """Returns the sqlglot Abstract Syntax Tree for the compiled sql code. TEST
+        """Returns the sqlglot Abstract Syntax Tree for the compiled sql code.
         See more about AST at: https://github.com/tobymao/sqlglot/blob/main/posts/ast_primer.md
         """
         if self._sql_code_ast is None and self.compiled_code:
