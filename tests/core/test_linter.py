@@ -160,9 +160,9 @@ def test_log_results_and_exit(linter_with_results, caplog):
     ):
         linter_with_results.log_results_and_exit(output_file="results.txt")
         expectations = [
-            "C001 | message",
-            "C002 | message",
-            "C003 | message",
+            "C001 | `test.yaml` message",
+            "C002 | `test.yaml` message",
+            "C003 | `test.yaml` message",
             "WARNING",
             "ERROR",
             "DEBUG",
@@ -171,6 +171,10 @@ def test_log_results_and_exit(linter_with_results, caplog):
             for expectation in expectations:
                 assert expectation in caplog.text
 
-        assert os.path.exists("results.txt")
+        with open("results.txt", "r") as f:
+            assert (
+                f.read()
+                == "# ✨ Dbt-opiner lint results\n- ⚠️ C001 | `test.yaml` message\n- ❌ C002 | `test.yaml` message\n"
+            )
         # Check that sys.exit was called with 1 because there are failed results
         mock_exit.assert_called_once_with(1)

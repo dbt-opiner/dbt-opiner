@@ -155,42 +155,28 @@ class Linter:
         Args:
           output_file: The file to write the lint results to.
         """
-        # Change logger setup to make messages more clear
-        # Get exiting logger config
-        original_logger_config = next(iter(logger._core.handlers.copy().values()))  # type: ignore
-        logger.remove()
-
-        # Add file sink if specified
-        if output_file:
-            logger.add(
-                output_file,
-                level=original_logger_config._levelno,
-                colorize=False,
-                format="{level} | {message}\n",
-            )
-
-        logger.add(
-            original_logger_config._sink,
-            level=original_logger_config._levelno,
-            colorize=True,
-            format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}\n{message}</level>",
-        )
 
         exit_code = 0
-
+        message_lines = ["# ✨ Dbt-opiner lint results\n"]
         for result in self.get_lint_results(deduplicate=True):
-            message = f"{result.opinion_code} | {result.message}\n{result.file.path}"
+            message = f"{result.opinion_code} | `{result.file.path}` {result.message}\n"
             if not result.passed:
                 if result.severity == OpinionSeverity.MUST:
                     exit_code = 1
                     logger.error(message)
+                    message_lines.append(f"- ❌ {message}")
                 if result.severity == OpinionSeverity.SHOULD:
                     logger.warning(message)
+                    message_lines.append(f"- ⚠️ {message}")
             if result.passed:
                 logger.debug(message)
+        if exit_code == 0:
+            logger.info("All opinions passed!")
+            message_lines.append("✅ All opinions passed!")
 
-        logger.remove()
-        logger.add(sys.stdout, level=original_logger_config._levelno)
+        if output_file:
+            with open(output_file, "w") as f:
+                f.writelines(message_lines)
         logger.debug(f"Exit with code: {exit_code}")
         sys.exit(exit_code)
 

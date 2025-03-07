@@ -8,7 +8,7 @@ on:
 jobs:
     precommit_flow:
         name: |
-            Pre-commit workflow
+            Pre-commit
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
