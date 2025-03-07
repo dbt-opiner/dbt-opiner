@@ -17,7 +17,7 @@ concurrency:
 jobs:
     pytest_flow:
         name: |
-            Pytest workflow - Python: ${{ matrix.python-version }}
+            Pytest workflow python: ${{ matrix.python-version }}
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
