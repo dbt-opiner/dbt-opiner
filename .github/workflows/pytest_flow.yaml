@@ -20,7 +20,7 @@ jobs:
             Pytest workflow python: ${{ matrix.python-version }}
         runs-on: ubuntu-latest
         strategy:
-            fail-fast: false
+            fail-fast: true
             matrix:
                 python-version:
                     - '3.10'
