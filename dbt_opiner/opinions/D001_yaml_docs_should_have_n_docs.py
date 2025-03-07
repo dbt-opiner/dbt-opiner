@@ -41,7 +41,7 @@ class D001(base_opinion.BaseOpinion):
                     opinion_code=self.code,
                     passed=False,
                     severity=self.severity,
-                    message=f"Yaml file {file.path} {self.severity.value} have more than {max_n_allowed} nodes.",
+                    message=f"Yaml file {file.path} {self.severity.value}'nt have more than {max_n_allowed} nodes.",
                 )
             else:
                 return linter.LintResult(
