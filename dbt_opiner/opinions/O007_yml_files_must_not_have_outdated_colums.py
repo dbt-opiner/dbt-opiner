@@ -7,7 +7,7 @@ from dbt_opiner.opinions import base_opinion
 
 
 class O007(base_opinion.BaseOpinion):
-    """YAML files should not have columns that are not present in the SQL model.
+    """YAML files must not have columns that are not present in the SQL model.
 
     This opinion ensures that any columns defined in the YAML files actually exist
     within the SQL code of the models. Unnecessary columns in YAML files can cause
