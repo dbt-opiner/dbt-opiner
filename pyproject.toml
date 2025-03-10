@@ -2,7 +2,7 @@
 name = "dbt-opiner"
 version = "1.3.0"
 description = "A tool to keep dbt projects on rails"
-authors=["Rodrigo Loredo <loredo.rod@gmail.com>"]
+authors=["Rodrigo Loredo <loredo.rod@gmail.com>", "Noora Mattsson <nooramattsson97@gmail.com>"]
 readme = "README.md"
 license = "MIT"
 
