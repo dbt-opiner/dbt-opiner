@@ -96,14 +96,14 @@ shared_config: # Load config from a repository.
   # Empty defaults to true.
 
 opinions_config: # Extra config for opinions. Check the opinions documentation for more info.
-  ignore_opinions: # To ignore some opinions list the opinion codes. Optional.
-    - O001
+  ignore_opinions: "O001" # To ignore some opinions list the opinion codes. Optional.
   ignore_files:
     # The opinion is ignored in all the files that match the regex.
     # Use the opinion code as key and a regex as value.
     - O002: ".*/models/dimensions/.*"
   extra_opinions_config:
-    O002_keywords:
+    O002:
+      keywords:
       - summary
       - granularity
   custom_opinions: # To set custom opinions. Optional.
