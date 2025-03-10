@@ -11,6 +11,7 @@ from .O003_all_columns_must_have_description import O003
 from .O004_final_columns_in_model_must_be_explicitly_named_at_least_once import O004
 from .O005_model_should_have_unique_key import O005
 from .O006_models_names_must_start_with_a_prefix import O006
+from .O007_yml_files_must_not_have_outdated_colums import O007
 from .P001_pii_columns_must_have_tags import P001
 from .P002_project_must_not_send_anon_stats import P002
 
@@ -29,6 +30,7 @@ opinion_classes = [
     O004,
     O005,
     O006,
+    O007,
     P001,
     P002,
 ]
