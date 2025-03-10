@@ -72,7 +72,7 @@ def test_runtime_open(dbt_project):
             file_handlers.SqlFileHandler(file, dbt_project)
 
 
-# Testfile_handlers.YamlFileHandler
+# Test file_handlers.YamlFileHandler
 def test_yaml_file_handler(dbt_project):
     file = (
         dbt_project.dbt_project_dir_path
@@ -88,6 +88,7 @@ def test_yaml_file_handler(dbt_project):
         "models": [
             {
                 "name": "model",
+                "compiled_code": "select id, value from table",
                 "columns": [
                     {"name": "id", "description": "id"},
                     {"name": "value", "description": "value"},

@@ -159,6 +159,7 @@ def temp_complete_git_repo(temp_empty_git_repo):
                 "models": [
                     {
                         "name": "model",
+                        "compiled_code": "select id, value from table",
                         "columns": [
                             {"name": "id", "description": "id"},
                             {"name": "value", "description": "value"},
@@ -182,7 +183,7 @@ def temp_complete_git_repo(temp_empty_git_repo):
                         "description": "model",
                         "name": "model",
                         "alias": "fct_model",
-                        "compiled_code": "",
+                        "compiled_code": "select id, value from table",
                         "original_file_path": "test/model/model.sql",
                         "patch_path": "dbt_project://models/test/model/_model__models.yaml",
                         "config": {"unique_key": "pk"},
@@ -231,6 +232,7 @@ def temp_complete_git_repo(temp_empty_git_repo):
                 "models": [
                     {
                         "name": "model",
+                        "compiled_code": "select id, value from table",
                         "columns": [
                             {"name": "id", "description": "id"},
                             {"name": "value", "description": "value"},
