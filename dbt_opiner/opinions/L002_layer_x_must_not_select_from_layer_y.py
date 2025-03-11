@@ -73,7 +73,7 @@ class L002(base_opinion.BaseOpinion):
 
             selected_models = [
                 file.parent_dbt_project.dbt_manifest.nodes.get(model)
-                for model in file.dbt_node.get("depends_on", {}).get("nodes", [])
+                for model in file.dbt_node.depends_on.get("nodes", [])
             ]
 
             # If there are no selected models, there's nothing to check
