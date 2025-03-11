@@ -204,6 +204,7 @@ class DbtManifest:
         manifest_dict: The dictionary representation of the manifest file.
         nodes: A dictionary of dbt nodes in the manifest.
         macros: A dictionary of dbt macros in the manifest.
+        sources: A dictionary of dbt sources in the manifest.
 
     """
 
@@ -220,14 +221,17 @@ class DbtManifest:
         # For now only a few elements of the manifest are defined as Attributes
         # If more are required they can be added or the manifest_dict can be used instead.
 
-        # Create a dictionary with the keys and values of the nodes
-        # and macros in the manifest file
+        # Create a dictionary with the keys and values of the nodes,
+        # macros and sources in the manifest file
         self.nodes = {}
         self.macros = {}
+        self.sources = {}
         for key, value in self.manifest_dict.get("nodes", {}).items():
             self.nodes[key] = DbtNode(value, dialect)
         for key, value in self.manifest_dict.get("macros", {}).items():
             self.macros[key] = DbtNode(value, dialect)
+        for key, value in self.manifest_dict.get("sources", {}).items():
+            self.sources[key] = DbtNode(value, dialect)
 
 
 class DbtCatalog:

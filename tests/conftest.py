@@ -200,6 +200,15 @@ def temp_complete_git_repo(temp_empty_git_repo):
                         "original_file_path": "macros/my_macro.sql",
                     }
                 },
+                "sources": {
+                    "source.this_project.dataset.table": {
+                        "database": "my_db",
+                        "schema": "dataset",
+                        "name": "table",
+                        "resource_type": "source",
+                        "original_file_path": "models/staging/dataset/sources.yml",
+                    }
+                },
             },
         ],
         [
