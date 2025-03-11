@@ -53,7 +53,7 @@ class BQ001(base_opinion.BaseOpinion):
             error_targets: dict[str, list[str]] = {
                 "missing": [],
                 "exceeded": [],
-                "bq_targets": [],
+                "bq_targets": ["a"],
             }
             for project in content.values():
                 for target_name, target in project.get("outputs", {}).items():
