@@ -224,8 +224,10 @@ class DbtManifest:
 
         # Create a dictionary with the keys and values of the nodes,
         # macros and sources in the manifest file
-        self.nodes: dict[str, DbtNode] = {} # nodes in manifest contains models, tests, seeds..
-        self.model_nodes: dict[str, DbtModelNode] = {} # only keep model nodes
+        self.nodes: dict[
+            str, DbtNode
+        ] = {}  # nodes in manifest contains models, tests, seeds..
+        self.model_nodes: dict[str, DbtModelNode] = {}  # only keep model nodes
         self.macros: dict[str, DbtMacroNode] = {}
         self.sources: dict[str, DbtSourceNode] = {}
 

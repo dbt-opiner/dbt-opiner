@@ -200,7 +200,7 @@ def temp_complete_git_repo(temp_empty_git_repo):
                         "path": "unique_fct_bigquery_table_daily_storage_costs_table_date_id.sql",
                         "original_file_path": "models/facts/_facts_models.yml",
                         "alias": "unique_test",
-                        "config": {}
+                        "config": {},
                     },
                 },
                 "macros": {
