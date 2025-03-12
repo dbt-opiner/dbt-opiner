@@ -1,6 +1,7 @@
 import abc
 import pathlib
 import re
+import sys
 from typing import Any
 from typing import Optional
 from typing import TYPE_CHECKING
@@ -147,13 +148,14 @@ class SqlFileHandler(FileHandler):
             node = self._find_model_node(dbt_manifest)
 
         if node is None:
-            message = (
-                f"Node not found for {self.path}. Try running dbt compile to "
-                "generate the manifest file or ensure the file is part of a "
-                "well-formed dbt project."
+            logger.critical(
+                (
+                    f"Node not found for {self.path}. Try running dbt compile to "
+                    "generate the manifest file, or make sure the file is part of a "
+                    "well formed dbt project."
+                )
             )
-            logger.critical(message)
-            raise ValueError(message)
+            sys.exit(1)
 
         self.dbt_node: Union["DbtModelNode", "DbtMacroNode"] = node
 
