@@ -6,6 +6,7 @@ from loguru import logger
 
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
+from dbt_opiner.dbt import DbtModelNode
 from dbt_opiner.opinions import base_opinion
 
 
@@ -68,7 +69,7 @@ class L002(base_opinion.BaseOpinion):
             return None
 
         if isinstance(file, file_handlers.SqlFileHandler):
-            if file.dbt_node.type != "model":
+            if not isinstance(file.dbt_node, DbtModelNode):
                 return None
 
             selected_models = [
