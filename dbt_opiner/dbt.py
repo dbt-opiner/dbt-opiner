@@ -8,6 +8,7 @@ from typing import Any
 from typing import ItemsView
 from typing import KeysView
 from typing import Optional
+from typing import TypedDict
 from typing import ValuesView
 
 import sqlglot
@@ -222,15 +223,15 @@ class DbtManifest:
 
         # Create a dictionary with the keys and values of the nodes,
         # macros and sources in the manifest file
-        self.nodes = {}
-        self.macros = {}
-        self.sources = {}
+        self.nodes: dict[str, DbtModelNode] = {}
+        self.macros: dict[str, DbtMacroNode] = {}
+        self.sources: dict[str, DbtSourceNode] = {}
 
         self._get_model_nodes(dialect)
         self._get_macros()
         self._get_sources()
 
-    def _get_model_nodes(self, dialect: str) -> None:
+    def _get_model_nodes(self, dialect: Optional[str]) -> None:
         for key, value in self.manifest_dict.get("nodes", {}).items():
             resource_type = value.get("resource_type")
             # Note: also e.g. seeds and tests are included in the nodes dict
@@ -239,12 +240,10 @@ class DbtManifest:
                 self.nodes[key] = DbtModelNode(value, dialect)
 
     def _get_macros(self) -> None:
-        """Process macros from the manifest."""
         for key, value in self.manifest_dict.get("macros", {}).items():
             self.macros[key] = DbtMacroNode(value)
 
     def _get_sources(self) -> None:
-        """Process sources from the manifest."""
         for key, value in self.manifest_dict.get("sources", {}).items():
             self.sources[key] = DbtSourceNode(value)
 
@@ -253,6 +252,20 @@ class DbtCatalog:
     """Class to represent a dbt catalog file."""
 
     # TODO
+
+
+class DbtNodeType(TypedDict, total=False):
+    schema: str
+    alias: str
+    resource_type: str
+    original_file_path: str
+    compiled_code: str
+    patch_path: str
+    description: str
+    config: dict[str, Any]
+    columns: dict[str, Any]
+    depends_on: dict[str, list[str]]
+    database: str
 
 
 class DbtNode:
@@ -277,7 +290,7 @@ class DbtNode:
         get: Get the value of a key in the node.
     """
 
-    def __init__(self, node: dict[str, Any]) -> None:
+    def __init__(self, node: DbtNodeType) -> None:
         """
         Args:
             node: The dictionary representation of the dbt node.
@@ -349,7 +362,7 @@ class DbtModelNode(DbtNode):
         ast_extracted_columns: The columns extracted from the sql code AST.
     """
 
-    def __init__(self, node: dict[str, Any], sql_dialect: Optional[str] = None) -> None:
+    def __init__(self, node: DbtNodeType, sql_dialect: Optional[str] = None) -> None:
         super().__init__(node)
         self._sql_code_ast = None
         self._sql_dialect = sql_dialect
@@ -432,6 +445,7 @@ class DbtMacroNode(DbtNode):
     """Represents a dbt macro node."""
 
     # Add specific properties or methods for macros if needed
+    pass
 
 
 class DbtProjectLoader:
