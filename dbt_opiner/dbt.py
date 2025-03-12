@@ -202,7 +202,8 @@ class DbtManifest:
 
     Attributes:
         manifest_dict: The dictionary representation of the manifest file.
-        nodes: A dictionary of dbt nodes in the manifest.
+        nodes: A dictionary of dbt nodes (models, tests, seeds..) in the manifest.
+        model_nodes: A dictionary of dbt model nodes in the manifest.
         macros: A dictionary of dbt macros in the manifest.
         sources: A dictionary of dbt sources in the manifest.
 
@@ -223,21 +224,26 @@ class DbtManifest:
 
         # Create a dictionary with the keys and values of the nodes,
         # macros and sources in the manifest file
-        self.nodes: dict[str, DbtModelNode] = {}
+        self.nodes: dict[str, DbtNode] = {} # nodes in manifest contains models, tests, seeds..
+        self.model_nodes: dict[str, DbtModelNode] = {} # only keep model nodes
         self.macros: dict[str, DbtMacroNode] = {}
         self.sources: dict[str, DbtSourceNode] = {}
 
+        self._get_nodes()
         self._get_model_nodes(dialect)
         self._get_macros()
         self._get_sources()
 
+    def _get_nodes(self) -> None:
+        for key, value in self.manifest_dict.get("nodes", {}).items():
+            # Note: also e.g. seeds and tests are included in the nodes dict
+            self.nodes[key] = DbtNode(value)
+
     def _get_model_nodes(self, dialect: Optional[str]) -> None:
         for key, value in self.manifest_dict.get("nodes", {}).items():
             resource_type = value.get("resource_type")
-            # Note: also e.g. seeds and tests are included in the nodes dict
-            # so those can be added if needed
             if resource_type == "model":
-                self.nodes[key] = DbtModelNode(value, dialect)
+                self.model_nodes[key] = DbtModelNode(value, dialect)
 
     def _get_macros(self) -> None:
         for key, value in self.manifest_dict.get("macros", {}).items():

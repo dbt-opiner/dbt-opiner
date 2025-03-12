@@ -191,7 +191,17 @@ def temp_complete_git_repo(temp_empty_git_repo):
                             "id": {"description": "id"},
                             "value": {"description": "value"},
                         },
-                    }
+                    },
+                    "test.project.unique_table_test.c5cd5696d4": {
+                        "database": "db",
+                        "schema": "dataset",
+                        "name": "unique_test",
+                        "resource_type": "test",
+                        "path": "unique_fct_bigquery_table_daily_storage_costs_table_date_id.sql",
+                        "original_file_path": "models/facts/_facts_models.yml",
+                        "alias": "unique_test",
+                        "config": {}
+                    },
                 },
                 "macros": {
                     "macro.project.my_macro": {

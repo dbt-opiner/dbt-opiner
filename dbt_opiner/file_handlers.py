@@ -12,8 +12,7 @@ from loguru import logger
 
 if TYPE_CHECKING:
     from dbt_opiner.dbt import DbtProject, DbtManifest  # pragma: no cover
-    from dbt_opiner.dbt import DbtMacroNode
-    from dbt_opiner.dbt import DbtModelNode
+    from dbt_opiner.dbt import DbtMacroNode, DbtNode, DbtModelNode
 
 
 class FileHandler(abc.ABC):
@@ -143,7 +142,8 @@ class SqlFileHandler(FileHandler):
         dbt_manifest = self.parent_dbt_project.dbt_manifest
         if "{%macro" in self.content.replace(" ", ""):
             node = self._find_macro_node(dbt_manifest)
-        # TODO: add test sql files
+        elif "{%test" in self.content.replace(" ", ""):
+            node = self._find_test_node(dbt_manifest)
         else:
             node = self._find_model_node(dbt_manifest)
 
@@ -174,13 +174,25 @@ class SqlFileHandler(FileHandler):
             None,
         )
 
+    def _find_test_node(
+            self, dbt_manifest: "DbtManifest"
+    ) -> Union["DbtNode", None]:
+        return next(
+            (
+                node
+                for node in dbt_manifest.nodes.values()
+                if node.original_file_path in str(self.path)
+            ),
+            None,
+        )
+
     def _find_model_node(
         self, dbt_manifest: "DbtManifest"
     ) -> Union["DbtModelNode", None]:
         return next(
             (
                 model
-                for model in dbt_manifest.nodes.values()
+                for model in dbt_manifest.model_nodes.values()
                 if model.original_file_path in str(self.path)
             ),
             None,
