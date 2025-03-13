@@ -149,33 +149,33 @@ def test_L002(temp_empty_git_repo, mock_sqlfilehandler, config, node, expected_p
         assert result is None
 
 
-# def test_L002_no_config(caplog, mock_sqlfilehandler):
-#     opinion = L002({})
-#     result = opinion.check_opinion(mock_sqlfilehandler)
-#     assert result is None
-#     assert "No layer pairs configured for L002. Skipping." in caplog.text
+def test_L002_no_config(caplog, mock_sqlfilehandler):
+    opinion = L002({})
+    result = opinion.check_opinion(mock_sqlfilehandler)
+    assert result is None
+    assert "No layer pairs configured for L002. Skipping." in caplog.text
+
 #
-# #
-# def test_L002_wrong_layer_pairs(caplog, mock_sqlfilehandler):
-#     layer_pairs = [
-#         "staging,stg -> facts,fct",
-#         "staging,stg selects from marts,mrt selects from facts,fct",
-#         "staging,stg,sttg selects from facts,fct",
-#         "staging,stg,sttg selects from facts,fct,fctt",
-#     ]
-#     config = {
-#         "opinions_config": {
-#             "extra_opinions_config": {"L002": {"layer_pairs": layer_pairs}}
-#         }
-#     }
-#     opinion = L002(config)
-#     result = opinion.check_opinion(mock_sqlfilehandler)
-#     for pair in layer_pairs:
-#         assert f"Invalid layer pair configuration: {pair}" in caplog.text
-#     assert result is None
-#
-#
-# def test_L002_not_sql_file(mock_yamlfilehandler):
-#     opinion = L002(config_dict)
-#     result = opinion.check_opinion(mock_yamlfilehandler)
-#     assert result is None
+def test_L002_wrong_layer_pairs(caplog, mock_sqlfilehandler):
+    layer_pairs = [
+        "staging,stg -> facts,fct",
+        "staging,stg selects from marts,mrt selects from facts,fct",
+        "staging,stg,sttg selects from facts,fct",
+        "staging,stg,sttg selects from facts,fct,fctt",
+    ]
+    config = {
+        "opinions_config": {
+            "extra_opinions_config": {"L002": {"layer_pairs": layer_pairs}}
+        }
+    }
+    opinion = L002(config)
+    result = opinion.check_opinion(mock_sqlfilehandler)
+    for pair in layer_pairs:
+        assert f"Invalid layer pair configuration: {pair}" in caplog.text
+    assert result is None
+
+
+def test_L002_not_sql_file(mock_yamlfilehandler):
+    opinion = L002(config_dict)
+    result = opinion.check_opinion(mock_yamlfilehandler)
+    assert result is None
