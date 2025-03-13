@@ -155,7 +155,7 @@ def test_L002_no_config(caplog, mock_sqlfilehandler):
     assert result is None
     assert "No layer pairs configured for L002. Skipping." in caplog.text
 
-#
+
 def test_L002_wrong_layer_pairs(caplog, mock_sqlfilehandler):
     layer_pairs = [
         "staging,stg -> facts,fct",
