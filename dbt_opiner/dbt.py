@@ -206,7 +206,7 @@ class DbtManifest:
         model_nodes: A dictionary of dbt model nodes in the manifest.
         macros: A dictionary of dbt macros in the manifest.
         sources: A dictionary of dbt sources in the manifest.
-
+        exposures: A dictionary of dbt exposures in the manifest.
     """
 
     def __init__(self, manifest_path: str) -> None:
@@ -223,18 +223,20 @@ class DbtManifest:
         # If more are required they can be added or the manifest_dict can be used instead.
 
         # Create a dictionary with the keys and values of the nodes,
-        # macros and sources in the manifest file
+        # macros, sources and exposures in the manifest file
         self.nodes: dict[
             str, DbtBaseNode
         ] = {}  # nodes in manifest contains models, tests, seeds..
         self.model_nodes: dict[str, DbtModel] = {}  # only keep model nodes
         self.macros: dict[str, DbtMacro] = {}
         self.sources: dict[str, DbtSource] = {}
+        self.exposures: dict[str, DbtBaseNode] = {}
 
         self._get_nodes()
         self._get_model_nodes(dialect)
         self._get_macros()
         self._get_sources()
+        self._get_exposures()
 
     def _get_nodes(self) -> None:
         for key, value in self.manifest_dict.get("nodes", {}).items():
@@ -254,6 +256,10 @@ class DbtManifest:
     def _get_sources(self) -> None:
         for key, value in self.manifest_dict.get("sources", {}).items():
             self.sources[key] = DbtSource(value)
+
+    def _get_exposures(self) -> None:
+        for key, value in self.manifest_dict.get("exposures", {}).items():
+            self.exposures[key] = DbtBaseNode(value)
 
 
 class DbtCatalog:

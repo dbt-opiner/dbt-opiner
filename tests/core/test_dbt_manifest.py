@@ -12,3 +12,4 @@ def test_dbt_manifest(temp_complete_git_repo):
     assert len(manifest.model_nodes.values()) == 1
     assert len(manifest.macros.values()) == 1
     assert len(manifest.sources.values()) == 1
+    assert len(manifest.exposures.values()) == 1
