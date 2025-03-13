@@ -219,6 +219,14 @@ def temp_complete_git_repo(temp_empty_git_repo):
                         "original_file_path": "models/staging/dataset/sources.yml",
                     }
                 },
+                "exposures": {
+                    "exposure.this_project.my_model": {
+                        "name": "my_model",
+                        "resource_type": "exposure",
+                        "path": "looker_exposures.yaml",
+                        "original_file_path": "models/looker_exposures.yaml",
+                    },
+                },
             },
         ],
         [
