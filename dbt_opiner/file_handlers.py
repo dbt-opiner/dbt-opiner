@@ -5,7 +5,6 @@ import sys
 from typing import Any
 from typing import Optional
 from typing import TYPE_CHECKING
-from typing import Union
 
 import yaml
 from loguru import logger
@@ -138,7 +137,7 @@ class SqlFileHandler(FileHandler):
         The node can be a model, macro or test (to be added) depending
         on the .sql file type.
         """
-        node: Union["DbtModel", "DbtMacro", "DbtBaseNode", None] = None
+        node: Optional["DbtModel" | "DbtMacro" | "DbtBaseNode"] = None
         dbt_manifest = self.parent_dbt_project.dbt_manifest
         if "{%macro" in self.content.replace(" ", ""):
             node = self._find_macro_node(dbt_manifest)
@@ -157,12 +156,12 @@ class SqlFileHandler(FileHandler):
             )
             sys.exit(1)
 
-        self.dbt_node: Union["DbtModel", "DbtMacro", "DbtBaseNode"] = node
+        self.dbt_node: "DbtModel" | "DbtMacro" | "DbtBaseNode" = node
 
         if self.dbt_node.docs_yml_file_path:
             self._add_no_qa_opinions_from_other_file(self.dbt_node.docs_yml_file_path)
 
-    def _find_macro_node(self, dbt_manifest: "DbtManifest") -> Union["DbtMacro", None]:
+    def _find_macro_node(self, dbt_manifest: "DbtManifest") -> Optional["DbtMacro"]:
         return next(
             (
                 macro
@@ -172,9 +171,7 @@ class SqlFileHandler(FileHandler):
             None,
         )
 
-    def _find_test_node(
-        self, dbt_manifest: "DbtManifest"
-    ) -> Union["DbtBaseNode", None]:
+    def _find_test_node(self, dbt_manifest: "DbtManifest") -> Optional["DbtBaseNode"]:
         return next(
             (
                 node
@@ -184,7 +181,7 @@ class SqlFileHandler(FileHandler):
             None,
         )
 
-    def _find_model_node(self, dbt_manifest: "DbtManifest") -> Union["DbtModel", None]:
+    def _find_model_node(self, dbt_manifest: "DbtManifest") -> Optional["DbtModel"]:
         return next(
             (
                 model
