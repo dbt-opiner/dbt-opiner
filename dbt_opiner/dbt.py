@@ -225,11 +225,11 @@ class DbtManifest:
         # Create a dictionary with the keys and values of the nodes,
         # macros and sources in the manifest file
         self.nodes: dict[
-            str, DbtNode
+            str, DbtBaseNode
         ] = {}  # nodes in manifest contains models, tests, seeds..
-        self.model_nodes: dict[str, DbtModelNode] = {}  # only keep model nodes
-        self.macros: dict[str, DbtMacroNode] = {}
-        self.sources: dict[str, DbtSourceNode] = {}
+        self.model_nodes: dict[str, DbtModel] = {}  # only keep model nodes
+        self.macros: dict[str, DbtMacro] = {}
+        self.sources: dict[str, DbtSource] = {}
 
         self._get_nodes()
         self._get_model_nodes(dialect)
@@ -239,21 +239,21 @@ class DbtManifest:
     def _get_nodes(self) -> None:
         for key, value in self.manifest_dict.get("nodes", {}).items():
             # Note: also e.g. seeds and tests are included in the nodes dict
-            self.nodes[key] = DbtNode(value)
+            self.nodes[key] = DbtBaseNode(value)
 
     def _get_model_nodes(self, dialect: Optional[str]) -> None:
         for key, value in self.manifest_dict.get("nodes", {}).items():
             resource_type = value.get("resource_type")
             if resource_type == "model":
-                self.model_nodes[key] = DbtModelNode(value, dialect)
+                self.model_nodes[key] = DbtModel(value, dialect)
 
     def _get_macros(self) -> None:
         for key, value in self.manifest_dict.get("macros", {}).items():
-            self.macros[key] = DbtMacroNode(value)
+            self.macros[key] = DbtMacro(value)
 
     def _get_sources(self) -> None:
         for key, value in self.manifest_dict.get("sources", {}).items():
-            self.sources[key] = DbtSourceNode(value)
+            self.sources[key] = DbtSource(value)
 
 
 class DbtCatalog:
@@ -276,7 +276,7 @@ class DbtNodeType(TypedDict, total=False):
     database: str
 
 
-class DbtNode:
+class DbtBaseNode:
     """Base class to represent a dbt node, macro or source in the manifest file.
 
     Each dbt node is represented as a dictionary, and this class provides
@@ -335,7 +335,7 @@ class DbtNode:
         return self._node.get("config", {})
 
     def __repr__(self) -> str:
-        return f"DbtNode({self.alias})"
+        return f"DbtBaseNode({self.alias})"
 
     def __str__(self) -> str:
         return f"{self._node}"
@@ -355,10 +355,10 @@ class DbtNode:
         return self._node.get(key, default)
 
 
-class DbtModelNode(DbtNode):
-    """Class to represent a dbt model node in the manifest file.
+class DbtModel(DbtBaseNode):
+    """Class to represent a dbt model in the manifest file.
 
-    Inherits from DbtNode and includes attributes and methods specific to model nodes,
+    Inherits from DbtBaseNode and includes attributes and methods specific to model nodes,
     such as handling of SQL code and AST (Abstract Syntax Tree).
 
     Attributes:
@@ -435,10 +435,10 @@ class DbtModelNode(DbtNode):
         return columns
 
 
-class DbtSourceNode(DbtNode):
+class DbtSource(DbtBaseNode):
     """Class to represent a dbt source in the manifest file.
 
-    Inherits from DbtNode and provides access to source-specific properties.
+    Inherits from DbtBaseNode and provides access to source-specific properties.
 
     Attributes:
         database: The database where the source is located.
@@ -449,8 +449,8 @@ class DbtSourceNode(DbtNode):
         return self._node.get("database", "")
 
 
-class DbtMacroNode(DbtNode):
-    """Represents a dbt macro node."""
+class DbtMacro(DbtBaseNode):
+    """Represents a dbt macro."""
 
     # Add specific properties or methods for macros if needed
     pass

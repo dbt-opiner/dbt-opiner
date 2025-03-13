@@ -3,7 +3,7 @@ from typing import Optional
 
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.dbt import DbtModelNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import base_opinion
 
 
@@ -71,7 +71,7 @@ class O004(base_opinion.BaseOpinion):
 
     def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         if isinstance(file, file_handlers.SqlFileHandler):
-            if isinstance(file.dbt_node, DbtModelNode):
+            if isinstance(file.dbt_node, DbtModel):
                 not_qualified_stars = [
                     star for star in file.dbt_node.ast_extracted_columns if "*" in star
                 ]

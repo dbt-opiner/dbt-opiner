@@ -12,7 +12,7 @@ from loguru import logger
 
 if TYPE_CHECKING:
     from dbt_opiner.dbt import DbtProject, DbtManifest  # pragma: no cover
-    from dbt_opiner.dbt import DbtMacroNode, DbtNode, DbtModelNode
+    from dbt_opiner.dbt import DbtMacro, DbtBaseNode, DbtModel
 
 
 class FileHandler(abc.ABC):
@@ -111,7 +111,7 @@ class SqlFileHandler(FileHandler):
         content: Raw content (as a string) of a file.
         no_qa_opinions: List of no_qa_opinions in the file content or related files
         parent_dbt_project: Parent dbt project of the file.
-        dbt_node: DbtNode object associated with the SQL file.
+        dbt_node: DbtBaseNode object associated with the SQL file.
     """
 
     def __init__(
@@ -138,7 +138,7 @@ class SqlFileHandler(FileHandler):
         The node can be a model, macro or test (to be added) depending
         on the .sql file type.
         """
-        node: Union["DbtModelNode", "DbtMacroNode", "DbtNode", None] = None
+        node: Union["DbtModel", "DbtMacro", "DbtBaseNode", None] = None
         dbt_manifest = self.parent_dbt_project.dbt_manifest
         if "{%macro" in self.content.replace(" ", ""):
             node = self._find_macro_node(dbt_manifest)
@@ -157,14 +157,12 @@ class SqlFileHandler(FileHandler):
             )
             sys.exit(1)
 
-        self.dbt_node: Union["DbtModelNode", "DbtMacroNode", "DbtNode"] = node
+        self.dbt_node: Union["DbtModel", "DbtMacro", "DbtBaseNode"] = node
 
         if self.dbt_node.docs_yml_file_path:
             self._add_no_qa_opinions_from_other_file(self.dbt_node.docs_yml_file_path)
 
-    def _find_macro_node(
-        self, dbt_manifest: "DbtManifest"
-    ) -> Union["DbtMacroNode", None]:
+    def _find_macro_node(self, dbt_manifest: "DbtManifest") -> Union["DbtMacro", None]:
         return next(
             (
                 macro
@@ -174,7 +172,9 @@ class SqlFileHandler(FileHandler):
             None,
         )
 
-    def _find_test_node(self, dbt_manifest: "DbtManifest") -> Union["DbtNode", None]:
+    def _find_test_node(
+        self, dbt_manifest: "DbtManifest"
+    ) -> Union["DbtBaseNode", None]:
         return next(
             (
                 node
@@ -184,9 +184,7 @@ class SqlFileHandler(FileHandler):
             None,
         )
 
-    def _find_model_node(
-        self, dbt_manifest: "DbtManifest"
-    ) -> Union["DbtModelNode", None]:
+    def _find_model_node(self, dbt_manifest: "DbtManifest") -> Union["DbtModel", None]:
         return next(
             (
                 model
@@ -208,7 +206,7 @@ class YamlFileHandler(FileHandler):
         content: Raw content (as a string) of a file.
         no_qa_opinions: List of no_qa_opinions in the file content or related files
         parent_dbt_project: Parent dbt project of the file.
-        dbt_nodes: List of DbtNode objects for which the YAML file is a patch (contains docs of).
+        dbt_nodes: List of DbtBaseNode objects for which the YAML file is a patch (contains docs of).
 
     Methods:
         to_dict: Returns the YAML file content as a dictionary.

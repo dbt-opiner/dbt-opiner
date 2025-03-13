@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtModelNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import P001
 
 
@@ -8,7 +8,7 @@ from dbt_opiner.opinions import P001
     "node, is_policy_tag, expected_passed",
     [
         pytest.param(
-            DbtModelNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "columns": {
@@ -30,7 +30,7 @@ from dbt_opiner.opinions import P001
             id="All PII columns have a tag",
         ),
         pytest.param(
-            DbtModelNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "columns": {
@@ -48,7 +48,7 @@ from dbt_opiner.opinions import P001
             id="PII columns don't have a tag",
         ),
         pytest.param(
-            DbtModelNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "columns": {
@@ -70,7 +70,7 @@ from dbt_opiner.opinions import P001
             id="Undocumented PII columns doesn't have a policy tag",
         ),
         pytest.param(
-            DbtModelNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "compiled_code": "select user_id, column_1, pii_column from dim_customers",
@@ -81,7 +81,7 @@ from dbt_opiner.opinions import P001
             id="No columns are defined.",
         ),
         pytest.param(
-            DbtModelNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "columns": {
@@ -129,7 +129,7 @@ def test_sql_P001(node, is_policy_tag, mock_sqlfilehandler, expected_passed):
     [
         pytest.param(
             [
-                DbtModelNode(
+                DbtModel(
                     {
                         "resource_type": "model",
                         "columns": {
@@ -146,7 +146,7 @@ def test_sql_P001(node, is_policy_tag, mock_sqlfilehandler, expected_passed):
                         "compiled_code": "select user_id, column_1 from dim_customers",
                     }
                 ),
-                DbtModelNode(
+                DbtModel(
                     {
                         "resource_type": "model",
                         "columns": {

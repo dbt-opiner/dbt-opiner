@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtBaseNode
 from dbt_opiner.opinions import BQ002
 
 
@@ -8,7 +8,7 @@ from dbt_opiner.opinions import BQ002
     "node, config, expected_passed",
     [
         pytest.param(
-            DbtNode(
+            DbtBaseNode(
                 {
                     "resource_type": "model",
                     "config": {"materialized": "table", "cluster_by": ["column"]},
@@ -19,7 +19,7 @@ from dbt_opiner.opinions import BQ002
             id="table_has_clustering",
         ),
         pytest.param(
-            DbtNode(
+            DbtBaseNode(
                 {
                     "resource_type": "model",
                     "config": {"materialized": "incremental", "cluster_by": ["column"]},
@@ -30,7 +30,7 @@ from dbt_opiner.opinions import BQ002
             id="incremental_model_has_clustering",
         ),
         pytest.param(
-            DbtNode(
+            DbtBaseNode(
                 {
                     "resource_type": "model",
                     "config": {"materialized": "table"},
@@ -41,7 +41,7 @@ from dbt_opiner.opinions import BQ002
             id="table_does_not_have_clustering",
         ),
         pytest.param(
-            DbtNode(
+            DbtBaseNode(
                 {
                     "resource_type": "model",
                     "config": {"materialized": "incremental"},
@@ -52,7 +52,7 @@ from dbt_opiner.opinions import BQ002
             id="incremental_model_does_not_have_clustering",
         ),
         pytest.param(
-            DbtNode(
+            DbtBaseNode(
                 {
                     "resource_type": "model",
                     "config": {"materialized": "view"},
@@ -63,7 +63,7 @@ from dbt_opiner.opinions import BQ002
             id="views_are_not_evaluated",
         ),
         pytest.param(
-            DbtNode(
+            DbtBaseNode(
                 {
                     "resource_type": "model",
                     "config": {"materialized": "table", "cluster_by": ["column"]},

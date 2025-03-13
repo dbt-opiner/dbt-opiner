@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import L001
 
 
@@ -8,7 +8,7 @@ from dbt_opiner.opinions import L001
     "node, raw_sql, expected_passed",
     [
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "fct_model",
@@ -20,7 +20,7 @@ from dbt_opiner.opinions import L001
             id="fact model uses source macro",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "fct_model",
@@ -32,7 +32,7 @@ from dbt_opiner.opinions import L001
             id="fact model uses source macro (with weird formatting)",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "fct_model",
@@ -44,7 +44,7 @@ from dbt_opiner.opinions import L001
             id="fact model doesn't source macro",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stage_model",
@@ -56,7 +56,7 @@ from dbt_opiner.opinions import L001
             id="Staging model (by prefix) uses source macro",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stg_model",

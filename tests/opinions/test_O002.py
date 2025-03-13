@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import O002
 
 config_dict = {
@@ -12,7 +12,7 @@ config_dict = {
     "node, config, expected_passed",
     [
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "description": "Some description with keyword",
@@ -23,7 +23,7 @@ config_dict = {
             id="model with description with keyword",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "description": "Some description without",
@@ -34,13 +34,13 @@ config_dict = {
             id="model with description without keyword",
         ),
         pytest.param(
-            DbtNode({"resource_type": "model", "description": "Some description"}),
+            DbtModel({"resource_type": "model", "description": "Some description"}),
             {},
             True,
             id="No keywords config defined",
         ),
         pytest.param(
-            DbtNode({"resource_type": "model"}),
+            DbtModel({"resource_type": "model"}),
             config_dict,
             True,
             id="model without description",
@@ -63,7 +63,7 @@ def test_O002(node, mock_sqlfilehandler, config, expected_passed):
         pytest.param(
             [
                 (
-                    DbtNode(
+                    DbtModel(
                         {
                             "resource_type": "model",
                             "description": "Some description with keyword",
@@ -71,7 +71,7 @@ def test_O002(node, mock_sqlfilehandler, config, expected_passed):
                     )
                 ),
                 (
-                    DbtNode(
+                    DbtModel(
                         {
                             "resource_type": "model",
                             "description": "Some description with keyword",
@@ -86,7 +86,7 @@ def test_O002(node, mock_sqlfilehandler, config, expected_passed):
         pytest.param(
             [
                 (
-                    DbtNode(
+                    DbtModel(
                         {
                             "resource_type": "model",
                             "description": "Some description with keyword",
@@ -94,7 +94,7 @@ def test_O002(node, mock_sqlfilehandler, config, expected_passed):
                     )
                 ),
                 (
-                    DbtNode(
+                    DbtModel(
                         {
                             "resource_type": "model",
                             "description": "Some description without",
@@ -109,7 +109,7 @@ def test_O002(node, mock_sqlfilehandler, config, expected_passed):
         pytest.param(
             [
                 (
-                    DbtNode(
+                    DbtModel(
                         {
                             "resource_type": "model",
                             "description": "Some description with keyword",
@@ -117,7 +117,7 @@ def test_O002(node, mock_sqlfilehandler, config, expected_passed):
                     )
                 ),
                 (
-                    DbtNode(
+                    DbtModel(
                         {
                             "resource_type": "model",
                         }

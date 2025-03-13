@@ -3,7 +3,7 @@ from typing import Optional
 
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
-from dbt_opiner.dbt import DbtModelNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import base_opinion
 
 
@@ -28,10 +28,10 @@ class O007(base_opinion.BaseOpinion):
     ) -> Optional[list[linter.LintResult]]:
         nodes = []
         if isinstance(file, file_handlers.SqlFileHandler):
-            if isinstance(file.dbt_node, DbtModelNode):
+            if isinstance(file.dbt_node, DbtModel):
                 nodes = [file.dbt_node]
         if isinstance(file, file_handlers.YamlFileHandler):
-            nodes = [node for node in file.dbt_nodes if isinstance(node, DbtModelNode)]
+            nodes = [node for node in file.dbt_nodes if isinstance(node, DbtModel)]
 
         results = []
 

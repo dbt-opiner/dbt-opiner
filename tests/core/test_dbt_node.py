@@ -186,7 +186,7 @@ from dbt_opiner import dbt
     ],
 )
 def test_ast_extracted_columns(node_dict, expected_columns):
-    node = dbt.DbtModelNode(node_dict, "duckdb")
+    node = dbt.DbtModel(node_dict, "duckdb")
     node.ast_extracted_columns == expected_columns
 
 
@@ -208,5 +208,5 @@ def test_ast_extracted_columns(node_dict, expected_columns):
     ],
 )
 def test_docs_yml_file_path(node_dict, expected_path):
-    node = dbt.DbtNode(node_dict)
+    node = dbt.DbtModel(node_dict)
     assert node.docs_yml_file_path == expected_path

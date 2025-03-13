@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from dbt_opiner.dbt import DbtManifest
-from dbt_opiner.dbt import DbtModelNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import L002
 
 config_dict = {
@@ -35,7 +35,7 @@ no_restrictions_dict = {
     "node, config, expected_passed",
     [
         pytest.param(
-            DbtModelNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stg_model",
@@ -50,7 +50,7 @@ no_restrictions_dict = {
             id="Staging incorrectly selects from facts and marts (by schema)",
         ),
         pytest.param(
-            DbtModelNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stg_model",
@@ -65,7 +65,7 @@ no_restrictions_dict = {
             id="Staging incorrectly selects from facts and marts (by prefix)",
         ),
         pytest.param(
-            DbtModelNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stg_model",
@@ -78,7 +78,7 @@ no_restrictions_dict = {
             id="Staging doesn't violate layer directionality",
         ),
         pytest.param(
-            DbtModelNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stg_model",
@@ -91,7 +91,7 @@ no_restrictions_dict = {
             id="No restrictions for this layer.",
         ),
         pytest.param(
-            DbtModelNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stg_model",
