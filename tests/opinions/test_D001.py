@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtBaseNode
 from dbt_opiner.opinions import D001
 
 config_dict = {
@@ -13,7 +13,7 @@ config_dict = {
     [
         pytest.param(
             [
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "model",
                     }
@@ -25,12 +25,12 @@ config_dict = {
         ),
         pytest.param(
             [
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "model",
                     }
                 ),
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "model",
                     }
@@ -42,12 +42,12 @@ config_dict = {
         ),
         pytest.param(
             [
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "model",
                     }
                 ),
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "model",
                     }
@@ -59,17 +59,17 @@ config_dict = {
         ),
         pytest.param(
             [
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "model",
                     }
                 ),
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "model",
                     }
                 ),
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "source",
                     }

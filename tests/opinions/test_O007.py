@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import O007
 
 
@@ -8,7 +8,7 @@ from dbt_opiner.opinions import O007
     "node, expected_passed",
     [
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "columns": {
@@ -22,7 +22,7 @@ from dbt_opiner.opinions import O007
             id="All columns match between YAML and SQL",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "columns": {
@@ -40,7 +40,7 @@ from dbt_opiner.opinions import O007
             id="Unnecessary columns in YAML",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "columns": {
@@ -67,7 +67,7 @@ def test_sql_O007(node, mock_sqlfilehandler, expected_passed):
     [
         pytest.param(
             [
-                DbtNode(
+                DbtModel(
                     {
                         "resource_type": "model",
                         "columns": {
@@ -83,7 +83,7 @@ def test_sql_O007(node, mock_sqlfilehandler, expected_passed):
                         "compiled_code": "select column_1, column_2 from dim_customers",
                     }
                 ),
-                DbtNode(
+                DbtModel(
                     {
                         "resource_type": "model",
                         "columns": {
@@ -103,7 +103,7 @@ def test_sql_O007(node, mock_sqlfilehandler, expected_passed):
                         "compiled_code": "select column_1, column_2 from dim_customers",
                     }
                 ),
-                DbtNode(
+                DbtModel(
                     {
                         "resource_type": "model",
                         "columns": {

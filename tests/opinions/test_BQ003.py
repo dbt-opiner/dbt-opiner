@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtBaseNode
 from dbt_opiner.opinions import BQ003
 
 
@@ -8,7 +8,7 @@ from dbt_opiner.opinions import BQ003
     "node, config, expected_passed",
     [
         pytest.param(
-            DbtNode(
+            DbtBaseNode(
                 {
                     "resource_type": "model",
                     "description": "partition cluster",
@@ -20,7 +20,7 @@ from dbt_opiner.opinions import BQ003
             id="model with description with keywords",
         ),
         pytest.param(
-            DbtNode(
+            DbtBaseNode(
                 {
                     "resource_type": "model",
                     "description": "no keys",
@@ -32,7 +32,7 @@ from dbt_opiner.opinions import BQ003
             id="model without keywords",
         ),
         pytest.param(
-            DbtNode(
+            DbtBaseNode(
                 {
                     "resource_type": "model",
                     "config": {"materialized": "view"},
@@ -43,7 +43,7 @@ from dbt_opiner.opinions import BQ003
             id="model without description",
         ),
         pytest.param(
-            DbtNode({}),
+            DbtBaseNode({}),
             {"sqlglot_dialect": "other"},
             [],
             id="not bq dialect",
@@ -62,14 +62,14 @@ def test_sql_BQ003(node, config, expected_passed, mock_sqlfilehandler):
     [
         pytest.param(
             [
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "model",
                         "description": "partition cluster",
                         "config": {"materialized": "view"},
                     }
                 ),
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "model",
                         "description": "partition cluster",
@@ -83,14 +83,14 @@ def test_sql_BQ003(node, config, expected_passed, mock_sqlfilehandler):
         ),
         pytest.param(
             [
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "model",
                         "description": "Some description",
                         "config": {"materialized": "view"},
                     }
                 ),
-                DbtNode(
+                DbtBaseNode(
                     {
                         "resource_type": "model",
                         "description": "partition cluster",

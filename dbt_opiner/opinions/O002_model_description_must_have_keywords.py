@@ -5,6 +5,7 @@ from loguru import logger
 
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import base_opinion
 
 
@@ -51,10 +52,10 @@ class O002(base_opinion.BaseOpinion):
             logger.debug(f"Checking model descriptions for keywords: {keywords}")
             nodes = []
             if isinstance(file, file_handlers.SqlFileHandler):
-                if file.dbt_node.type == "model":
+                if isinstance(file.dbt_node, DbtModel):
                     nodes = [file.dbt_node]
             if isinstance(file, file_handlers.YamlFileHandler):
-                nodes = [node for node in file.dbt_nodes if node.type == "model"]
+                nodes = [node for node in file.dbt_nodes if isinstance(node, DbtModel)]
 
             results = []
             for node in nodes:

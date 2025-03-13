@@ -3,6 +3,7 @@ from typing import Optional
 
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import base_opinion
 
 
@@ -22,7 +23,7 @@ class O005(base_opinion.BaseOpinion):
 
     def _eval(self, file: file_handlers.FileHandler) -> Optional[linter.LintResult]:
         if isinstance(file, file_handlers.SqlFileHandler):
-            if file.dbt_node.type == "model":
+            if isinstance(file.dbt_node, DbtModel):
                 if file.dbt_node.unique_key:
                     return linter.LintResult(
                         file=file,

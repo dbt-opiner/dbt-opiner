@@ -10,8 +10,8 @@ import yaml
 from loguru import logger
 
 if TYPE_CHECKING:
-    from dbt_opiner.dbt import DbtNode  # pragma: no cover
-    from dbt_opiner.dbt import DbtProject  # pragma: no cover
+    from dbt_opiner.dbt import DbtProject, DbtManifest  # pragma: no cover
+    from dbt_opiner.dbt import DbtMacro, DbtBaseNode, DbtModel
 
 
 class FileHandler(abc.ABC):
@@ -110,8 +110,7 @@ class SqlFileHandler(FileHandler):
         content: Raw content (as a string) of a file.
         no_qa_opinions: List of no_qa_opinions in the file content or related files
         parent_dbt_project: Parent dbt project of the file.
-        dbt_node: DbtNode object associated with the SQL file.
-        compiled_code: Compiled code of the dbt node
+        dbt_node: DbtBaseNode object associated with the SQL file.
     """
 
     def __init__(
@@ -120,7 +119,6 @@ class SqlFileHandler(FileHandler):
         """
         Args:
             file_path: Path to the SQL file.
-            dbt_manifest:  dbt manifest to search the DbtNode object associated with the SQL file.
             parent_dbt_project: Parent dbt project of the file.
         """
         # Trying to instantiate SqlFileHandler with another extension should fail
@@ -131,34 +129,24 @@ class SqlFileHandler(FileHandler):
                 f"SqlFileHandler requires a .sql file, got {file_path.suffix}"
             )
         super().__init__(file_path, parent_dbt_project)
-        self.dbt_node: DbtNode
+        self._find_node_for_file()
 
+    def _find_node_for_file(self) -> None:
+        """
+        Find the dbt node associated with the file from the manifest.
+        The node can be a model, macro or test (to be added) depending
+        on the .sql file type.
+        """
+        node: Optional["DbtModel" | "DbtMacro" | "DbtBaseNode"] = None
         dbt_manifest = self.parent_dbt_project.dbt_manifest
-        # Add dbt node to the file handler
-        # Check if it's a model or a macro .sql file
-        node = None
         if "{%macro" in self.content.replace(" ", ""):
-            node = next(
-                (
-                    node
-                    for node in dbt_manifest.macros.values()
-                    if node.original_file_path in str(self.path)
-                ),
-                None,
-            )
-
+            node = self._find_macro_node(dbt_manifest)
+        elif "{%test" in self.content.replace(" ", ""):
+            node = self._find_test_node(dbt_manifest)
         else:
-            # It's a model or a test
-            node = next(
-                (
-                    node
-                    for node in dbt_manifest.nodes.values()
-                    if node.original_file_path in str(self.path)
-                ),
-                None,
-            )
+            node = self._find_model_node(dbt_manifest)
 
-        if not node:
+        if node is None:
             logger.critical(
                 (
                     f"Node not found for {self.path}. Try running dbt compile to "
@@ -167,13 +155,41 @@ class SqlFileHandler(FileHandler):
                 )
             )
             sys.exit(1)
-        else:
-            self.dbt_node = node
 
-        # Add no_qa_opinions from the docs yml file
+        self.dbt_node: "DbtModel" | "DbtMacro" | "DbtBaseNode" = node
+
         if self.dbt_node.docs_yml_file_path:
             self._add_no_qa_opinions_from_other_file(self.dbt_node.docs_yml_file_path)
 
+    def _find_macro_node(self, dbt_manifest: "DbtManifest") -> Optional["DbtMacro"]:
+        return next(
+            (
+                macro
+                for macro in dbt_manifest.macros.values()
+                if macro.original_file_path in str(self.path)
+            ),
+            None,
+        )
+
+    def _find_test_node(self, dbt_manifest: "DbtManifest") -> Optional["DbtBaseNode"]:
+        return next(
+            (
+                node
+                for node in dbt_manifest.nodes.values()
+                if node.original_file_path in str(self.path)
+            ),
+            None,
+        )
+
+    def _find_model_node(self, dbt_manifest: "DbtManifest") -> Optional["DbtModel"]:
+        return next(
+            (
+                model
+                for model in dbt_manifest.model_nodes.values()
+                if model.original_file_path in str(self.path)
+            ),
+            None,
+        )
         # TODO: Add the raw yaml patch content as a property
         # TODO: Add catalog entry to the file handler
 
@@ -187,7 +203,7 @@ class YamlFileHandler(FileHandler):
         content: Raw content (as a string) of a file.
         no_qa_opinions: List of no_qa_opinions in the file content or related files
         parent_dbt_project: Parent dbt project of the file.
-        dbt_nodes: List of DbtNode objects for which the YAML file is a patch (contains docs of).
+        dbt_nodes: List of DbtBaseNode objects for which the YAML file is a patch (contains docs of).
 
     Methods:
         to_dict: Returns the YAML file content as a dictionary.

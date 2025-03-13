@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtBaseNode
 from dbt_opiner.opinions import O006
 
 
@@ -8,7 +8,7 @@ from dbt_opiner.opinions import O006
     "node, expected_passed",
     [
         pytest.param(
-            DbtNode(
+            DbtBaseNode(
                 {
                     "resource_type": "model",
                     "alias": "stg_some_model",
@@ -18,7 +18,7 @@ from dbt_opiner.opinions import O006
             id="model with valid prefix",
         ),
         pytest.param(
-            DbtNode(
+            DbtBaseNode(
                 {
                     "resource_type": "model",
                     "alias": "some_model",

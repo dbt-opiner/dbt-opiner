@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import O003
 
 
@@ -8,7 +8,7 @@ from dbt_opiner.opinions import O003
     "node, expected_passed",
     [
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "columns": {
@@ -28,7 +28,7 @@ from dbt_opiner.opinions import O003
             id="All columns have descriptions",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "columns": {
@@ -45,7 +45,7 @@ from dbt_opiner.opinions import O003
             id="One columns don't have a description",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "columns": {
@@ -62,7 +62,7 @@ from dbt_opiner.opinions import O003
             id="One columns has empty description",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "columns": {
@@ -82,7 +82,7 @@ from dbt_opiner.opinions import O003
             id="Missing column identified by ast_extracted_columns",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                 }
@@ -104,7 +104,7 @@ def test_sql_C003(node, mock_sqlfilehandler, expected_passed):
     [
         pytest.param(
             [
-                DbtNode(
+                DbtModel(
                     {
                         "resource_type": "model",
                         "columns": {
@@ -120,7 +120,7 @@ def test_sql_C003(node, mock_sqlfilehandler, expected_passed):
                         "compiled_code": "select column_1, column_2 from dim_customers",
                     }
                 ),
-                DbtNode(
+                DbtModel(
                     {
                         "resource_type": "model",
                         "columns": {
@@ -142,7 +142,7 @@ def test_sql_C003(node, mock_sqlfilehandler, expected_passed):
         )
     ],
 )
-def test_yaml_C003(nodes, mock_yamlfilehandler, expected_passed):
+def test_yaml_O003(nodes, mock_yamlfilehandler, expected_passed):
     mock_yamlfilehandler.dbt_nodes = nodes
     opinion = O003()
     results = opinion.check_opinion(mock_yamlfilehandler)

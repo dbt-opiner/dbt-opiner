@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import O004
 
 
@@ -8,7 +8,7 @@ from dbt_opiner.opinions import O004
     "node, expected_passed",
     [
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "compiled_code": """
@@ -29,7 +29,7 @@ from dbt_opiner.opinions import O004
             id="select * customers are named in the CTE",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "compiled_code": """
@@ -51,7 +51,7 @@ from dbt_opiner.opinions import O004
             id="select * customers are named in the join CTE",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "compiled_code": """

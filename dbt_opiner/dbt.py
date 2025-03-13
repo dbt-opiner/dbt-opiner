@@ -202,8 +202,10 @@ class DbtManifest:
 
     Attributes:
         manifest_dict: The dictionary representation of the manifest file.
-        nodes: A dictionary of dbt nodes in the manifest.
+        nodes: A dictionary of dbt nodes (models, tests, seeds..) in the manifest.
+        model_nodes: A dictionary of dbt model nodes in the manifest.
         macros: A dictionary of dbt macros in the manifest.
+        sources: A dictionary of dbt sources in the manifest.
 
     """
 
@@ -220,14 +222,38 @@ class DbtManifest:
         # For now only a few elements of the manifest are defined as Attributes
         # If more are required they can be added or the manifest_dict can be used instead.
 
-        # Create a dictionary with the keys and values of the nodes
-        # and macros in the manifest file
-        self.nodes = {}
-        self.macros = {}
+        # Create a dictionary with the keys and values of the nodes,
+        # macros and sources in the manifest file
+        self.nodes: dict[
+            str, DbtBaseNode
+        ] = {}  # nodes in manifest contains models, tests, seeds..
+        self.model_nodes: dict[str, DbtModel] = {}  # only keep model nodes
+        self.macros: dict[str, DbtMacro] = {}
+        self.sources: dict[str, DbtSource] = {}
+
+        self._get_nodes()
+        self._get_model_nodes(dialect)
+        self._get_macros()
+        self._get_sources()
+
+    def _get_nodes(self) -> None:
         for key, value in self.manifest_dict.get("nodes", {}).items():
-            self.nodes[key] = DbtNode(value, dialect)
+            # Note: also e.g. seeds and tests are included in the nodes dict
+            self.nodes[key] = DbtBaseNode(value)
+
+    def _get_model_nodes(self, dialect: Optional[str]) -> None:
+        for key, value in self.manifest_dict.get("nodes", {}).items():
+            resource_type = value.get("resource_type")
+            if resource_type == "model":
+                self.model_nodes[key] = DbtModel(value, dialect)
+
+    def _get_macros(self) -> None:
         for key, value in self.manifest_dict.get("macros", {}).items():
-            self.macros[key] = DbtNode(value, dialect)
+            self.macros[key] = DbtMacro(value)
+
+    def _get_sources(self) -> None:
+        for key, value in self.manifest_dict.get("sources", {}).items():
+            self.sources[key] = DbtSource(value)
 
 
 class DbtCatalog:
@@ -247,27 +273,23 @@ class DbtNodeType(TypedDict, total=False):
     config: dict[str, Any]
     columns: dict[str, Any]
     depends_on: dict[str, list[str]]
+    database: str
 
 
-class DbtNode:
-    """Class to represent a dbt node or a macro in the manifest file.
+class DbtBaseNode:
+    """Base class to represent a dbt node, macro or source in the manifest file.
 
-    The underlying structure is a dictionary but some Attributes are
-    defined as properties for convenience.
+    Each dbt node is represented as a dictionary, and this class provides
+    methods to access common attributes via properties for convenience.
 
     Attributes:
         schema: The schema of the node.
         alias: The alias of the node.
         type: The type of the node.
         original_file_path: The path to the original file of the node.
-        compiled_code: The compiled code of the node.
         docs_yml_file_path: The path to the docs yml file of the node.
+        config: A dictionary containing configuration options for the node.
         description: The description of the node.
-        columns: The columns of the node available in the manifest.json
-        unique_key: The unique key of the node.
-        depends_on: The list of dependencies of the node (macros and nodes).
-        sql_code_ast: The sqlglot Abstract Syntax Tree (AST) of the compiled code.
-        ast_extracted_columns: The columns extracted from the sql code AST.
 
     These Dict methods are also available:
         keys: Get the keys of the node.
@@ -276,14 +298,12 @@ class DbtNode:
         get: Get the value of a key in the node.
     """
 
-    def __init__(self, node: DbtNodeType, sql_dialect: Optional[str] = None) -> None:
+    def __init__(self, node: DbtNodeType) -> None:
         """
         Args:
             node: The dictionary representation of the dbt node.
         """
         self._node = node
-        self._sql_code_ast = None
-        self._sql_dialect = sql_dialect
 
     @property
     def schema(self) -> str:
@@ -302,10 +322,6 @@ class DbtNode:
         return self._node.get("original_file_path", "")
 
     @property
-    def compiled_code(self) -> str:
-        return self._node.get("compiled_code", "")
-
-    @property
     def docs_yml_file_path(self) -> Optional[str]:
         patch_path = self._node.get("patch_path")
         return patch_path.replace("://", "/") if patch_path is not None else None
@@ -318,13 +334,58 @@ class DbtNode:
     def config(self) -> dict[str, Any]:
         return self._node.get("config", {})
 
+    def __repr__(self) -> str:
+        return f"DbtBaseNode({self.alias})"
+
+    def __str__(self) -> str:
+        return f"{self._node}"
+
+    def keys(self) -> KeysView[str]:
+        return self._node.keys()
+
+    def values(self) -> ValuesView[Any]:
+        return self._node.values()
+
+    def items(self) -> ItemsView[str, Any]:
+        return self._node.items()
+
+    def get(
+        self, key: str, default: Optional[str | dict[str, Any] | list[Any]] = None
+    ) -> Any:
+        return self._node.get(key, default)
+
+
+class DbtModel(DbtBaseNode):
+    """Class to represent a dbt model in the manifest file.
+
+    Inherits from DbtBaseNode and includes attributes and methods specific to model nodes,
+    such as handling of SQL code and AST (Abstract Syntax Tree).
+
+    Attributes:
+        compiled_code: The compiled code of the node.
+        columns: The columns of the node available in the manifest.json
+        unique_key: The unique key of the node.
+        depends_on: The list of dependencies of the node (macros and nodes).
+        sql_code_ast: The sqlglot Abstract Syntax Tree (AST) of the compiled code.
+        ast_extracted_columns: The columns extracted from the sql code AST.
+    """
+
+    def __init__(self, node: DbtNodeType, sql_dialect: Optional[str] = None) -> None:
+        super().__init__(node)
+        self._sql_code_ast = None
+        self._sql_dialect = sql_dialect
+
+    @property
+    def compiled_code(self) -> str:
+        return self._node.get("compiled_code", "")
+
     @property
     def columns(self) -> dict[str, Any]:
         return self._node.get("columns", {})
 
     @property
     def unique_key(self) -> Optional[str]:
-        return self._node.get("config", {}).get("unique_key")
+        return self.config.get("unique_key")
 
     @property
     def depends_on(self) -> dict[str, list[str]]:
@@ -373,25 +434,26 @@ class DbtNode:
                 columns.append(column.alias)
         return columns
 
-    def __repr__(self) -> str:
-        return f"DbtNode({self.alias})"
 
-    def __str__(self) -> str:
-        return f"{self._node}"
+class DbtSource(DbtBaseNode):
+    """Class to represent a dbt source in the manifest file.
 
-    def keys(self) -> KeysView[str]:
-        return self._node.keys()
+    Inherits from DbtBaseNode and provides access to source-specific properties.
 
-    def values(self) -> ValuesView[Any]:
-        return self._node.values()
+    Attributes:
+        database: The database where the source is located.
+    """
 
-    def items(self) -> ItemsView[str, Any]:
-        return self._node.items()
+    @property
+    def database(self) -> str:
+        return self._node.get("database", "")
 
-    def get(
-        self, key: str, default: Optional[str | dict[str, Any] | list[Any]] = None
-    ) -> Any:
-        return self._node.get(key, default)
+
+class DbtMacro(DbtBaseNode):
+    """Represents a dbt macro."""
+
+    # Add specific properties or methods for macros if needed
+    pass
 
 
 class DbtProjectLoader:

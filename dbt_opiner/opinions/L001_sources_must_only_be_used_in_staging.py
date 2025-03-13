@@ -3,6 +3,7 @@ from typing import Optional
 
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import base_opinion
 
 
@@ -41,7 +42,7 @@ class L001(base_opinion.BaseOpinion):
         staging_prefix = self._opinions_config.get("staging_prefix", "stg_")
         if isinstance(file, file_handlers.SqlFileHandler):
             if (
-                file.dbt_node.type == "model"
+                isinstance(file.dbt_node, DbtModel)
                 and not file.dbt_node.alias.startswith(staging_prefix)
                 and not file.dbt_node.schema == staging_schema_name
             ):

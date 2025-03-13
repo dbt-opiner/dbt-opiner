@@ -77,7 +77,7 @@ def test_get_lint_results(base_linter, mock_sqlfilehandler, mock_yamlfilehandler
     yaml_file = mock_yamlfilehandler
     yaml_file.path = "test.yaml"
     sql_file = mock_sqlfilehandler
-    sql_file.dbt_node = dbt.DbtNode(
+    sql_file.dbt_node = dbt.DbtBaseNode(
         {
             "resource_type": "model",
             "description": "Some description",

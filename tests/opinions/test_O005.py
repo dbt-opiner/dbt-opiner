@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import O005
 
 
@@ -8,17 +8,17 @@ from dbt_opiner.opinions import O005
     "node, expected_passed",
     [
         pytest.param(
-            DbtNode({"resource_type": "model", "config": {"unique_key": "column_1"}}),
+            DbtModel({"resource_type": "model", "config": {"unique_key": "column_1"}}),
             True,
             id="Model has a unique key",
         ),
         pytest.param(
-            DbtNode({"resource_type": "model", "config": {}}),
+            DbtModel({"resource_type": "model", "config": {}}),
             False,
             id="Model doesn't have a unique key config",
         ),
         pytest.param(
-            DbtNode({"resource_type": "model", "config": {"unique_key": None}}),
+            DbtModel({"resource_type": "model", "config": {"unique_key": None}}),
             False,
             id="Model doesn't have a unique key",
         ),

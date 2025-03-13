@@ -1,6 +1,6 @@
 import pytest
 
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import O001
 
 
@@ -8,17 +8,17 @@ from dbt_opiner.opinions import O001
     "node, expected_passed",
     [
         pytest.param(
-            DbtNode({"resource_type": "model", "description": "Some description"}),
+            DbtModel({"resource_type": "model", "description": "Some description"}),
             [True],
             id="model with description",
         ),
         pytest.param(
-            DbtNode({"resource_type": "model", "description": ""}),
+            DbtModel({"resource_type": "model", "description": ""}),
             [False],
             id="model with empty description",
         ),
         pytest.param(
-            DbtNode({"resource_type": "model"}),
+            DbtModel({"resource_type": "model"}),
             [False],
             id="model with no description",
         ),
@@ -36,24 +36,24 @@ def test_sql_O001(node, expected_passed, mock_sqlfilehandler):
     [
         pytest.param(
             [
-                DbtNode({"resource_type": "model", "description": "Some description"}),
-                DbtNode({"resource_type": "model", "description": "Some description"}),
+                DbtModel({"resource_type": "model", "description": "Some description"}),
+                DbtModel({"resource_type": "model", "description": "Some description"}),
             ],  #
             [True, True],
             id="two models with description",
         ),
         pytest.param(
             [
-                DbtNode({"resource_type": "model", "description": "Some description"}),
-                DbtNode({"resource_type": "model", "description": ""}),
+                DbtModel({"resource_type": "model", "description": "Some description"}),
+                DbtModel({"resource_type": "model", "description": ""}),
             ],
             [True, False],
             id="two models one with description, one empty",
         ),
         pytest.param(
             [
-                DbtNode({"resource_type": "model", "description": "Some description"}),
-                DbtNode(
+                DbtModel({"resource_type": "model", "description": "Some description"}),
+                DbtModel(
                     {
                         "resource_type": "model",
                     }

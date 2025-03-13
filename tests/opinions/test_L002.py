@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from dbt_opiner.dbt import DbtManifest
-from dbt_opiner.dbt import DbtNode
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import L002
 
 config_dict = {
@@ -35,7 +35,7 @@ no_restrictions_dict = {
     "node, config, expected_passed",
     [
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stg_model",
@@ -47,10 +47,10 @@ no_restrictions_dict = {
             ),
             config_dict,
             False,
-            id="Staging incorrecltly selects from facts and marts (by schema)",
+            id="Staging incorrectly selects from facts and marts (by schema)",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stg_model",
@@ -62,10 +62,10 @@ no_restrictions_dict = {
             ),
             config_dict,
             False,
-            id="Staging incorrecltly selects from facts and marts (by prefix)",
+            id="Staging incorrectly selects from facts and marts (by prefix)",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stg_model",
@@ -78,7 +78,7 @@ no_restrictions_dict = {
             id="Staging doesn't violate layer directionality",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stg_model",
@@ -91,7 +91,7 @@ no_restrictions_dict = {
             id="No restrictions for this layer.",
         ),
         pytest.param(
-            DbtNode(
+            DbtModel(
                 {
                     "resource_type": "model",
                     "alias": "stg_model",
@@ -110,9 +110,21 @@ def test_L002(temp_empty_git_repo, mock_sqlfilehandler, config, node, expected_p
 
     manifest = {
         "nodes": {
-            "model.project.fct_model": {"schema": "facts", "alias": "fct_model"},
-            "model.project.mrt_model": {"schema": "marts", "alias": "mrt_model"},
-            "model.project.stg_model": {"schema": "staging", "alias": "stg_model"},
+            "model.project.fct_model": {
+                "resource_type": "model",
+                "schema": "facts",
+                "alias": "fct_model",
+            },
+            "model.project.mrt_model": {
+                "resource_type": "model",
+                "schema": "marts",
+                "alias": "mrt_model",
+            },
+            "model.project.stg_model": {
+                "resource_type": "model",
+                "schema": "staging",
+                "alias": "stg_model",
+            },
         }
     }
     manifest_file = temp_empty_git_repo / "target" / "manifest.json"

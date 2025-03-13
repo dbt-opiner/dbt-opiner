@@ -6,6 +6,7 @@ from loguru import logger
 
 from dbt_opiner import file_handlers
 from dbt_opiner import linter
+from dbt_opiner.dbt import DbtModel
 from dbt_opiner.opinions import base_opinion
 
 
@@ -68,12 +69,12 @@ class L002(base_opinion.BaseOpinion):
             return None
 
         if isinstance(file, file_handlers.SqlFileHandler):
-            if file.dbt_node.type != "model":
+            if not isinstance(file.dbt_node, DbtModel):
                 return None
 
             selected_models = [
                 file.parent_dbt_project.dbt_manifest.nodes.get(model)
-                for model in file.dbt_node.get("depends_on", {}).get("nodes", [])
+                for model in file.dbt_node.depends_on.get("nodes", [])
             ]
 
             # If there are no selected models, there's nothing to check
