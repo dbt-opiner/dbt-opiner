@@ -206,7 +206,7 @@ class DbtManifest:
         model_nodes: A dictionary of dbt model nodes in the manifest.
         macros: A dictionary of dbt macros in the manifest.
         sources: A dictionary of dbt sources in the manifest.
-        exposures: A dictionaty of dbt exposures in the manifest.
+        exposures: A dictionary of dbt exposures in the manifest.
     """
 
     def __init__(self, manifest_path: str) -> None:
