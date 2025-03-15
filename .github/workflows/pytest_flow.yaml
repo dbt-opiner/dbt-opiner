@@ -3,11 +3,6 @@ name: pytest
 on:
   workflow_call:
 
-permissions:
-  contents: write
-  checks: write
-  pull-requests: write
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
