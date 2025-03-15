@@ -12,9 +12,9 @@ permissions:
 
 jobs:
   pre-commit:
-    uses: dbt-opiner/dbt-opiner/.github/workflows/pre_commit_flow.yaml@fix-ci-hopefully
+    uses: dbt-opiner/dbt-opiner/.github/workflows/pre_commit_flow.yaml@main
   pytest:
-    uses: dbt-opiner/dbt-opiner/.github/workflows/pytest_flow.yaml@fix-ci-hopefully
+    uses: dbt-opiner/dbt-opiner/.github/workflows/pytest_flow.yaml@main
   ci-status:
         # We require this job to succeed for a PR to be merged, hence we need this job to fail or succeed,
         # skipped is not sufficient. When adding a new job for this workflow please update both the
