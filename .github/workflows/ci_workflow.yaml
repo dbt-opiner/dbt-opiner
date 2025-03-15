@@ -1,0 +1,40 @@
+name: CI Workflow
+
+on:
+  pull_request:
+      branches:
+          - main
+
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+
+jobs:
+  pre-commit:
+    uses: dbt-opiner/dbt-opiner/.github/workflows/pre_commit_flow.yaml@main
+  pytest:
+    uses: dbt-opiner/dbt-opiner/.github/workflows/pytest_flow.yaml@main
+  ci-status:
+        # We require this job to succeed for a PR to be merged, hence we need this job to fail or succeed,
+        # skipped is not sufficient. When adding a new job for this workflow please update both the
+        # `needs` array and the conditions in both steps.
+        if: always()
+        permissions:
+            contents: read
+            id-token: write
+        needs: [pre-commit, pytest]
+        runs-on: ubuntu-latest
+        timeout-minutes: 2
+        steps:
+            - name: Pipeline succeeded
+              if: |
+                  needs.pre-commit.result == 'success' &&
+                  needs.pytest.result == 'success'
+
+              run: exit 0
+            - name: Pipeline failed
+              if: |
+                  !(needs.pre-commit.result != 'cancelled' && needs.pre-commit.result != 'failure') ||
+                  !(needs.pytest.result != 'cancelled' && needs.pytest.result != 'failure')
+              run: exit 1

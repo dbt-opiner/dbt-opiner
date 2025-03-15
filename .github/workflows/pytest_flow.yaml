@@ -1,14 +1,7 @@
-name: Pytest
+name: pytest
 
 on:
-    pull_request:
-        branches:
-            - main
-
-permissions:
-  contents: write
-  checks: write
-  pull-requests: write
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
