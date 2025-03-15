@@ -1,0 +1,10 @@
+name: CI Workflow
+
+on:
+  pull_request:
+      branches:
+          - main
+
+jobs:
+  pre-commit:
+    uses: dbt-opiner/dbt-opiner/.github/workflows/pre_commit_flow.yaml@fix-ci-hopefully
