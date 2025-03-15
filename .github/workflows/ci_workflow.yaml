@@ -8,3 +8,5 @@ on:
 jobs:
   pre-commit:
     uses: dbt-opiner/dbt-opiner/.github/workflows/pre_commit_flow.yaml@fix-ci-hopefully
+  pytest:
+    uses: dbt-opiner/dbt-opiner/.github/workflows/pytest_flow.yaml@fix-ci-hopefully
